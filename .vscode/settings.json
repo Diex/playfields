@@ -1,0 +1,5 @@
+{
+    "atari-dev-studio.compiler.7800basic.defaultCompiler": "Custom",
+    "atari-dev-studio.compiler.batariBasic.defaultCompiler": "Custom",
+    "atari-dev-studio.compiler.dasm.defaultCompiler": "Custom"
+}
