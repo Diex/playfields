@@ -23,10 +23,10 @@
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
-r_seed          ds 1            ; random seed
-l_seed          ds 1            ; list seed
-seed			ds 1			; seed for randomize
-RANDOM		  	ds 1            ; random number
+; r_seed          ds 1            ; random seed
+; l_seed          ds 1            ; list seed
+; seed			ds 1			; seed for randomize
+; RANDOM		  	ds 1            ; random number
 ;t			  	ds 2            ; temporary variable for sierpinsky
 
 
@@ -42,6 +42,8 @@ RANDOM		  	ds 1            ; random number
 
 BORDERCOLOR		equ 	#$9A
 BORDERHEIGHT	equ		#20				; How many scan lines are our top and bottom borders
+SEGMENTS 		equ		#24
+
 
 reset: 			ldx 	#0 				; Clear RAM and all TIA registers
 				lda 	#0 
@@ -61,10 +63,10 @@ clear:       	sta 	0,x 			; $0 to $7F (0-127) reserved OS page zero, $80 to $FF 
 
 
                 ; generate a random see from the interval timer
-                lda INTIM               ; unknown value to use as an initial random seed
-                sta r_seed              ; random seed
-                sta l_seed              ; iterive seed
-				sta RANDOM			  ; random number
+                ; lda INTIM               ; unknown value to use as an initial random seed
+                ; sta r_seed              ; random seed
+                ; sta l_seed              ; iterive seed
+				; sta RANDOM			  ; random number
 				; --------------------------- Begin main loop -------------------------------------
 				; 262 lineas x 288 clock counts
 				; 3 vsync lines
@@ -104,41 +106,40 @@ startframe:
 lvblank:		sta 	WSYNC
 				inx
 				cpx 	#37				; 37 scanlines of vertical blank
-				bne 	lvblank
+				bne 	lvblank			; branch on not equal to continue the loop
 				
 				; --------------------------- 192 lines of drawfield ------------------------------
     			ldx 	#0 				; x = line number	
-drawfield:		cpx		#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
-				beq		borderwalls		; branch on top down
+				
+top:			
+				sta 	WSYNC
+    			inx  
+				cpx		#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
+				bne		top		; branch on top down
 
+				ldy		SEGMENTS-1
+				; --------------------------- Draw the left and rigth borders ---------------------
+walls:			lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
+				sta     PF0				; Set PF0 register
+				sta 	WSYNC
+
+				jsr     randomize
+				
+				
+				; iny
+    			inx  
 				cpx 	#192-BORDERHEIGHT	; will be interpreted by the assembler
-				beq		borderbottom
-
-				jmp 	borderdone
-
-borderbottom:  	lda		#%11111111		; Solid row of pixels for all PF# registers
+				bne		walls		; branch on top down
+bottom:
+			  	lda		#%11111111		; Solid row of pixels for all PF# registers
 				sta 	PF0
 				sta		PF1
 				sta		PF2				
 
-				jmp 	borderdone
-
-				; --------------------------- Draw the left and rigth borders ---------------------
-
-borderwalls:	lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
-				sta     PF0				; Set PF0 register
-				lda		#%00000000		; Clear the PF1-2 registers to have an empty middle
-				lda 	INTIM
-				sta 	PF1
-				sta     PF2	
-
-borderdone:		sta 	WSYNC
-
-
+				sta 	WSYNC
     			inx  
 				cpx 	#192			; end of playfield
-				bne 	drawfield
-
+				bne 	bottom
 				; -------------------------- 30 scanlines of overscan -----------------------------
 
 				ldx 	#0					
@@ -152,7 +153,18 @@ overscan:       sta 	WSYNC
 				jmp 	startframe		; jump back up to start the next frame
 
 				; --------------------------- Pad until end of main segment -----------------------
-
+						
+randomize:					
+				
+				cpy 	SEGMENTS			; 192/
+				bne 	return				
+				ldy		#0
+				lda 	INTIM
+				sta 	PF1
+				sta     PF2	
+return:			
+				iny
+				rts
 
 
 				org 	$FFFA
@@ -164,3 +176,6 @@ irqvectors:
                 
 
 				; -------------------------- End of main segment ----------------------------------
+
+				
+				

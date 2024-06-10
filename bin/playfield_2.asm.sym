@@ -5,11 +5,9 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-borderbottom             f04c              (R )
 BORDERCOLOR              009a              (R )
-borderdone               f064              (R )
 BORDERHEIGHT             0014              (R )
-borderwalls              f057              (R )
+bottom                   f04f              (R )
 clear                    f004              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
@@ -25,7 +23,6 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-drawfield                f041              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -46,16 +43,14 @@ INPT4                    000c
 INPT5                    000d                  
 INTIM                    0284              (R )
 irqvectors               fffa                  
-l_seed                   0081              (R )
-lvblank                  f038              (R )
+lvblank                  f02f              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f06d              (R )
+overscan                 f060              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
-r_seed                   0080              (R )
-RANDOM                   0083              (R )
+randomize                f06a              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -66,9 +61,10 @@ RESMP0                   0028
 RESMP1                   0029                  
 RESP0                    0010                  
 RESP1                    0011                  
+return                   f077              (R )
 RSYNC                    0003                  
-seed                     0082                  
-startframe               f01e              (R )
+SEGMENTS                 0018              (R )
+startframe               f015              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
@@ -81,11 +77,13 @@ TIM1T                    0294
 TIM64T                   0296                  
 TIM8T                    0295                  
 TIMINT                   0285                  
+top                      f038              (R )
 VBLANK                   0001                  
 VDELBL                   0027                  
 VDELP0                   0025                  
 VDELP1                   0026                  
 VERSION_VCS              0069                  
 VSYNC                    0000              (R )
+walls                    f041              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

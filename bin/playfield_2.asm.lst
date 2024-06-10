@@ -223,21 +223,21 @@
      20  0000 ????
      21  0000 ????
      22  0000 ????						; assigning RAM addresses to labels.
-     23 U0084 ????				      seg.u	vars	; uninitialized segment
+     23 U0080 ????				      seg.u	vars	; uninitialized segment
      24 U0080					      org	$80	; origin set at base of ram
      25 U0080
-     26 U0080		       00	   r_seed     ds	1	; random seed
-     27 U0081		       00	   l_seed     ds	1	; list seed
-     28 U0082		       00	   seed       ds	1	; seed for randomize
-     29 U0083		       00	   RANDOM     ds	1	; random number
-     30 U0084							;t				ds 2		 ; temporary variable for sierpinsky
-     31 U0084
-     32 U0084
-     33 U0084							; seg.u   bss
-     34 U0084							; org	   $100
-     35 U0084
-     36 U0084							; ------------------------- Start of main segment ---------------------------------
-     37 U0084
+     26 U0080							; r_seed	   ds 1 	   ; random seed
+     27 U0080							; l_seed	   ds 1 	   ; list seed
+     28 U0080							; seed			ds 1			; seed for randomize
+     29 U0080							; RANDOM			ds 1		 ; random number
+     30 U0080							;t				ds 2		 ; temporary variable for sierpinsky
+     31 U0080
+     32 U0080
+     33 U0080							; seg.u   bss
+     34 U0080							; org	   $100
+     35 U0080
+     36 U0080							; ------------------------- Start of main segment ---------------------------------
+     37 U0080
      38  10000 ????				       seg	code	; uninitialized segment
      39  f000					      org	$F000
      40  f000
@@ -245,125 +245,140 @@
      42  f000
      43  f000		       00 9a	   BORDERCOLOR equ	#$9A
      44  f000		       00 14	   BORDERHEIGHT equ	#20	; How many scan lines are our top and bottom borders
-     45  f000
-     46  f000		       a2 00	   reset      ldx	#0	; Clear RAM and all TIA registers
-     47  f002		       a9 00		      lda	#0
-     48  f004
-     49  f004		       95 00	   clear      sta	0,x	; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
-     50  f006		       e8		      inx
-     51  f007		       d0 fb		      bne	clear
-     52  f009
-     53  f009		       a9 01		      lda	#%00000001	; Set D0 to reflect the playfield
-     54  f00b		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
-     55  f00d
-     56  f00d		       a9 9a		      lda	#BORDERCOLOR
-     57  f00f		       85 08		      sta	COLUPF	; Set the PF color
-     58  f011
-     59  f011		       a9 46		      lda	#$46
-     60  f013		       85 09		      sta	COLUBK	; Set the background color
-     61  f015
-     62  f015
-     63  f015							; generate a random see from the interval timer
-     64  f015		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
-     65  f018		       85 80		      sta	r_seed	; random seed
-     66  f01a		       85 81		      sta	l_seed	; iterive seed
-     67  f01c		       85 83		      sta	RANDOM	; random number
-     68  f01e							; --------------------------- Begin main loop -------------------------------------
-     69  f01e							; 262 lineas x 288 clock counts
-     70  f01e							; 3 vsync lines
-     71  f01e							; 37 vertical blank lines
-     72  f01e							; 192 drawfield lines
-     73  f01e							; 30 overscan lines
-     74  f01e							; --------------------------- 262 scanlines per frame -----------------------------
-     75  f01e				   startframe
-     76  f01e							; When the last line of the previous frame is detected,
-     77  f01e							; the microprocessor must generate 3 lines of VSYNC
-     78  f01e							; When the electron beam has scanned 262 lines,
-     79  f01e							; the TV set must be signaled to blank the beam and position
-     80  f01e							; it at the top of the screen to start a new frame.
-     81  f01e							; This signal is called vertical sync, and the TIA must
-     82  f01e							; transmit this signal for at least 3 scan lines.
-     83  f01e							; This is accomplished by writing a “1” in D1 of VSYNC to turn
-     84  f01e							; it on, count at least 2 scan lines, then write a “0” to D1 of
-     85  f01e							; VSYNC to turn it off.
-     86  f01e		       a9 02		      lda	#%00000010	; Writing a bit into the D1 vsync latch
-     87  f020		       85 00		      sta	VSYNC	; Turn on VSYNC
-     88  f022							; --------------------------- 3 scanlines of VSYNC signal
-     89  f022		       85 02		      sta	WSYNC
-     90  f024		       85 02		      sta	WSYNC
-     91  f026		       85 02		      sta	WSYNC
-     92  f028							; --------------------------- Turn off VSYNC
-     93  f028		       a9 00		      lda	#0
-     94  f02a		       85 00		      sta	VSYNC
-     95  f02c							; -------------------------- Additional 37 scanlines of vertical blank ------------
-     96  f02c
-     97  f02c		       a9 ff		      lda	#%11111111	; Solid line of pixels
-     98  f02e		       85 0d		      sta	PF0	; Set them in all the PF# registers
-     99  f030		       85 0e		      sta	PF1
-    100  f032		       85 0f		      sta	PF2
-    101  f034		       a2 00		      ldx	#0
-    102  f036		       a9 00		      lda	#0
-    103  f038
-    104  f038		       85 02	   lvblank    sta	WSYNC
-    105  f03a		       e8		      inx
-    106  f03b		       e0 25		      cpx	#37	; 37 scanlines of vertical blank
-    107  f03d		       d0 f9		      bne	lvblank
-    108  f03f
-    109  f03f							; --------------------------- 192 lines of drawfield ------------------------------
-    110  f03f		       a2 00		      ldx	#0	; x = line number
-    111  f041		       e0 13	   drawfield  cpx	#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
-    112  f043		       f0 12		      beq	borderwalls	; branch on top down
-    113  f045
-    114  f045		       e0 ac		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
-    115  f047		       f0 03		      beq	borderbottom
-    116  f049
-    117  f049		       4c 64 f0 	      jmp	borderdone
-    118  f04c
-    119  f04c		       a9 ff	   borderbottom lda	#%11111111	; Solid row of pixels for all PF# registers
-    120  f04e		       85 0d		      sta	PF0
-    121  f050		       85 0e		      sta	PF1
-    122  f052		       85 0f		      sta	PF2
-    123  f054
-    124  f054		       4c 64 f0 	      jmp	borderdone
-    125  f057
-    126  f057							; --------------------------- Draw the left and rigth borders ---------------------
-    127  f057
-    128  f057		       a9 10	   borderwalls lda	#%00010000	; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
-    129  f059		       85 0d		      sta	PF0	; Set PF0 register
-    130  f05b		       a9 00		      lda	#%00000000	; Clear the PF1-2 registers to have an empty middle
-    131  f05d		       ad 84 02 	      lda	INTIM
-    132  f060		       85 0e		      sta	PF1
-    133  f062		       85 0f		      sta	PF2
-    134  f064
-    135  f064		       85 02	   borderdone sta	WSYNC
-    136  f066
-    137  f066
-    138  f066		       e8		      inx
-    139  f067		       e0 c0		      cpx	#192	; end of playfield
-    140  f069		       d0 d6		      bne	drawfield
-    141  f06b
-    142  f06b							; -------------------------- 30 scanlines of overscan -----------------------------
-    143  f06b
-    144  f06b		       a2 00		      ldx	#0
-    145  f06d		       85 02	   overscan   sta	WSYNC
-    146  f06f		       e8		      inx
-    147  f070		       e0 1e		      cpx	#30
-    148  f072		       d0 f9		      bne	overscan
-    149  f074
-    150  f074							; --------------------------- End of overscan -------------------------------------
-    151  f074
-    152  f074		       4c 1e f0 	      jmp	startframe	; jump back up to start the next frame
-    153  f077
-    154  f077							; --------------------------- Pad until end of main segment -----------------------
-    155  f077
-    156  f077
-    157  f077
-    158  fffa					      org	$FFFA
-    159  fffa
-    160  fffa				   irqvectors
-    161  fffa		       00 f0		      .word.w	reset	; NMI
-    162  fffc		       00 f0		      .word.w	reset	; RESET
-    163  fffe		       00 f0		      .word.w	reset	; IRQ
-    164  10000
-    165  10000
-    166  10000							; -------------------------- End of main segment ----------------------------------
+     45  f000		       00 18	   SEGMENTS   equ	#24
+     46  f000
+     47  f000
+     48  f000		       a2 00	   reset      ldx	#0	; Clear RAM and all TIA registers
+     49  f002		       a9 00		      lda	#0
+     50  f004
+     51  f004		       95 00	   clear      sta	0,x	; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
+     52  f006		       e8		      inx
+     53  f007		       d0 fb		      bne	clear
+     54  f009
+     55  f009		       a9 01		      lda	#%00000001	; Set D0 to reflect the playfield
+     56  f00b		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
+     57  f00d
+     58  f00d		       a9 9a		      lda	#BORDERCOLOR
+     59  f00f		       85 08		      sta	COLUPF	; Set the PF color
+     60  f011
+     61  f011		       a9 46		      lda	#$46
+     62  f013		       85 09		      sta	COLUBK	; Set the background color
+     63  f015
+     64  f015
+     65  f015							; generate a random see from the interval timer
+     66  f015							; lda INTIM		   ; unknown value to use as an initial random seed
+     67  f015							; sta r_seed		   ; random seed
+     68  f015							; sta l_seed		   ; iterive seed
+     69  f015							; sta RANDOM			  ; random number
+     70  f015							; --------------------------- Begin main loop -------------------------------------
+     71  f015							; 262 lineas x 288 clock counts
+     72  f015							; 3 vsync lines
+     73  f015							; 37 vertical blank lines
+     74  f015							; 192 drawfield lines
+     75  f015							; 30 overscan lines
+     76  f015							; --------------------------- 262 scanlines per frame -----------------------------
+     77  f015				   startframe
+     78  f015							; When the last line of the previous frame is detected,
+     79  f015							; the microprocessor must generate 3 lines of VSYNC
+     80  f015							; When the electron beam has scanned 262 lines,
+     81  f015							; the TV set must be signaled to blank the beam and position
+     82  f015							; it at the top of the screen to start a new frame.
+     83  f015							; This signal is called vertical sync, and the TIA must
+     84  f015							; transmit this signal for at least 3 scan lines.
+     85  f015							; This is accomplished by writing a “1” in D1 of VSYNC to turn
+     86  f015							; it on, count at least 2 scan lines, then write a “0” to D1 of
+     87  f015							; VSYNC to turn it off.
+     88  f015		       a9 02		      lda	#%00000010	; Writing a bit into the D1 vsync latch
+     89  f017		       85 00		      sta	VSYNC	; Turn on VSYNC
+     90  f019							; --------------------------- 3 scanlines of VSYNC signal
+     91  f019		       85 02		      sta	WSYNC
+     92  f01b		       85 02		      sta	WSYNC
+     93  f01d		       85 02		      sta	WSYNC
+     94  f01f							; --------------------------- Turn off VSYNC
+     95  f01f		       a9 00		      lda	#0
+     96  f021		       85 00		      sta	VSYNC
+     97  f023							; -------------------------- Additional 37 scanlines of vertical blank ------------
+     98  f023
+     99  f023		       a9 ff		      lda	#%11111111	; Solid line of pixels
+    100  f025		       85 0d		      sta	PF0	; Set them in all the PF# registers
+    101  f027		       85 0e		      sta	PF1
+    102  f029		       85 0f		      sta	PF2
+    103  f02b		       a2 00		      ldx	#0
+    104  f02d		       a9 00		      lda	#0
+    105  f02f
+    106  f02f		       85 02	   lvblank    sta	WSYNC
+    107  f031		       e8		      inx
+    108  f032		       e0 25		      cpx	#37	; 37 scanlines of vertical blank
+    109  f034		       d0 f9		      bne	lvblank	; branch on not equal to continue the loop
+    110  f036
+    111  f036							; --------------------------- 192 lines of drawfield ------------------------------
+    112  f036		       a2 00		      ldx	#0	; x = line number
+    113  f038
+    114  f038				   top
+    115  f038		       85 02		      sta	WSYNC
+    116  f03a		       e8		      inx
+    117  f03b		       e0 13		      cpx	#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
+    118  f03d		       d0 f9		      bne	top	; branch on top down
+    119  f03f
+    120  f03f		       a4 17		      ldy	SEGMENTS-1
+    121  f041							; --------------------------- Draw the left and rigth borders ---------------------
+    122  f041		       a9 10	   walls      lda	#%00010000	; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+    123  f043		       85 0d		      sta	PF0	; Set PF0 register
+    124  f045		       85 02		      sta	WSYNC
+    125  f047
+    126  f047		       20 6a f0 	      jsr	randomize
+    127  f04a
+    128  f04a
+    129  f04a							; iny
+    130  f04a		       e8		      inx
+    131  f04b		       e0 ac		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
+    132  f04d		       d0 f2		      bne	walls	; branch on top down
+    133  f04f				   bottom
+    134  f04f		       a9 ff		      lda	#%11111111	; Solid row of pixels for all PF# registers
+    135  f051		       85 0d		      sta	PF0
+    136  f053		       85 0e		      sta	PF1
+    137  f055		       85 0f		      sta	PF2
+    138  f057
+    139  f057		       85 02		      sta	WSYNC
+    140  f059		       e8		      inx
+    141  f05a		       e0 c0		      cpx	#192	; end of playfield
+    142  f05c		       d0 f1		      bne	bottom
+    143  f05e							; -------------------------- 30 scanlines of overscan -----------------------------
+    144  f05e
+    145  f05e		       a2 00		      ldx	#0
+    146  f060		       85 02	   overscan   sta	WSYNC
+    147  f062		       e8		      inx
+    148  f063		       e0 1e		      cpx	#30
+    149  f065		       d0 f9		      bne	overscan
+    150  f067
+    151  f067							; --------------------------- End of overscan -------------------------------------
+    152  f067
+    153  f067		       4c 15 f0 	      jmp	startframe	; jump back up to start the next frame
+    154  f06a
+    155  f06a							; --------------------------- Pad until end of main segment -----------------------
+    156  f06a
+    157  f06a				   randomize
+    158  f06a
+    159  f06a		       c4 18		      cpy	SEGMENTS	; 192/
+    160  f06c		       d0 09		      bne	return
+    161  f06e		       a0 00		      ldy	#0
+    162  f070		       ad 84 02 	      lda	INTIM
+    163  f073		       85 0e		      sta	PF1
+    164  f075		       85 0f		      sta	PF2
+    165  f077				   return
+    166  f077		       c8		      iny
+    167  f078		       60		      rts
+    168  f079
+    169  f079
+    170  fffa					      org	$FFFA
+    171  fffa
+    172  fffa				   irqvectors
+    173  fffa		       00 f0		      .word.w	reset	; NMI
+    174  fffc		       00 f0		      .word.w	reset	; RESET
+    175  fffe		       00 f0		      .word.w	reset	; IRQ
+    176  10000
+    177  10000
+    178  10000							; -------------------------- End of main segment ----------------------------------
+    179  10000
+    180  10000
+    181  10000
