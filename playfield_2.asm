@@ -41,7 +41,7 @@ RANDOM		  	ds 1            ; random number
 				; ------------------------- Start of program execution ----------------------------
 
 BORDERCOLOR		equ 	#$9A
-BORDERHEIGHT	equ		#8				; How many scan lines are our top and bottom borders
+BORDERHEIGHT	equ		#20				; How many scan lines are our top and bottom borders
 
 reset: 			ldx 	#0 				; Clear RAM and all TIA registers
 				lda 	#0 
@@ -85,32 +85,27 @@ startframe:
 				sta 	WSYNC
 				sta 	WSYNC
 				sta 	WSYNC
-				lda 	#%00000000		; Writing a bit into the D1 vsync latch
-				sta 	VSYNC 			; Turn on VSYNC
-
 				; --------------------------- Turn off VSYNC         	 
 				lda 	#0
 				sta		VSYNC
-
 				; -------------------------- Additional 37 scanlines of vertical blank ------------
 
 				lda    	#%11111111		; Solid line of pixels
 				sta    	PF0				; Set them in all the PF# registers
 				sta 	PF1
 				sta    	PF2	
-
 				ldx 	#0 					
 				lda 	#0
+
 lvblank:		sta 	WSYNC
 				inx
 				cpx 	#37				; 37 scanlines of vertical blank
 				bne 	lvblank
 				
 				; --------------------------- 192 lines of drawfield ------------------------------
-
-    			ldx 	#0 					
+    			ldx 	#0 				; x = line number	
 drawfield:		cpx		#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
-				beq		borderwalls
+				beq		borderwalls		; branch on top down
 
 				cpx 	#192-BORDERHEIGHT	; will be interpreted by the assembler
 				beq		borderbottom
@@ -121,40 +116,27 @@ borderbottom:  	lda		#%11111111		; Solid row of pixels for all PF# registers
 				sta 	PF0
 				sta		PF1
 				sta		PF2				
+
 				jmp 	borderdone
 
-borderwalls:	
-                ; lda     #%01000000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
-				; sta     PF0				; Set PF0 register
-				; lda		#%00000000		; Clear the PF1-2 registers to have an empty middle              
-                ; sta 	PF1
-				; sta     PF2	
-
+				; --------------------------- Draw the left and rigth borders ---------------------
+borderwalls:	lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+				sta     PF0				; Set PF0 register
+				lda		#%00000000		; Clear the PF1-2 registers to have an empty middle
+				sta 	PF1
+				sta     PF2	
 
 borderdone:		sta 	WSYNC
-                lda	 INTIM			   ; unknown value to use as an initial random seed
-				sta 	PF0
-                ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
-				lda	 INTIM			   ; unknown value to use as an initial random seed
-				sta		PF1
-                ; ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
-				lda	 INTIM			   ; unknown value to use as an initial random seed
-				sta		PF2	
-    			
-				inx  
-				cpx 	#192
+				lda 	#$46
+				sta		COLUBK			; Set the background color to a dark blue
+    			inx  
+				cpx 	#192			; end of playfield
 				bne 	drawfield
 
 				; -------------------------- 30 scanlines of overscan -----------------------------
 
 				ldx 	#0					
-				lda     #%00000000
-				sta 	PF0
-				sta 	PF1
-				sta 	PF2
-				sta     COLUBK
-overscan:       
-                sta 	WSYNC                
+overscan:       sta 	WSYNC
 				inx
 				cpx 	#30
 				bne 	overscan
@@ -162,6 +144,8 @@ overscan:
 				; --------------------------- End of overscan -------------------------------------
 
 				jmp 	startframe		; jump back up to start the next frame
+
+				; --------------------------- Pad until end of main segment -----------------------
 
 
 

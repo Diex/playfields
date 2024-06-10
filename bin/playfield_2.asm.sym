@@ -5,11 +5,11 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-borderbottom             f04c              (R )
+borderbottom             f048              (R )
 BORDERCOLOR              009a              (R )
-borderdone               f057              (R )
-BORDERHEIGHT             0008              (R )
-borderwalls              f057              (R )
+borderdone               f05d              (R )
+BORDERHEIGHT             0014              (R )
+borderwalls              f053              (R )
 clear                    f004              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
@@ -25,7 +25,7 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-drawfield                f041              (R )
+drawfield                f03d              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -47,10 +47,10 @@ INPT5                    000d
 INTIM                    0284              (R )
 irqvectors               fffa                  
 l_seed                   0081              (R )
-lvblank                  f038              (R )
+lvblank                  f034              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f079              (R )
+overscan                 f06a              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
