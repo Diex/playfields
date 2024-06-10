@@ -18,22 +18,30 @@
                                         ;
                                         ; Email - 8blit0@gmail.com
 
-BORDERCOLOR		equ 	#$9A
-BORDERHEIGHT	equ		#8				; How many scan lines are our top and bottom borders
                 
+				; assigning RAM addresses to labels.
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
 r_seed          ds 1            ; random seed
 l_seed          ds 1            ; list seed
+seed			ds 1			; seed for randomize
+RANDOM		  	ds 1            ; random number
+;t			  	ds 2            ; temporary variable for sierpinsky
 
+
+				; seg.u   bss
+				; org     $100
 
 				; ------------------------- Start of main segment ---------------------------------
 
-				seg		main
-				org 	$F000
+				seg   	code		; uninitialized segment
+				org     $F000
 
 				; ------------------------- Start of program execution ----------------------------
+
+BORDERCOLOR		equ 	#$9A
+BORDERHEIGHT	equ		#8				; How many scan lines are our top and bottom borders
 
 reset: 			ldx 	#0 				; Clear RAM and all TIA registers
 				lda 	#0 
@@ -52,17 +60,33 @@ clear:       	sta 	0,x 			; $0 to $7F (0-127) reserved OS page zero, $80 to $FF 
                 lda INTIM               ; unknown value to use as an initial random seed
                 sta r_seed              ; random seed
                 sta l_seed              ; iterive seed
-
+				sta RANDOM			  ; random number
 				; --------------------------- Begin main loop -------------------------------------
-
-startframe:			; ------- 76543210 ---------- Bit order
+				; 262 lineas x 288 clock counts
+				; 3 vsync lines
+				; 37 vertical blank lines
+				; 192 drawfield lines
+				; 30 overscan lines
+				; --------------------------- 262 scanlines per frame -----------------------------
+startframe:		
+				; When the last line of the previous frame is detected, 
+				; the microprocessor must generate 3 lines of VSYNC
+				; When the electron beam has scanned 262 lines, 
+				; the TV set must be signaled to blank the beam and position 
+				; it at the top of the screen to start a new frame. 
+				; This signal is called vertical sync, and the TIA must 
+				; transmit this signal for at least 3 scan lines. 
+				; This is accomplished by writing a “1” in D1 of VSYNC to turn 
+				; it on, count at least 2 scan lines, then write a “0” to D1 of 
+				; VSYNC to turn it off.
 				lda 	#%00000010		; Writing a bit into the D1 vsync latch
-				sta 	VSYNC 
-
+				sta 	VSYNC 			; Turn on VSYNC
 				; --------------------------- 3 scanlines of VSYNC signal
 				sta 	WSYNC
 				sta 	WSYNC
-				sta 	WSYNC  
+				sta 	WSYNC
+				lda 	#%00000000		; Writing a bit into the D1 vsync latch
+				sta 	VSYNC 			; Turn on VSYNC
 
 				; --------------------------- Turn off VSYNC         	 
 				lda 	#0
@@ -97,33 +121,40 @@ borderbottom:  	lda		#%11111111		; Solid row of pixels for all PF# registers
 				sta 	PF0
 				sta		PF1
 				sta		PF2				
-
 				jmp 	borderdone
 
-borderwalls:	lda     #%01000000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
-				sta     PF0				; Set PF0 register
-				lda		#%00000000		; Clear the PF1-2 registers to have an empty middle
-                
-              
-                sta 	PF1
-				sta     PF2	
+borderwalls:	
+                ; lda     #%01000000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+				; sta     PF0				; Set PF0 register
+				; lda		#%00000000		; Clear the PF1-2 registers to have an empty middle              
+                ; sta 	PF1
+				; sta     PF2	
+
 
 borderdone:		sta 	WSYNC
-
-                jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
-                sta 	PF0
+                lda	 INTIM			   ; unknown value to use as an initial random seed
+				sta 	PF0
                 ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
+				lda	 INTIM			   ; unknown value to use as an initial random seed
 				sta		PF1
-                ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
+                ; ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy 
+				lda	 INTIM			   ; unknown value to use as an initial random seed
 				sta		PF2	
-    			inx  
+    			
+				inx  
 				cpx 	#192
 				bne 	drawfield
 
 				; -------------------------- 30 scanlines of overscan -----------------------------
 
 				ldx 	#0					
-overscan:       sta 	WSYNC
+				lda     #%00000000
+				sta 	PF0
+				sta 	PF1
+				sta 	PF2
+				sta     COLUBK
+overscan:       
+                sta 	WSYNC                
 				inx
 				cpx 	#30
 				bne 	overscan
@@ -132,41 +163,6 @@ overscan:       sta 	WSYNC
 
 				jmp 	startframe		; jump back up to start the next frame
 
-				; --------------------------- Pad until end of main segment -----------------------
-
-; Galois 8-bit Linear Feedback Shift Registers
-; https://samiam.org/blog/20130617.html
-galois_lfsr_random  
-
-                lda r_seed              ; keep calling funtion to for better entropy
-                lsr                     ; shift right
-                
-                bcc noeor0              ; if carry 1, then exclusive OR the bits
-                eor #$D4                ; d4 tap (11010100)
-                eor #$A9                ; a9 tap (10101001)
-                ; eor #%11001001                ; d4 tap (11010100)
-                ; eor #$D4                ; d4 tap (11010100)
-                ; rts
-
-noeor0:         sta r_seed
-                rts
-
-; galois_lfsr_forward
-;         lda l_seed
-;         lsr                     ; shift right
-;         bcc noeor1              ; if carry 1, then exclusive OR the bits
-;         eor #$D4                ; d4 tap (11010100)
-; noeor1: sta l_seed
-;         rts
-
-; galois_lfsr_backward
-;         lda l_seed
-;         asl                     ; shift left
-;         bcc noeor2              ; if carry 1, then exclusive OR the bits
-;         eor #$A9                ; a9 tap (10101001)
-; noeor2: sta l_seed
-;         rts
-; -----------------------------------------------------------------------------
 
 
 				org 	$FFFA
@@ -178,5 +174,3 @@ irqvectors:
                 
 
 				; -------------------------- End of main segment ----------------------------------
-
-

@@ -5,13 +5,13 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-borderbottom             f046              (R )
+borderbottom             f04c              (R )
 BORDERCOLOR              009a              (R )
-borderdone               f05b              (R )
+borderdone               f057              (R )
 BORDERHEIGHT             0008              (R )
-borderwalls              f051              (R )
+borderwalls              f057              (R )
 clear                    f004              (R )
-COLUBK                   0009                  
+COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
 COLUPF                   0008              (R )
@@ -25,11 +25,10 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-drawfield                f03b              (R )
+drawfield                f041              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-galois_lfsr_random       f077              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -48,15 +47,15 @@ INPT5                    000d
 INTIM                    0284              (R )
 irqvectors               fffa                  
 l_seed                   0081              (R )
-lvblank                  f032              (R )
-noeor0                   f080              (R )
+lvblank                  f038              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f06d              (R )
+overscan                 f079              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
 r_seed                   0080              (R )
+RANDOM                   0083              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -68,7 +67,8 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-startframe               f018              (R )
+seed                     0082                  
+startframe               f01a              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  

@@ -221,165 +221,159 @@
      18  0000 ????						;
      19  0000 ????						; Email - 8blit0@gmail.com
      20  0000 ????
-     21  0000 ????	       00 9a	   BORDERCOLOR equ	#$9A
-     22  0000 ????	       00 08	   BORDERHEIGHT equ	#8	; How many scan lines are our top and bottom borders
-     23  0000 ????
-     24 U0082 ????				      seg.u	vars	; uninitialized segment
-     25 U0080					      org	$80	; origin set at base of ram
-     26 U0080
-     27 U0080		       00	   r_seed     ds	1	; random seed
-     28 U0081		       00	   l_seed     ds	1	; list seed
-     29 U0082
-     30 U0082
-     31 U0082							; ------------------------- Start of main segment ---------------------------------
-     32 U0082
-     33  10000 ????				       seg	main
-     34  f000					      org	$F000
-     35  f000
-     36  f000							; ------------------------- Start of program execution ----------------------------
-     37  f000
-     38  f000		       a2 00	   reset      ldx	#0	; Clear RAM and all TIA registers
-     39  f002		       a9 00		      lda	#0
-     40  f004
-     41  f004		       95 00	   clear      sta	0,x	; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
-     42  f006		       e8		      inx
-     43  f007		       d0 fb		      bne	clear
-     44  f009
-     45  f009		       a9 01		      lda	#%00000001	; Set D0 to reflect the playfield
-     46  f00b		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
-     47  f00d
-     48  f00d		       a9 9a		      lda	#BORDERCOLOR
-     49  f00f		       85 08		      sta	COLUPF	; Set the PF color
-     50  f011
-     51  f011							; generate a random see from the interval timer
-     52  f011		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
-     53  f014		       85 80		      sta	r_seed	; random seed
-     54  f016		       85 81		      sta	l_seed	; iterive seed
-     55  f018
-     56  f018							; --------------------------- Begin main loop -------------------------------------
-     57  f018
-     58  f018				   startframe		; ------- 76543210 ---------- Bit order
-     59  f018		       a9 02		      lda	#%00000010	; Writing a bit into the D1 vsync latch
-     60  f01a		       85 00		      sta	VSYNC
-     61  f01c
-     62  f01c							; --------------------------- 3 scanlines of VSYNC signal
-     63  f01c		       85 02		      sta	WSYNC
-     64  f01e		       85 02		      sta	WSYNC
-     65  f020		       85 02		      sta	WSYNC
-     66  f022
-     67  f022							; --------------------------- Turn off VSYNC
-     68  f022		       a9 00		      lda	#0
-     69  f024		       85 00		      sta	VSYNC
-     70  f026
-     71  f026							; -------------------------- Additional 37 scanlines of vertical blank ------------
-     72  f026
-     73  f026		       a9 ff		      lda	#%11111111	; Solid line of pixels
-     74  f028		       85 0d		      sta	PF0	; Set them in all the PF# registers
-     75  f02a		       85 0e		      sta	PF1
-     76  f02c		       85 0f		      sta	PF2
-     77  f02e
-     78  f02e		       a2 00		      ldx	#0
-     79  f030		       a9 00		      lda	#0
-     80  f032		       85 02	   lvblank    sta	WSYNC
-     81  f034		       e8		      inx
-     82  f035		       e0 25		      cpx	#37	; 37 scanlines of vertical blank
-     83  f037		       d0 f9		      bne	lvblank
-     84  f039
-     85  f039							; --------------------------- 192 lines of drawfield ------------------------------
-     86  f039
-     87  f039		       a2 00		      ldx	#0
-     88  f03b		       e0 07	   drawfield  cpx	#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
-     89  f03d		       f0 12		      beq	borderwalls
-     90  f03f
-     91  f03f		       e0 b8		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
-     92  f041		       f0 03		      beq	borderbottom
-     93  f043
-     94  f043		       4c 5b f0 	      jmp	borderdone
-     95  f046
-     96  f046		       a9 ff	   borderbottom lda	#%11111111	; Solid row of pixels for all PF# registers
-     97  f048		       85 0d		      sta	PF0
-     98  f04a		       85 0e		      sta	PF1
-     99  f04c		       85 0f		      sta	PF2
-    100  f04e
-    101  f04e		       4c 5b f0 	      jmp	borderdone
-    102  f051
-    103  f051		       a9 40	   borderwalls lda	#%01000000	; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
-    104  f053		       85 0d		      sta	PF0	; Set PF0 register
-    105  f055		       a9 00		      lda	#%00000000	; Clear the PF1-2 registers to have an empty middle
-    106  f057
-    107  f057
-    108  f057		       85 0e		      sta	PF1
-    109  f059		       85 0f		      sta	PF2
-    110  f05b
-    111  f05b		       85 02	   borderdone sta	WSYNC
-    112  f05d
-    113  f05d		       20 77 f0 	      jsr	galois_lfsr_random	; runs once through at frame end to increase entropy
-    114  f060		       85 0d		      sta	PF0
-    115  f062							; jsr	   galois_lfsr_random  ; runs once through at frame end to increase entropy
-    116  f062		       85 0e		      sta	PF1
-    117  f064							; jsr	   galois_lfsr_random  ; runs once through at frame end to increase entropy
-    118  f064		       85 0f		      sta	PF2
-    119  f066		       e8		      inx
-    120  f067		       e0 c0		      cpx	#192
-    121  f069		       d0 d0		      bne	drawfield
-    122  f06b
-    123  f06b							; -------------------------- 30 scanlines of overscan -----------------------------
-    124  f06b
-    125  f06b		       a2 00		      ldx	#0
-    126  f06d		       85 02	   overscan   sta	WSYNC
-    127  f06f		       e8		      inx
-    128  f070		       e0 1e		      cpx	#30
-    129  f072		       d0 f9		      bne	overscan
-    130  f074
-    131  f074							; --------------------------- End of overscan -------------------------------------
-    132  f074
-    133  f074		       4c 18 f0 	      jmp	startframe	; jump back up to start the next frame
-    134  f077
-    135  f077							; --------------------------- Pad until end of main segment -----------------------
-    136  f077
-    137  f077							; Galois 8-bit Linear Feedback Shift Registers
-    138  f077							; https://samiam.org/blog/20130617.html
-    139  f077				   galois_lfsr_random
-    140  f077
-    141  f077		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
-    142  f079		       4a		      lsr		; shift right
-    143  f07a
-    144  f07a		       90 04		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    145  f07c		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    146  f07e		       49 a9		      eor	#$A9	; a9 tap (10101001)
-    147  f080							; eor #%11001001		 ; d4 tap (11010100)
-    148  f080							; eor #$D4		   ; d4 tap (11010100)
-    149  f080							; rts
-    150  f080
-    151  f080		       85 80	   noeor0     sta	r_seed
-    152  f082		       60		      rts
-    153  f083
-    154  f083							; galois_lfsr_forward
-    155  f083							;	   lda l_seed
-    156  f083							;	   lsr			   ; shift right
-    157  f083							;	   bcc noeor1		   ; if carry 1, then exclusive OR the bits
-    158  f083							;	   eor #$D4		   ; d4 tap (11010100)
-    159  f083							; noeor1: sta l_seed
-    160  f083							;	   rts
-    161  f083
-    162  f083							; galois_lfsr_backward
-    163  f083							;	   lda l_seed
-    164  f083							;	   asl			   ; shift left
-    165  f083							;	   bcc noeor2		   ; if carry 1, then exclusive OR the bits
-    166  f083							;	   eor #$A9		   ; a9 tap (10101001)
-    167  f083							; noeor2: sta l_seed
-    168  f083							;	   rts
-    169  f083							; -----------------------------------------------------------------------------
-    170  f083
-    171  f083
-    172  fffa					      org	$FFFA
-    173  fffa
-    174  fffa				   irqvectors
-    175  fffa		       00 f0		      .word.w	reset	; NMI
-    176  fffc		       00 f0		      .word.w	reset	; RESET
-    177  fffe		       00 f0		      .word.w	reset	; IRQ
-    178  10000
-    179  10000
-    180  10000							; -------------------------- End of main segment ----------------------------------
-    181  10000
-    182  10000
+     21  0000 ????
+     22  0000 ????						; assigning RAM addresses to labels.
+     23 U0084 ????				      seg.u	vars	; uninitialized segment
+     24 U0080					      org	$80	; origin set at base of ram
+     25 U0080
+     26 U0080		       00	   r_seed     ds	1	; random seed
+     27 U0081		       00	   l_seed     ds	1	; list seed
+     28 U0082		       00	   seed       ds	1	; seed for randomize
+     29 U0083		       00	   RANDOM     ds	1	; random number
+     30 U0084							;t				ds 2		 ; temporary variable for sierpinsky
+     31 U0084
+     32 U0084
+     33 U0084							; seg.u   bss
+     34 U0084							; org	   $100
+     35 U0084
+     36 U0084							; ------------------------- Start of main segment ---------------------------------
+     37 U0084
+     38  10000 ????				       seg	code	; uninitialized segment
+     39  f000					      org	$F000
+     40  f000
+     41  f000							; ------------------------- Start of program execution ----------------------------
+     42  f000
+     43  f000		       00 9a	   BORDERCOLOR equ	#$9A
+     44  f000		       00 08	   BORDERHEIGHT equ	#8	; How many scan lines are our top and bottom borders
+     45  f000
+     46  f000		       a2 00	   reset      ldx	#0	; Clear RAM and all TIA registers
+     47  f002		       a9 00		      lda	#0
+     48  f004
+     49  f004		       95 00	   clear      sta	0,x	; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
+     50  f006		       e8		      inx
+     51  f007		       d0 fb		      bne	clear
+     52  f009
+     53  f009		       a9 01		      lda	#%00000001	; Set D0 to reflect the playfield
+     54  f00b		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
+     55  f00d
+     56  f00d		       a9 9a		      lda	#BORDERCOLOR
+     57  f00f		       85 08		      sta	COLUPF	; Set the PF color
+     58  f011
+     59  f011							; generate a random see from the interval timer
+     60  f011		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
+     61  f014		       85 80		      sta	r_seed	; random seed
+     62  f016		       85 81		      sta	l_seed	; iterive seed
+     63  f018		       85 83		      sta	RANDOM	; random number
+     64  f01a							; --------------------------- Begin main loop -------------------------------------
+     65  f01a							; 262 lineas x 288 clock counts
+     66  f01a							; 3 vsync lines
+     67  f01a							; 37 vertical blank lines
+     68  f01a							; 192 drawfield lines
+     69  f01a							; 30 overscan lines
+     70  f01a							; --------------------------- 262 scanlines per frame -----------------------------
+     71  f01a				   startframe
+     72  f01a							; When the last line of the previous frame is detected,
+     73  f01a							; the microprocessor must generate 3 lines of VSYNC
+     74  f01a							; When the electron beam has scanned 262 lines,
+     75  f01a							; the TV set must be signaled to blank the beam and position
+     76  f01a							; it at the top of the screen to start a new frame.
+     77  f01a							; This signal is called vertical sync, and the TIA must
+     78  f01a							; transmit this signal for at least 3 scan lines.
+     79  f01a							; This is accomplished by writing a “1” in D1 of VSYNC to turn
+     80  f01a							; it on, count at least 2 scan lines, then write a “0” to D1 of
+     81  f01a							; VSYNC to turn it off.
+     82  f01a		       a9 02		      lda	#%00000010	; Writing a bit into the D1 vsync latch
+     83  f01c		       85 00		      sta	VSYNC	; Turn on VSYNC
+     84  f01e							; --------------------------- 3 scanlines of VSYNC signal
+     85  f01e		       85 02		      sta	WSYNC
+     86  f020		       85 02		      sta	WSYNC
+     87  f022		       85 02		      sta	WSYNC
+     88  f024		       a9 00		      lda	#%00000000	; Writing a bit into the D1 vsync latch
+     89  f026		       85 00		      sta	VSYNC	; Turn on VSYNC
+     90  f028
+     91  f028							; --------------------------- Turn off VSYNC
+     92  f028		       a9 00		      lda	#0
+     93  f02a		       85 00		      sta	VSYNC
+     94  f02c
+     95  f02c							; -------------------------- Additional 37 scanlines of vertical blank ------------
+     96  f02c
+     97  f02c		       a9 ff		      lda	#%11111111	; Solid line of pixels
+     98  f02e		       85 0d		      sta	PF0	; Set them in all the PF# registers
+     99  f030		       85 0e		      sta	PF1
+    100  f032		       85 0f		      sta	PF2
+    101  f034
+    102  f034		       a2 00		      ldx	#0
+    103  f036		       a9 00		      lda	#0
+    104  f038		       85 02	   lvblank    sta	WSYNC
+    105  f03a		       e8		      inx
+    106  f03b		       e0 25		      cpx	#37	; 37 scanlines of vertical blank
+    107  f03d		       d0 f9		      bne	lvblank
+    108  f03f
+    109  f03f							; --------------------------- 192 lines of drawfield ------------------------------
+    110  f03f
+    111  f03f		       a2 00		      ldx	#0
+    112  f041		       e0 07	   drawfield  cpx	#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
+    113  f043		       f0 12		      beq	borderwalls
+    114  f045
+    115  f045		       e0 b8		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
+    116  f047		       f0 03		      beq	borderbottom
+    117  f049
+    118  f049		       4c 57 f0 	      jmp	borderdone
+    119  f04c
+    120  f04c		       a9 ff	   borderbottom lda	#%11111111	; Solid row of pixels for all PF# registers
+    121  f04e		       85 0d		      sta	PF0
+    122  f050		       85 0e		      sta	PF1
+    123  f052		       85 0f		      sta	PF2
+    124  f054		       4c 57 f0 	      jmp	borderdone
+    125  f057
+    126  f057				   borderwalls
+    127  f057							; lda	   #%01000000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+    128  f057							; sta	   PF0				; Set PF0 register
+    129  f057							; lda		#%00000000		; Clear the PF1-2 registers to have an empty middle
+    130  f057							; sta	PF1
+    131  f057							; sta	   PF2
+    132  f057
+    133  f057
+    134  f057		       85 02	   borderdone sta	WSYNC
+    135  f059		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
+    136  f05c		       85 0d		      sta	PF0
+    137  f05e							; jsr	   galois_lfsr_random  ; runs once through at frame end to increase entropy
+    138  f05e		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
+    139  f061		       85 0e		      sta	PF1
+    140  f063							; ; jsr     galois_lfsr_random  ; runs once through at frame end to increase entropy
+    141  f063		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
+    142  f066		       85 0f		      sta	PF2
+    143  f068
+    144  f068		       e8		      inx
+    145  f069		       e0 c0		      cpx	#192
+    146  f06b		       d0 d4		      bne	drawfield
+    147  f06d
+    148  f06d							; -------------------------- 30 scanlines of overscan -----------------------------
+    149  f06d
+    150  f06d		       a2 00		      ldx	#0
+    151  f06f		       a9 00		      lda	#%00000000
+    152  f071		       85 0d		      sta	PF0
+    153  f073		       85 0e		      sta	PF1
+    154  f075		       85 0f		      sta	PF2
+    155  f077		       85 09		      sta	COLUBK
+    156  f079				   overscan
+    157  f079		       85 02		      sta	WSYNC
+    158  f07b		       e8		      inx
+    159  f07c		       e0 1e		      cpx	#30
+    160  f07e		       d0 f9		      bne	overscan
+    161  f080
+    162  f080							; --------------------------- End of overscan -------------------------------------
+    163  f080
+    164  f080		       4c 1a f0 	      jmp	startframe	; jump back up to start the next frame
+    165  f083
+    166  f083
+    167  f083
+    168  fffa					      org	$FFFA
+    169  fffa
+    170  fffa				   irqvectors
+    171  fffa		       00 f0		      .word.w	reset	; NMI
+    172  fffc		       00 f0		      .word.w	reset	; RESET
+    173  fffe		       00 f0		      .word.w	reset	; IRQ
+    174  10000
+    175  10000
+    176  10000							; -------------------------- End of main segment ----------------------------------
