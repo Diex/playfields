@@ -5,11 +5,11 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-borderbottom             f048              (R )
+borderbottom             f04c              (R )
 BORDERCOLOR              009a              (R )
-borderdone               f05d              (R )
+borderdone               f064              (R )
 BORDERHEIGHT             0014              (R )
-borderwalls              f053              (R )
+borderwalls              f057              (R )
 clear                    f004              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
@@ -25,7 +25,7 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-drawfield                f03d              (R )
+drawfield                f041              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -47,10 +47,10 @@ INPT5                    000d
 INTIM                    0284              (R )
 irqvectors               fffa                  
 l_seed                   0081              (R )
-lvblank                  f034              (R )
+lvblank                  f038              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f06a              (R )
+overscan                 f06d              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
@@ -68,7 +68,7 @@ RESP0                    0010
 RESP1                    0011                  
 RSYNC                    0003                  
 seed                     0082                  
-startframe               f01a              (R )
+startframe               f01e              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  

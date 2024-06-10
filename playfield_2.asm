@@ -56,6 +56,10 @@ clear:       	sta 	0,x 			; $0 to $7F (0-127) reserved OS page zero, $80 to $FF 
 				lda		#BORDERCOLOR			
 				sta		COLUPF			; Set the PF color
 
+				lda 	#$46
+				sta		COLUBK			; Set the background color
+
+
                 ; generate a random see from the interval timer
                 lda INTIM               ; unknown value to use as an initial random seed
                 sta r_seed              ; random seed
@@ -120,15 +124,17 @@ borderbottom:  	lda		#%11111111		; Solid row of pixels for all PF# registers
 				jmp 	borderdone
 
 				; --------------------------- Draw the left and rigth borders ---------------------
-borderwalls:	lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+
+borderwalls:	lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
 				sta     PF0				; Set PF0 register
 				lda		#%00000000		; Clear the PF1-2 registers to have an empty middle
+				lda 	INTIM
 				sta 	PF1
 				sta     PF2	
 
 borderdone:		sta 	WSYNC
-				lda 	#$46
-				sta		COLUBK			; Set the background color to a dark blue
+
+
     			inx  
 				cpx 	#192			; end of playfield
 				bne 	drawfield
