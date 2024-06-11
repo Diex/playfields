@@ -1,17 +1,19 @@
 --- Symbol List (sorted by symbol)
+0.FREE_BYTES             0000                  
+1.CLEAR_STACK            f006              (R )
+2.VSLP1                  f011              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-BLUE                     009a              (R )
-clear                    f004              (R )
-COLUBK                   0009              (R )
+COLUBK                   0009                  
 COLUP0                   0006                  
 COLUP1                   0007                  
-COLUPF                   0008                  
-CTRLPF                   000a                  
+COLUPF                   0008              (R )
+Counter                  0081              (R )
+CTRLPF                   000a              (R )
 CXBLPF                   0006                  
 CXCLR                    002c                  
 CXM0FB                   0004                  
@@ -24,8 +26,6 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0081              (R )
-galois_lfsr_random       f047                  
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -41,21 +41,18 @@ INPT2                    000a
 INPT3                    000b                  
 INPT4                    000c                  
 INPT5                    000d                  
-interruptVectors         fffa                  
 INTIM                    0284                  
-noeor0                   f04e              (R )
+LVBlank                  f01a              (R )
+LVOver                   f044              (R )
+NextFrame                f00f              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f03d              (R )
-PF0                      000d                  
-PF1                      000e                  
-PF2                      000f                  
-playfield                f02c              (R )
-r_seed                   0080              (R )
+PF0                      000d              (R )
+PF1                      000e              (R )
+PF2                      000f              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
-reset                    f000              (R )
 RESM0                    0012                  
 RESM1                    0013                  
 RESMP0                   0028                  
@@ -63,7 +60,8 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-startFrame               f00d              (R )
+ScanLoop                 f029              (R )
+Start                    f000              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
@@ -80,8 +78,8 @@ VBLANK                   0001              (R )
 VDELBL                   0027                  
 VDELP0                   0025                  
 VDELP1                   0026                  
+VERSION_MACRO            006a                  
 VERSION_VCS              0069                  
-verticalBlank            f023              (R )
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

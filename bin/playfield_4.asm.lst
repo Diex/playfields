@@ -1,7 +1,23 @@
 ------- FILE playfield_4.asm LEVEL 1 PASS 2
-      1  10000					       processor	6502	; s01e05 Ex1. Draw the playfield on an Atari 2600
+      1  10000 ????						; S01E02 Generating a stable screen
+      2  10000 ????
+      3  10000 ????						; This example creates the proper VSYNC, and number of scanlines to generate a stable frame on NTSC
+      4  10000 ????						; televisions.
+      5  10000 ????
+      6  10000 ????						; This Episode on Youtube - https://youtu.be/WcRtIpvjKNI
+      7  10000 ????
+      8  10000 ????						; Become a Patron - https://patreon.com/8blit
+      9  10000 ????						; 8blit Merch - https://8blit.myspreadshop.com/
+     10  10000 ????						; Subscribe to 8Blit - https://www.youtube.com/8blit?sub_confirmation=1
+     11  10000 ????						; Follow on Facebook - https://www.facebook.com/8Blit
+     12  10000 ????						; Follow on Instagram - https://www.instagram.com/8blit
+     13  10000 ????						; Visit the Website - https://www.8blit.com
+     14  10000 ????
+     15  10000 ????						; Email - 8blit0@gmail.com
+     16  10000 ????
+     17  10000 ????				       processor	6502
 ------- FILE vcs.h LEVEL 2 PASS 2
-      0  10000 ????				       include	"vcs.h"	; This example uses the TIA PF0, PF1, PF2, and CTLRPF
+      0  10000 ????				       include	"vcs.h"
       1  10000 ????						; VCS.H
       2  10000 ????						; Version 1.05, 13/November/2003
       3  10000 ????
@@ -203,142 +219,99 @@
     199  0000 ????
     200  0000 ????						; EOF
 ------- FILE playfield_4.asm
-      3  0000 ????						; Registers to draw a border around the screen. We're setting the top and
-      4  0000 ????						; bottom border before and at the end of the main 192 screen frame which will result in
-      5  0000 ????						; thicker than expected top and bottom boarders when executed in the
-      6  0000 ????						; Stella emulator because it shows the number of scanlines that could be displayed on some CRT's.
-      7  0000 ????						; However, on most CRT's usually 192 (+/- a few) scanlines are visible so the thickness of the
-      8  0000 ????						; boarder would look the same all around. For this, we're not even going to use VBLANK.
-      9  0000 ????						;
-     10  0000 ????						; This Episode on Youtube - https://youtu.be/LWIyHl9QfvQ
-     11  0000 ????						;
-     12  0000 ????						; Become a Patron - https://patreon.com/8blit
-     13  0000 ????						; 8blit Merch - https://8blit.myspreadshop.com/
-     14  0000 ????						; Subscribe to 8Blit - https://www.youtube.com/8blit?sub_confirmation=1
-     15  0000 ????						; Follow on Facebook - https://www.facebook.com/8Blit
-     16  0000 ????						; Follow on Instagram - https://www.instagram.com/8blit
-     17  0000 ????						; Visit the Website - https://www.8blit.com
-     18  0000 ????						;
-     19  0000 ????						; Email - 8blit0@gmail.com
-     20  0000 ????
+     19  0000 ????
+     20  0000 ????	       00 9a	   BLUE       =	$9a	;		define symbol for TIA color (NTSC)
      21  0000 ????
-     22  0000 ????	       00 9a	   BORDERCOLOR equ	#$9A
-     23  0000 ????	       00 14	   BORDERHEIGHT equ	#20	; How many scan lines are our top and bottom borders
-     24  0000 ????	       00 18	   SEGMENTS   equ	#24
-     25  0000 ????
-     26  0000 ????						; assigning RAM addresses to labels.
-     27 U0081 ????				      seg.u	vars	; uninitialized segment
-     28 U0080					      org	$80	; origin set at base of ram
-     29 U0080
-     30 U0080		       00	   framecount ds	1	; frame counter
-     31 U0081							; ------------------------- Start of main segment ---------------------------------
-     32 U0081
-     33  10000 ????				       seg	code	; uninitialized segment
-     34  f000					      org	$F000
-     35  f000
-     36  f000							; ------------------------- Start of program execution ----------------------------
-     37  f000
-     38  f000
-     39  f000		       a2 00	   reset      ldx	#0	; Clear RAM and all TIA registers
-     40  f002		       a0 00		      ldy	#0
-     41  f004		       a9 00		      lda	#0
-     42  f006
-     43  f006
-     44  f006		       95 00	   clear      sta	0,x	; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
-     45  f008		       e8		      inx
-     46  f009		       d0 fb		      bne	clear
-     47  f00b
-     48  f00b		       a9 01		      lda	#%00000001	; Set D0 to reflect the playfield
-     49  f00d		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
-     50  f00f
-     51  f00f		       a9 9a		      lda	#BORDERCOLOR
-     52  f011		       85 08		      sta	COLUPF	; Set the PF color
-     53  f013		       a9 46		      lda	#$46
-     54  f015		       85 09		      sta	COLUBK	; Set the background color
-     55  f017
-     56  f017
-     57  f017							; generate a random see from the interval timer
-     58  f017							; lda INTIM		   ; unknown value to use as an initial random seed
-     59  f017							; sta r_seed		   ; random seed
-     60  f017							; sta l_seed		   ; iterive seed
-     61  f017							; sta RANDOM			  ; random number
-     62  f017							; --------------------------- Begin main loop -------------------------------------
-     63  f017							; 262 lineas x 288 clock counts
-     64  f017							; 3 vsync lines
-     65  f017							; 37 vertical blank lines
-     66  f017							; 192 drawfield lines
-     67  f017							; 30 overscan lines
-     68  f017							; --------------------------- 262 scanlines per frame -----------------------------
-     69  f017				   startframe
-     70  f017							; When the last line of the previous frame is detected,
-     71  f017							; the microprocessor must generate 3 lines of VSYNC
-     72  f017							; When the electron beam has scanned 262 lines,
-     73  f017							; the TV set must be signaled to blank the beam and position
-     74  f017							; it at the top of the screen to start a new frame.
-     75  f017							; This signal is called vertical sync, and the TIA must
-     76  f017							; transmit this signal for at least 3 scan lines.
-     77  f017							; This is accomplished by writing a “1” in D1 of VSYNC to turn
-     78  f017							; it on, count at least 2 scan lines, then write a “0” to D1 of
-     79  f017							; VSYNC to turn it off.
-     80  f017		       a9 02		      lda	#%00000010	; Writing a bit into the D1 vsync latch
-     81  f019		       85 00		      sta	VSYNC	; Turn on VSYNC
-     82  f01b							; --------------------------- 3 scanlines of VSYNC signal
-     83  f01b		       85 02		      sta	WSYNC
-     84  f01d		       85 02		      sta	WSYNC
-     85  f01f		       85 02		      sta	WSYNC
-     86  f021							; --------------------------- Turn off VSYNC
-     87  f021		       a9 00		      lda	#0
-     88  f023		       85 00		      sta	VSYNC
-     89  f025							; -------------------------- Additional 37 scanlines of vertical blank ------------
-     90  f025
-     91  f025		       a9 ff		      lda	#%11111111	; Solid line of pixels
-     92  f027		       85 0d		      sta	PF0	; Set them in all the PF# registers
-     93  f029		       85 0e		      sta	PF1
-     94  f02b		       85 0f		      sta	PF2
-     95  f02d		       a2 00		      ldx	#0
-     96  f02f		       a9 00		      lda	#0
-     97  f031
-     98  f031		       85 02	   lvblank    sta	WSYNC
-     99  f033		       e8		      inx
-    100  f034		       e0 25		      cpx	#37	; 37 scanlines of vertical blank
-    101  f036		       d0 f9		      bne	lvblank	; branch on not equal to continue the loop
-    102  f038
-    103  f038							; --------------------------- 192 lines of drawfield ------------------------------
-    104  f038		       a2 00		      ldx	#0	; x = line number
-    105  f03a		       85 02	   walls      sta	WSYNC
-    106  f03c		       e8		      inx
-    107  f03d		       e0 c0		      cpx	#192	; will be interpreted by the assembler
-    108  f03f		       d0 f9		      bne	walls	; branch on top down
-    109  f041
-    110  f041							; -------------------------- 30 scanlines of overscan -----------------------------
-    111  f041
-    112  f041		       a2 00		      ldx	#0
-    113  f043		       85 02	   overscan   sta	WSYNC
-    114  f045		       e8		      inx
-    115  f046		       e0 1e		      cpx	#30
-    116  f048		       d0 f9		      bne	overscan
-    117  f04a
-    118  f04a							; --------------------------- End of overscan -------------------------------------
-    119  f04a		       e6 80		      inc	framecount
-    120  f04c		       a5 80		      lda	framecount
-    121  f04e		       c9 07		      cmp	#7
-    122  f050		       f0 03		      beq	changecolor
-    123  f052
-    124  f052		       4c 17 f0 	      jmp	startframe	; jump back up to start the next frame
-    125  f055
-    126  f055
-    127  f055		       a5 09	   changecolor lda	COLUPF+1
-    128  f057		       85 08		      sta	COLUPF
-    129  f059		       a9 00		      lda	#0
-    130  f05b		       85 80		      sta	framecount
-    131  f05d		       4c 17 f0 	      jmp	startframe
-    132  f060
-    133  f060							; --------------------------- Pad until end of main segment -----------------------
-    134  fffa					      org	$FFFA
-    135  fffa				   irqvectors
-    136  fffa		       00 f0		      .word.w	reset	; NMI
-    137  fffc		       00 f0		      .word.w	reset	; RESET
-    138  fffe		       00 f0		      .word.w	reset	; IRQ
-    139  10000
-    140  10000
-    141  10000							; -------------------------- End of main segment ----------------------------------
+     22 U0082 ????				      seg.u	vars	; uninitialized segment
+     23 U0080					      org	$80	; origin set at base of ram
+     24 U0080
+     25 U0080		       00	   r_seed     ds	1	; ball x pos
+     26 U0081		       00	   fcount     ds	1	; frame counter
+     27 U0082
+     28 U0082
+     29  10000 ????				       seg	code
+     30  f000					      org	$f000
+     31  f000
+     32  f000				   reset
+     33  f000							; clear RAM and all TIA registers
+     34  f000		       a2 00		      ldx	#0	;		load the value 0 into (x)
+     35  f002		       a9 00		      lda	#0	;		load the value 0 into (a)
+     36  f004				   clear		;		define a label
+     37  f004		       95 00		      sta	0,x	;		store value in (a) at address of 0 with offset (x)
+     38  f006		       e8		      inx		;		inc (x) by 1. it will count to 255 then rollover to 0
+     39  f007		       d0 fb		      bne	clear	;		branch up to the 'clear' label if (x) != 0
+     40  f009
+     41  f009		       a9 9a		      lda	#BLUE	;		load the value from the symbol 'blue' into (a)
+     42  f00b		       85 09		      sta	COLUBK	;		store (a) into the TIA background color register
+     43  f00d
+     44  f00d				   startFrame
+     45  f00d		       e6 81		      inc	fcount	;		increment the frame counter
+     46  f00f							; start of new frame
+     47  f00f							; start of vertical blank processing
+     48  f00f		       a9 00		      lda	#0	;		load the value 0 into (a)
+     49  f011		       85 01		      sta	VBLANK	;		store (a) into the TIA VBLANK register
+     50  f013		       a9 02		      lda	#2	;		load the value 2 into (a).
+     51  f015		       85 00		      sta	VSYNC	;		store (a) into TIA VSYNC register to turn on vsync
+     52  f017		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     53  f019							;---------------------------------------
+     54  f019		       85 02		      sta	WSYNC
+     55  f01b							;---------------------------------------
+     56  f01b		       85 02		      sta	WSYNC	;		we need 3 scanlines of VSYNC for a stable frame
+     57  f01d							;---------------------------------------
+     58  f01d		       a9 00		      lda	#0
+     59  f01f		       85 00		      sta	VSYNC	;		store 0 into TIA VSYNC register to turn off vsync
+     60  f021
+     61  f021							; generate 37 scanlines of vertical blank
+     62  f021		       a2 00		      ldx	#0
+     63  f023				   verticalBlank
+     64  f023		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     65  f025							;---------------------------------------
+     66  f025		       e8		      inx
+     67  f026		       e0 25		      cpx	#37	;		compare the value in (x) to the immeadiate value of 37
+     68  f028		       d0 f9		      bne	verticalBlank	;		branch to 'verticalBlank' label if compare not equal
+     69  f02a
+     70  f02a							; generate 192 lines of playfield
+     71  f02a		       a2 00		      ldx	#0
+     72  f02c				   playfield
+     73  f02c		       85 02		      sta	WSYNC
+     74  f02e							;--------------------------------------
+     75  f02e		       a5 81		      lda	fcount
+     76  f030		       85 09		      sta	COLUBK
+     77  f032		       e8		      inx
+     78  f033		       e0 c0		      cpx	#192	;		compare the value in (x) to the immeadiate value of 192
+     79  f035		       d0 f5		      bne	playfield	;		branch to 'drawField' label if compare not equal
+     80  f037
+     81  f037							; end of playfield - turn on vertical blank
+     82  f037		       a9 42		      lda	#%01000010
+     83  f039		       85 01		      sta	VBLANK
+     84  f03b
+     85  f03b							; generate 30 scanlines of overscan
+     86  f03b		       a2 00		      ldx	#0
+     87  f03d				   overscan
+     88  f03d		       85 02		      sta	WSYNC
+     89  f03f							;---------------------------------------
+     90  f03f		       e8		      inx
+     91  f040		       e0 1e		      cpx	#30	;		compare value in (x) to immeadiate value of 30
+     92  f042		       d0 f9		      bne	overscan	;		branch up to 'overscan' label, compare if not equal
+     93  f044		       4c 0d f0 	      jmp	startFrame	;		frame completed, branch up to the 'startFrame' label
+     94  f047							;------------------------------------------------
+     95  f047
+     96  f047
+     97  f047							; Galois 8-bit Linear Feedback Shift Registers
+     98  f047							; https://samiam.org/blog/20130617.html
+     99  f047				   galois_lfsr_random
+    100  f047		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
+    101  f049		       4a		      lsr		; shift right
+    102  f04a		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
+    103  f04c		       49 d4		      eor	#$D4	; d4 tap (11010100)
+    104  f04e		       85 80	   noeor0     sta	r_seed
+    105  f050		       60		      rts
+    106  f051
+    107  f051
+    108  f051
+    109  fffa					      org	$fffa	;		set origin to last 6 bytes of 4k rom
+    110  fffa
+    111  fffa				   interruptVectors
+    112  fffa		       00 f0		      .word.w	reset	;		nmi
+    113  fffc		       00 f0		      .word.w	reset	;		reset
+    114  fffe		       00 f0		      .word.w	reset	;		irq
