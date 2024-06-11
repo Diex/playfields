@@ -18,21 +18,16 @@
                                         ;
                                         ; Email - 8blit0@gmail.com
 
-                
+
+BORDERCOLOR		equ 	#$9A
+BORDERHEIGHT	equ		#20				; How many scan lines are our top and bottom borders
+SEGMENTS 		equ		#24
+
 				; assigning RAM addresses to labels.
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
-; r_seed          ds 1            ; random seed
-; l_seed          ds 1            ; list seed
-; seed			ds 1			; seed for randomize
-; RANDOM		  	ds 1            ; random number
-;t			  	ds 2            ; temporary variable for sierpinsky
-
-
-				; seg.u   bss
-				; org     $100
-
+framecount:	    ds	1				; frame counter
 				; ------------------------- Start of main segment ---------------------------------
 
 				seg   	code		; uninitialized segment
@@ -40,14 +35,12 @@
 
 				; ------------------------- Start of program execution ----------------------------
 
-BORDERCOLOR		equ 	#$9A
-BORDERHEIGHT	equ		#20				; How many scan lines are our top and bottom borders
-SEGMENTS 		equ		#24
-
 
 reset: 			ldx 	#0 				; Clear RAM and all TIA registers
+                ldy 	#0
 				lda 	#0 
-  
+
+
 clear:       	sta 	0,x 			; $0 to $7F (0-127) reserved OS page zero, $80 to $FF (128-255) user zero page ram.
 				inx 
 				bne 	clear
@@ -57,7 +50,6 @@ clear:       	sta 	0,x 			; $0 to $7F (0-127) reserved OS page zero, $80 to $FF 
 
 				lda		#BORDERCOLOR			
 				sta		COLUPF			; Set the PF color
-
 				lda 	#$46
 				sta		COLUBK			; Set the background color
 
@@ -109,37 +101,12 @@ lvblank:		sta 	WSYNC
 				bne 	lvblank			; branch on not equal to continue the loop
 				
 				; --------------------------- 192 lines of drawfield ------------------------------
-    			ldx 	#0 				; x = line number	
-				
-top:			
-				sta 	WSYNC
-    			inx  
-				cpx		#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
-				bne		top		; branch on top down
-
-				; --------------------------- Draw the left and rigth borders ---------------------
-				ldy		#SEGMENTS-1
-				lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
-				sta     PF0				; Set PF0 register
-
+    			ldx 	#0 				; x = line number	                
 walls:			sta 	WSYNC
-				lda		INTIM
-                sta		COLUBK
-				jsr     randomize
-				
     			inx  
-				cpx 	#192-BORDERHEIGHT	; will be interpreted by the assembler
+				cpx 	#192	; will be interpreted by the assembler
 				bne		walls		; branch on top down
-bottom:
-			  	lda		#%11111111		; Solid row of pixels for all PF# registers
-				sta 	PF0
-				sta		PF1
-				sta		PF2				
 
-				sta 	WSYNC
-    			inx  
-				cpx 	#192			; end of playfield
-				bne 	bottom
 				; -------------------------- 30 scanlines of overscan -----------------------------
 
 				ldx 	#0					
@@ -149,26 +116,22 @@ overscan:       sta 	WSYNC
 				bne 	overscan
 
 				; --------------------------- End of overscan -------------------------------------
+                inc framecount
+                lda framecount
+                cmp #7
+                beq changecolor
 
 				jmp 	startframe		; jump back up to start the next frame
 
+
+changecolor:	lda		COLUPF+1                
+                sta		COLUPF
+                lda     #0
+                sta     framecount
+                jmp		startframe
+
 				; --------------------------- Pad until end of main segment -----------------------
-						
-randomize					
-				
-				cpy 	SEGMENTS			; 192/
-				bne 	return				
-				; ldy		#0
-				lda 	INTIM
-				sta 	PF1
-				sta     PF2	
-return			
-				dey
-				rts
-
-
-				org 	$FFFA
-	
+                org 	$FFFA
 irqvectors:
 				.word reset          	; NMI
 				.word reset          	; RESET
@@ -176,5 +139,3 @@ irqvectors:
                 
 
 				; -------------------------- End of main segment ----------------------------------
-
-				end
