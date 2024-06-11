@@ -20,25 +20,20 @@
 
 BLUE           = $9a         ;              define symbol for TIA color (NTSC)
 changeColorSpeed = 60     ; frames to change color
+lineCountChange = 192/16     ; lines to change playfield
         seg.u	vars		; uninitialized segment
         org	$80             ; origin set at base of ram
 
 r_seed             ds 1            ; ball x pos
 fcount             ds 1            ; frame counter
-bgcolor             ds 1            ; background color
-lcount              ds 1            ; line counter
+bgcolor            ds 1            ; background color
+lcount             ds 1            ; line counter
 
-        
-        
-
-	
     seg code
 	org $f000
 
 reset:
-	
     CLEAN_START
-
     ; generate a random see from the interval timer
     lda INTIM               ; unknown value to use as an initial random seed
     sta r_seed              ; random seed
@@ -78,31 +73,29 @@ verticalBlank:
 	cpx #37                  ;              compare the value in (x) to the immeadiate value of 37
 	bne verticalBlank        ;              branch to 'verticalBlank' label if compare not equal
 ;---------------------------------------
+    
     lda bgcolor
     sta COLUBK
-
+    
     ldx #0   ; counter for lines
-	; generate 192 lines of playfield
+    jsr setPlayfield
     lda fcount
     cmp #changeColorSpeed
     bne playfield
-    jsr galois_lfsr_random
-    lda #0
-    sta fcount
-    lda r_seed
-    sta bgcolor
-    sta COLUBK
+    jsr changeBackground
 
 	lda #0
     sta lcount
+    sta fcount
+
+    ; jsr setPlayfield  ; first time set the playfield
 
 playfield:
     
     sta WSYNC    
-
     inc lcount
     lda lcount
-    cmp #8
+    cmp #lineCountChange
     bne noChangeColor
     jsr setPlayfield
     lda #0
@@ -144,11 +137,18 @@ noeor0: sta r_seed
 setPlayfield:
     jsr galois_lfsr_random
     lda r_seed
-    sta PF0
-    sta PF1
+    sta PF0    
+    sta PF1    
     sta PF2
     rts
 
+changeBackground:
+    jsr galois_lfsr_random
+    lda r_seed
+    sta bgcolor
+    rts
+
+    
 	org $fffa                ;              set origin to last 6 bytes of 4k rom
 	
 interruptVectors:
