@@ -25,6 +25,11 @@ changeColorSpeed = 60     ; frames to change color
 
 r_seed             ds 1            ; ball x pos
 fcount             ds 1            ; frame counter
+bgcolor             ds 1            ; background color
+lcount              ds 1            ; line counter
+
+        
+        
 
 	
     seg code
@@ -48,12 +53,18 @@ startFrame:
 	; start of vertical blank processing
 	lda #0                   ;              load the value 0 into (a)
 	sta VBLANK               ;              store (a) into the TIA VBLANK register
+    sta PF0
+    sta PF1
+    sta PF2
+    sta COLUBK
+
 	lda #2                   ;              load the value 2 into (a). 
 	sta VSYNC                ;              store (a) into TIA VSYNC register to turn on vsync
 
 	sta WSYNC                ;              write any value to TIA WSYNC register to wait for hsync
 	sta WSYNC
 	sta WSYNC                ;              we need 3 scanlines of VSYNC for a stable frame
+    
 ;---------------------------------------
 	lda #0
 	sta VSYNC                ;              store 0 into TIA VSYNC register to turn off vsync
@@ -67,21 +78,38 @@ verticalBlank:
 	cpx #37                  ;              compare the value in (x) to the immeadiate value of 37
 	bne verticalBlank        ;              branch to 'verticalBlank' label if compare not equal
 ;---------------------------------------
-    
+    lda bgcolor
+    sta COLUBK
+
     ldx #0   ; counter for lines
 	; generate 192 lines of playfield
     lda fcount
     cmp #changeColorSpeed
     bne playfield
     jsr galois_lfsr_random
-    
+    lda #0
+    sta fcount
     lda r_seed
+    sta bgcolor
     sta COLUBK
 
-	
+	lda #0
+    sta lcount
+
 playfield:
     
     sta WSYNC    
+
+    inc lcount
+    lda lcount
+    cmp #8
+    bne noChangeColor
+    jsr setPlayfield
+    lda #0
+    sta lcount
+
+noChangeColor:
+
 	inx
 	cpx #192                 ;              compare the value in (x) to the immeadiate value of 192
 	bne playfield            ;              branch to 'drawField' label if compare not equal
@@ -106,8 +134,6 @@ overscan:
 ; Galois 8-bit Linear Feedback Shift Registers
 ; https://samiam.org/blog/20130617.html
 galois_lfsr_random:              
-        lda #0
-        sta fcount
         lda r_seed              ; keep calling funtion to for better entropy
         lsr                     ; shift right
         bcc noeor0              ; if carry 1, then exclusive OR the bits
@@ -115,7 +141,13 @@ galois_lfsr_random:
 noeor0: sta r_seed
         rts
 
-
+setPlayfield:
+    jsr galois_lfsr_random
+    lda r_seed
+    sta PF0
+    sta PF1
+    sta PF2
+    rts
 
 	org $fffa                ;              set origin to last 6 bytes of 4k rom
 	

@@ -7,6 +7,7 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
+bgcolor                  0082              (R )
 BLUE                     009a              (R )
 changeColorSpeed         003c              (R )
 clear                    f010                  
@@ -28,7 +29,7 @@ ENABL                    001f
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   0081              (R )
-galois_lfsr_random       f057              (R )
+galois_lfsr_random       f07c              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -46,14 +47,16 @@ INPT4                    000c
 INPT5                    000d                  
 interruptVectors         fffa                  
 INTIM                    0284              (R )
-noeor0                   f062              (R )
+lcount                   0083              (R )
+noChangeColor            f065              (R )
+noeor0                   f083              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f04b              (R )
-PF0                      000d                  
-PF1                      000e                  
-PF2                      000f                  
-playfield                f03e              (R )
+overscan                 f070              (R )
+PF0                      000d              (R )
+PF1                      000e              (R )
+PF2                      000f              (R )
+playfield                f054              (R )
 r_seed                   0080              (R )
 REFP0                    000b                  
 REFP1                    000c                  
@@ -66,6 +69,7 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
+setPlayfield             f086              (R )
 startFrame               f014              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
@@ -85,7 +89,7 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_MACRO            006a                  
 VERSION_VCS              0069                  
-verticalBlank            f028              (R )
+verticalBlank            f030              (R )
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.
