@@ -320,56 +320,56 @@
     117  f03b		       e0 13		      cpx	#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
     118  f03d		       d0 f9		      bne	top	; branch on top down
     119  f03f
-    120  f03f		       a4 17		      ldy	SEGMENTS-1
-    121  f041							; --------------------------- Draw the left and rigth borders ---------------------
-    122  f041		       a9 10	   walls      lda	#%00010000	; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
+    120  f03f							; --------------------------- Draw the left and rigth borders ---------------------
+    121  f03f		       a4 17		      ldy	SEGMENTS-1
+    122  f041		       a9 10		      lda	#%00010000	; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.
     123  f043		       85 0d		      sta	PF0	; Set PF0 register
-    124  f045		       85 02		      sta	WSYNC
-    125  f047
-    126  f047		       20 6a f0 	      jsr	randomize
-    127  f04a
+    124  f045
+    125  f045		       85 02	   walls      sta	WSYNC
+    126  f047
+    127  f047		       20 6a f0 	      jsr	randomize
     128  f04a
-    129  f04a							; iny
-    130  f04a		       e8		      inx
-    131  f04b		       e0 ac		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
-    132  f04d		       d0 f2		      bne	walls	; branch on top down
-    133  f04f				   bottom
-    134  f04f		       a9 ff		      lda	#%11111111	; Solid row of pixels for all PF# registers
-    135  f051		       85 0d		      sta	PF0
-    136  f053		       85 0e		      sta	PF1
-    137  f055		       85 0f		      sta	PF2
-    138  f057
-    139  f057		       85 02		      sta	WSYNC
-    140  f059		       e8		      inx
-    141  f05a		       e0 c0		      cpx	#192	; end of playfield
-    142  f05c		       d0 f1		      bne	bottom
-    143  f05e							; -------------------------- 30 scanlines of overscan -----------------------------
-    144  f05e
-    145  f05e		       a2 00		      ldx	#0
-    146  f060		       85 02	   overscan   sta	WSYNC
-    147  f062		       e8		      inx
-    148  f063		       e0 1e		      cpx	#30
-    149  f065		       d0 f9		      bne	overscan
-    150  f067
-    151  f067							; --------------------------- End of overscan -------------------------------------
-    152  f067
-    153  f067		       4c 15 f0 	      jmp	startframe	; jump back up to start the next frame
-    154  f06a
-    155  f06a							; --------------------------- Pad until end of main segment -----------------------
-    156  f06a
-    157  f06a				   randomize
-    158  f06a
-    159  f06a		       c4 18		      cpy	SEGMENTS	; 192/
-    160  f06c		       d0 09		      bne	return
-    161  f06e		       a0 00		      ldy	#0
-    162  f070		       ad 84 02 	      lda	INTIM
-    163  f073		       85 0e		      sta	PF1
-    164  f075		       85 0f		      sta	PF2
-    165  f077				   return
-    166  f077		       c8		      iny
-    167  f078		       60		      rts
-    168  f079
-    169  f079
+    129  f04a		       e8		      inx
+    130  f04b		       e0 ac		      cpx	#192-BORDERHEIGHT	; will be interpreted by the assembler
+    131  f04d		       d0 f6		      bne	walls	; branch on top down
+    132  f04f				   bottom
+    133  f04f		       a9 ff		      lda	#%11111111	; Solid row of pixels for all PF# registers
+    134  f051		       85 0d		      sta	PF0
+    135  f053		       85 0e		      sta	PF1
+    136  f055		       85 0f		      sta	PF2
+    137  f057
+    138  f057		       85 02		      sta	WSYNC
+    139  f059		       e8		      inx
+    140  f05a		       e0 c0		      cpx	#192	; end of playfield
+    141  f05c		       d0 f1		      bne	bottom
+    142  f05e							; -------------------------- 30 scanlines of overscan -----------------------------
+    143  f05e
+    144  f05e		       a2 00		      ldx	#0
+    145  f060		       85 02	   overscan   sta	WSYNC
+    146  f062		       e8		      inx
+    147  f063		       e0 1e		      cpx	#30
+    148  f065		       d0 f9		      bne	overscan
+    149  f067
+    150  f067							; --------------------------- End of overscan -------------------------------------
+    151  f067
+    152  f067		       4c 15 f0 	      jmp	startframe	; jump back up to start the next frame
+    153  f06a
+    154  f06a							; --------------------------- Pad until end of main segment -----------------------
+    155  f06a
+    156  f06a				   randomize
+    157  f06a
+    158  f06a							; cpy	SEGMENTS			; 192/
+    159  f06a							; bne	return
+    160  f06a							; ldy		#0
+    161  f06a							; lda	INTIM
+    162  f06a		       c8		      iny
+    163  f06b		       84 0e		      sty	PF1
+    164  f06d		       84 0f		      sty	PF2
+    165  f06f				   return
+    166  f06f		       c8		      iny
+    167  f070		       60		      rts
+    168  f071
+    169  f071
     170  fffa					      org	$FFFA
     171  fffa
     172  fffa				   irqvectors

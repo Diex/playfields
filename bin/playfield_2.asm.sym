@@ -41,7 +41,7 @@ INPT2                    000a
 INPT3                    000b                  
 INPT4                    000c                  
 INPT5                    000d                  
-INTIM                    0284              (R )
+INTIM                    0284                  
 irqvectors               fffa                  
 lvblank                  f02f              (R )
 NUSIZ0                   0004                  
@@ -61,7 +61,7 @@ RESMP0                   0028
 RESMP1                   0029                  
 RESP0                    0010                  
 RESP1                    0011                  
-return                   f077              (R )
+return                   f06f                  
 RSYNC                    0003                  
 SEGMENTS                 0018              (R )
 startframe               f015              (R )
@@ -84,6 +84,6 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_VCS              0069                  
 VSYNC                    0000              (R )
-walls                    f041              (R )
+walls                    f045              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

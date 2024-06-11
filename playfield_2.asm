@@ -117,16 +117,15 @@ top:
 				cpx		#BORDERHEIGHT-1	; Borderheight-1 will be interpreted by the assembler (-1 because the index starts at 0)
 				bne		top		; branch on top down
 
-				ldy		SEGMENTS-1
 				; --------------------------- Draw the left and rigth borders ---------------------
-walls:			lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
+				ldy		SEGMENTS-1
+				lda     #%00010000		; Set the first pixel of PF0. Uses the 4 hight bits and rendered in reverse.				
 				sta     PF0				; Set PF0 register
-				sta 	WSYNC
+
+walls:			sta 	WSYNC
 
 				jsr     randomize
 				
-				
-				; iny
     			inx  
 				cpx 	#192-BORDERHEIGHT	; will be interpreted by the assembler
 				bne		walls		; branch on top down
@@ -156,12 +155,13 @@ overscan:       sta 	WSYNC
 						
 randomize:					
 				
-				cpy 	SEGMENTS			; 192/
-				bne 	return				
-				ldy		#0
-				lda 	INTIM
-				sta 	PF1
-				sta     PF2	
+				; cpy 	SEGMENTS			; 192/
+				; bne 	return				
+				; ldy		#0
+				; lda 	INTIM
+				iny				
+				sty 	PF1
+				sty     PF2	
 return:			
 				iny
 				rts
