@@ -8,6 +8,7 @@ AUDF1                    0018
 AUDV0                    0019                  
 AUDV1                    001a                  
 BLUE                     009a              (R )
+changeColorSpeed         003c              (R )
 clear                    f010                  
 COLUBK                   0009              (R )
 COLUP0                   0006                  
@@ -27,7 +28,7 @@ ENABL                    001f
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   0081              (R )
-galois_lfsr_random       f051              (R )
+galois_lfsr_random       f057              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -45,14 +46,14 @@ INPT4                    000c
 INPT5                    000d                  
 interruptVectors         fffa                  
 INTIM                    0284              (R )
-noeor0                   f058              (R )
+noeor0                   f062              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f044              (R )
+overscan                 f04b              (R )
 PF0                      000d                  
 PF1                      000e                  
 PF2                      000f                  
-playfield                f037              (R )
+playfield                f03e              (R )
 r_seed                   0080              (R )
 REFP0                    000b                  
 REFP1                    000c                  
@@ -84,7 +85,7 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_MACRO            006a                  
 VERSION_VCS              0069                  
-verticalBlank            f02a              (R )
+verticalBlank            f028              (R )
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

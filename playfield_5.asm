@@ -19,12 +19,12 @@
 	include "macro.h"
 
 BLUE           = $9a         ;              define symbol for TIA color (NTSC)
-
+changeColorSpeed = 60     ; frames to change color
         seg.u	vars		; uninitialized segment
         org	$80             ; origin set at base of ram
 
 r_seed             ds 1            ; ball x pos
-fcount              ds 1            ; frame counter
+fcount             ds 1            ; frame counter
 
 	
     seg code
@@ -43,38 +43,42 @@ clear:                       ;              define a label
 	sta COLUBK               ;              store (a) into the TIA background color register
 
 startFrame:
-    inc fcount              ;              increment the frame counter
+
 	; start of new frame
 	; start of vertical blank processing
 	lda #0                   ;              load the value 0 into (a)
 	sta VBLANK               ;              store (a) into the TIA VBLANK register
 	lda #2                   ;              load the value 2 into (a). 
 	sta VSYNC                ;              store (a) into TIA VSYNC register to turn on vsync
+
 	sta WSYNC                ;              write any value to TIA WSYNC register to wait for hsync
-;---------------------------------------
 	sta WSYNC
-;---------------------------------------
 	sta WSYNC                ;              we need 3 scanlines of VSYNC for a stable frame
 ;---------------------------------------
 	lda #0
 	sta VSYNC                ;              store 0 into TIA VSYNC register to turn off vsync
 
+;---------------------------------------
 	; generate 37 scanlines of vertical blank
 	ldx #0
 verticalBlank:   
 	sta WSYNC                ;              write any value to TIA WSYNC register to wait for hsync
-;---------------------------------------
 	inx
 	cpx #37                  ;              compare the value in (x) to the immeadiate value of 37
 	bne verticalBlank        ;              branch to 'verticalBlank' label if compare not equal
-
+;---------------------------------------
+    
+    ldx #0   ; counter for lines
 	; generate 192 lines of playfield
-    ; jsr galois_lfsr_random
+    lda fcount
+    cmp #changeColorSpeed
+    bne playfield
+    jsr galois_lfsr_random
     
     lda r_seed
     sta COLUBK
 
-	ldx #0
+	
 playfield:
     
     sta WSYNC    
@@ -94,14 +98,16 @@ overscan:
 	inx
 	cpx #30                  ;              compare value in (x) to immeadiate value of 30
 	bne overscan             ;              branch up to 'overscan' label, compare if not equal
-    jsr galois_lfsr_random
-	jmp startFrame           ;              frame completed, branch up to the 'startFrame' label
+    inc fcount
+    jmp startFrame           ;              frame completed, branch up to the 'startFrame' label
 ;------------------------------------------------
 
 
 ; Galois 8-bit Linear Feedback Shift Registers
 ; https://samiam.org/blog/20130617.html
 galois_lfsr_random:              
+        lda #0
+        sta fcount
         lda r_seed              ; keep calling funtion to for better entropy
         lsr                     ; shift right
         bcc noeor0              ; if carry 1, then exclusive OR the bits

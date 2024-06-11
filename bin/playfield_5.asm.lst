@@ -1,4 +1,4 @@
-------- FILE playfield_4.asm LEVEL 1 PASS 2
+------- FILE playfield_5.asm LEVEL 1 PASS 2
       1  10000 ????						; S01E02 Generating a stable screen
       2  10000 ????
       3  10000 ????						; This example creates the proper VSYNC, and number of scanlines to generate a stable frame on NTSC
@@ -218,7 +218,7 @@
     198  0000 ????				      SEG
     199  0000 ????
     200  0000 ????						; EOF
-------- FILE playfield_4.asm
+------- FILE playfield_5.asm
 ------- FILE macro.h LEVEL 2 PASS 2
       0  0000 ????				      include	"macro.h"
       1  0000 ????						; MACRO.H
@@ -384,10 +384,10 @@
     161  0000 ????
     162  0000 ????
     163  0000 ????						; EOF
-------- FILE playfield_4.asm
+------- FILE playfield_5.asm
      20  0000 ????
      21  0000 ????	       00 9a	   BLUE       =	$9a	;		define symbol for TIA color (NTSC)
-     22  0000 ????
+     22  0000 ????	       00 3c	   changeColorSpeed =	60	; frames to change color
      23 U0082 ????				      seg.u	vars	; uninitialized segment
      24 U0080					      org	$80	; origin set at base of ram
      25 U0080
@@ -422,77 +422,83 @@
      43  f012		       85 09		      sta	COLUBK	;		store (a) into the TIA background color register
      44  f014
      45  f014				   startFrame
-     46  f014		       e6 81		      inc	fcount	;		increment the frame counter
-     47  f016							; start of new frame
-     48  f016							; start of vertical blank processing
-     49  f016		       a9 00		      lda	#0	;		load the value 0 into (a)
-     50  f018		       85 01		      sta	VBLANK	;		store (a) into the TIA VBLANK register
-     51  f01a		       a9 02		      lda	#2	;		load the value 2 into (a).
-     52  f01c		       85 00		      sta	VSYNC	;		store (a) into TIA VSYNC register to turn on vsync
-     53  f01e		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
-     54  f020							;---------------------------------------
-     55  f020		       85 02		      sta	WSYNC
-     56  f022							;---------------------------------------
-     57  f022		       85 02		      sta	WSYNC	;		we need 3 scanlines of VSYNC for a stable frame
-     58  f024							;---------------------------------------
-     59  f024		       a9 00		      lda	#0
-     60  f026		       85 00		      sta	VSYNC	;		store 0 into TIA VSYNC register to turn off vsync
-     61  f028
-     62  f028							; generate 37 scanlines of vertical blank
-     63  f028		       a2 00		      ldx	#0
-     64  f02a				   verticalBlank
-     65  f02a		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
-     66  f02c							;---------------------------------------
-     67  f02c		       e8		      inx
-     68  f02d		       e0 25		      cpx	#37	;		compare the value in (x) to the immeadiate value of 37
-     69  f02f		       d0 f9		      bne	verticalBlank	;		branch to 'verticalBlank' label if compare not equal
-     70  f031
-     71  f031							; generate 192 lines of playfield
-     72  f031							; jsr galois_lfsr_random
-     73  f031
-     74  f031		       a5 80		      lda	r_seed
-     75  f033		       85 09		      sta	COLUBK
-     76  f035
-     77  f035		       a2 00		      ldx	#0
-     78  f037				   playfield
-     79  f037
-     80  f037		       85 02		      sta	WSYNC
-     81  f039		       e8		      inx
-     82  f03a		       e0 c0		      cpx	#192	;		compare the value in (x) to the immeadiate value of 192
-     83  f03c		       d0 f9		      bne	playfield	;		branch to 'drawField' label if compare not equal
-     84  f03e
-     85  f03e							; end of playfield - turn on vertical blank
-     86  f03e		       a9 42		      lda	#%01000010
-     87  f040		       85 01		      sta	VBLANK
-     88  f042
-     89  f042							; generate 30 scanlines of overscan
-     90  f042		       a2 00		      ldx	#0
-     91  f044				   overscan
-     92  f044		       85 02		      sta	WSYNC
-     93  f046							;---------------------------------------
-     94  f046		       e8		      inx
-     95  f047		       e0 1e		      cpx	#30	;		compare value in (x) to immeadiate value of 30
-     96  f049		       d0 f9		      bne	overscan	;		branch up to 'overscan' label, compare if not equal
-     97  f04b		       20 51 f0 	      jsr	galois_lfsr_random
-     98  f04e		       4c 14 f0 	      jmp	startFrame	;		frame completed, branch up to the 'startFrame' label
-     99  f051							;------------------------------------------------
-    100  f051
-    101  f051
-    102  f051							; Galois 8-bit Linear Feedback Shift Registers
-    103  f051							; https://samiam.org/blog/20130617.html
-    104  f051				   galois_lfsr_random
-    105  f051		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
-    106  f053		       4a		      lsr		; shift right
-    107  f054		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    108  f056		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    109  f058		       85 80	   noeor0     sta	r_seed
-    110  f05a		       60		      rts
-    111  f05b
-    112  f05b
-    113  f05b
-    114  fffa					      org	$fffa	;		set origin to last 6 bytes of 4k rom
-    115  fffa
-    116  fffa				   interruptVectors
-    117  fffa		       00 f0		      .word.w	reset	;		nmi
-    118  fffc		       00 f0		      .word.w	reset	;		reset
-    119  fffe		       00 f0		      .word.w	reset	;		irq
+     46  f014
+     47  f014							; start of new frame
+     48  f014							; start of vertical blank processing
+     49  f014		       a9 00		      lda	#0	;		load the value 0 into (a)
+     50  f016		       85 01		      sta	VBLANK	;		store (a) into the TIA VBLANK register
+     51  f018		       a9 02		      lda	#2	;		load the value 2 into (a).
+     52  f01a		       85 00		      sta	VSYNC	;		store (a) into TIA VSYNC register to turn on vsync
+     53  f01c
+     54  f01c		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     55  f01e		       85 02		      sta	WSYNC
+     56  f020		       85 02		      sta	WSYNC	;		we need 3 scanlines of VSYNC for a stable frame
+     57  f022							;---------------------------------------
+     58  f022		       a9 00		      lda	#0
+     59  f024		       85 00		      sta	VSYNC	;		store 0 into TIA VSYNC register to turn off vsync
+     60  f026
+     61  f026							;---------------------------------------
+     62  f026							; generate 37 scanlines of vertical blank
+     63  f026		       a2 00		      ldx	#0
+     64  f028				   verticalBlank
+     65  f028		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     66  f02a		       e8		      inx
+     67  f02b		       e0 25		      cpx	#37	;		compare the value in (x) to the immeadiate value of 37
+     68  f02d		       d0 f9		      bne	verticalBlank	;		branch to 'verticalBlank' label if compare not equal
+     69  f02f							;---------------------------------------
+     70  f02f
+     71  f02f		       a2 00		      ldx	#0	; counter for lines
+     72  f031							; generate 192 lines of playfield
+     73  f031		       a5 81		      lda	fcount
+     74  f033		       c9 3c		      cmp	#changeColorSpeed
+     75  f035		       d0 07		      bne	playfield
+     76  f037		       20 57 f0 	      jsr	galois_lfsr_random
+     77  f03a
+     78  f03a		       a5 80		      lda	r_seed
+     79  f03c		       85 09		      sta	COLUBK
+     80  f03e
+     81  f03e
+     82  f03e				   playfield
+     83  f03e
+     84  f03e		       85 02		      sta	WSYNC
+     85  f040		       e8		      inx
+     86  f041		       e0 c0		      cpx	#192	;		compare the value in (x) to the immeadiate value of 192
+     87  f043		       d0 f9		      bne	playfield	;		branch to 'drawField' label if compare not equal
+     88  f045
+     89  f045							; end of playfield - turn on vertical blank
+     90  f045		       a9 42		      lda	#%01000010
+     91  f047		       85 01		      sta	VBLANK
+     92  f049
+     93  f049							; generate 30 scanlines of overscan
+     94  f049		       a2 00		      ldx	#0
+     95  f04b				   overscan
+     96  f04b		       85 02		      sta	WSYNC
+     97  f04d							;---------------------------------------
+     98  f04d		       e8		      inx
+     99  f04e		       e0 1e		      cpx	#30	;		compare value in (x) to immeadiate value of 30
+    100  f050		       d0 f9		      bne	overscan	;		branch up to 'overscan' label, compare if not equal
+    101  f052		       e6 81		      inc	fcount
+    102  f054		       4c 14 f0 	      jmp	startFrame	;		frame completed, branch up to the 'startFrame' label
+    103  f057							;------------------------------------------------
+    104  f057
+    105  f057
+    106  f057							; Galois 8-bit Linear Feedback Shift Registers
+    107  f057							; https://samiam.org/blog/20130617.html
+    108  f057				   galois_lfsr_random
+    109  f057		       a9 00		      lda	#0
+    110  f059		       85 81		      sta	fcount
+    111  f05b		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
+    112  f05d		       4a		      lsr		; shift right
+    113  f05e		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
+    114  f060		       49 d4		      eor	#$D4	; d4 tap (11010100)
+    115  f062		       85 80	   noeor0     sta	r_seed
+    116  f064		       60		      rts
+    117  f065
+    118  f065
+    119  f065
+    120  fffa					      org	$fffa	;		set origin to last 6 bytes of 4k rom
+    121  fffa
+    122  fffa				   interruptVectors
+    123  fffa		       00 f0		      .word.w	reset	;		nmi
+    124  fffc		       00 f0		      .word.w	reset	;		reset
+    125  fffe		       00 f0		      .word.w	reset	;		irq
