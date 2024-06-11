@@ -7,7 +7,7 @@ AUDV0                    0019
 AUDV1                    001a                  
 BORDERCOLOR              009a              (R )
 BORDERHEIGHT             0014              (R )
-bottom                   f04d              (R )
+bottom                   f054              (R )
 clear                    f004              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
@@ -41,16 +41,16 @@ INPT2                    000a
 INPT3                    000b                  
 INPT4                    000c                  
 INPT5                    000d                  
-INTIM                    0284                  
+INTIM                    0284              (R )
 irqvectors               fffa                  
 lvblank                  f02f              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f05e              (R )
+overscan                 f065              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
-randomize                f068              (R )
+randomize                f06f              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -61,9 +61,9 @@ RESMP0                   0028
 RESMP1                   0029                  
 RESP0                    0010                  
 RESP1                    0011                  
-return                   f06c                  
+return                   f076                  
 RSYNC                    0003                  
-SEGMENTS                 0018                  
+SEGMENTS                 0018              (R )
 startframe               f015              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
@@ -84,6 +84,6 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_VCS              0069                  
 VSYNC                    0000              (R )
-walls                    f043              (R )
+walls                    f045              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

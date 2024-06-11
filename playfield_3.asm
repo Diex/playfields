@@ -123,7 +123,8 @@ top:
 				sta     PF0				; Set PF0 register
 
 walls:			sta 	WSYNC
-
+				lda	INTIM
+                sta	COLUBK
 				jsr     randomize
 				
     			inx  
@@ -153,15 +154,15 @@ overscan:       sta 	WSYNC
 
 				; --------------------------- Pad until end of main segment -----------------------
 						
-randomize:					
+randomize					
 				
 				; cpy 	SEGMENTS			; 192/
 				; bne 	return				
 				; ldy		#0
-				; lda 	INTIM
-				sty 	PF1
-				sty     PF2	
-return:			
+				lda 	INTIM
+				sta 	PF1
+				sta     PF2	
+return			
 				iny
 				rts
 
