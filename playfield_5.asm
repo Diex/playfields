@@ -21,6 +21,7 @@
 BLUE           = $9a         ;              define symbol for TIA color (NTSC)
 changeColorSpeed = 60     ; frames to change color
 lineCountChange = 192/16     ; lines to change playfield
+
         seg.u	vars		; uninitialized segment
         org	$80             ; origin set at base of ram
 

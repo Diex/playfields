@@ -36,14 +36,19 @@
 
 
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
-PF_H            equ #192            ; playfield height
-
-
+PF_H                equ #192            ; playfield height
+COLOR_SPEED         equ 5     ; frames to change color
+DATA_LENGTH         equ 96
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
 
 scanline        ds 1                ; 1 byte - current scanline
+changeColor     ds 1                ; 1 byte - change color counter
+colorbk         ds 1                ; 1 byte - background color
+r_seed          ds 1                ; 1 byte - random seed
+data            ds 96            ; 48 bytes - data
+
 
                 seg	main    		; start of main segment
                 org $F000
@@ -56,7 +61,11 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #$A8       
                 sta COLUBK               
 
-               
+                lda #COLOR_SPEED
+                sta changeColor
+
+                lda INTIM
+                sta r_seed
 
 ; ---- Verticle Sync (3 scanlines)
 
@@ -76,6 +85,23 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 lda #0              ; background clear
                 sta COLUBK
 
+                lda #$FF
+                sta COLUPF
+                
+                
+                lda #1
+                sta CTRLPF           ; enable playfield                
+                
+                dec changeColor
+                bne timer1          ; done with the color change
+
+                jsr generateData
+
+setPFColors:    
+                lda		r_seed			
+				; sta		COLUPF			; Set the PF color
+
+                jmp timer1
 
 timer1:         ldx INTIM           ; check the timer          
                 bne timer1          ; if it's not 0 then branch back up to timer1
@@ -84,15 +110,31 @@ timer1:         ldx INTIM           ; check the timer
                 sta	WSYNC		    ; (3) end with a clean scanline
                 sta VBLANK		    ; (3) turn on the beam
 
-kernel:		    
-                sta WSYNC           ; (3)                 
+                lda data,x
+                sta COLUBK          ; set the playfield color
                 
 
-                lda INTIM
-                sta COLUBK
+                ldx #DATA_LENGTH
                 
+kernel:		                        ; 38 machine cycles per half line
+                lda data,x
+                sta PF0
+                dex                
+                lda data,x
+                sta PF1
+                dex
+                lda data,x
+                sta PF2
+                dex
+                bne next		    ; (2) loop back up to kernel                
+                ldx #48
+
+                ; ldy #10
+next:           sta WSYNC           ; (3)                                 
                 dec	scanline        ; (5)
+                ; dey
                 bne kernel		    ; (2/3)
+
 
                 sta WSYNC           ; (3) end kernel with a clean scan line
                 lda #$2     	    ; set D1 = 1 to initiate VBLANK
@@ -118,7 +160,27 @@ timer2:         ldx INTIM
                 sta WSYNC 
 
                 jmp nextframe       ; (3) jump back up to start the next frame
- 
+
+                
+; ////////////////////////////////////////////////////////
+generateData:    
+                lda #COLOR_SPEED
+                sta changeColor 
+
+                ldx #DATA_LENGTH
+galois_lfsr_random:              
+                lda r_seed              ; keep calling funtion to for better entropy
+                lsr                     ; shift right
+                bcc noeor0              ; if carry 1, then exclusive OR the bits
+                eor #$D4                ; d4 tap (11010100)
+noeor0:         sta r_seed
+                sta data,X
+                dex
+                bne galois_lfsr_random
+                rts
+
+
+
                 org 	$FFFA
 
                 .word reset     	; NMI  ($FFFA)
