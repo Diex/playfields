@@ -37,7 +37,7 @@
 
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H                equ #192            ; playfield height
-COLOR_SPEED         equ 5     ; frames to change color
+COLOR_SPEED         equ 4     ; frames to change color
 DATA_LENGTH         equ 96
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
@@ -48,7 +48,9 @@ changeColor     ds 1                ; 1 byte - change color counter
 colorbk         ds 1                ; 1 byte - background color
 r_seed          ds 1                ; 1 byte - random seed
 fcount          ds 1                ; 1 byte - frame counter
-t_               ds 1                ; 1 byte - temp
+t_              ds 1                ; 1 byte - temp
+t2_             ds 1                ; 1 byte - temp
+temp            ds 1                ; 1 byte - temp
 data            ds 96            ; 48 bytes - data
 
 
@@ -91,15 +93,23 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta COLUPF
                 
                 
-                lda #1
+                lda #%00000001
                 sta CTRLPF           ; enable playfield                
                 
+
+                 lda #COLOR_SPEED    ; resets the color change counter
+                sta changeColor 
+                
+                ; jsr randomData
+                jsr bytebeat1
+                ; jsr bytebeat2
+
+
+                ; out...
                 dec changeColor
                 bne timer1          ; done with the color change
-
-                jsr randomData
-                ; jsr bytebeat
-
+                
+               
 setPFColors:    
                 lda		r_seed			
 				; sta		COLUPF			; Set the PF color
@@ -129,14 +139,49 @@ kernel:		                        ; 38 machine cycles per half line
                 lda data,x
                 sta PF2
                 dex
-                bne next		    ; (2) loop back up to kernel                
-                ldx #48
+                
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+                ; nop ; 45
+                ; nop
+                ; nop
 
-                ; ldy #10
-next:           sta WSYNC           ; (3)                                 
-                dec	scanline        ; (5)
-                ; dey
-                bne kernel		    ; (2/3)
+                lda data,x
+                ; sta PF0
+                dex                
+                ; lda data,x
+                ; sta PF1
+                ; dex
+                ; lda data,x
+                ; sta PF2
+                ; dex
+
+                bne line		    ; (2) loop back up to kernel                
+                
+                ldx #DATA_LENGTH    ; resets the count                
+                ldy #4
+
+line:           sta WSYNC           ; (3)                                 
+                dec	scanline        ; (5)                                
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)                                
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)                                
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)  
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)  
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)  
+                
+                bne kernel            ; (2) loop back up to next
+            
 
 
                 sta WSYNC           ; (3) end kernel with a clean scan line
@@ -162,14 +207,13 @@ timer2:         ldx INTIM
 
                 sta WSYNC 
 
+                
                 jmp nextframe       ; (3) jump back up to start the next frame
 
 
 ; ////////////////////////////////////////////////////////
 randomData:    
-                lda #COLOR_SPEED
-                sta changeColor 
-
+                
                 ldx #DATA_LENGTH
 galois_lfsr_random:              
                 lda r_seed              ; keep calling funtion to for better entropy
@@ -183,17 +227,47 @@ noeor0:         sta r_seed
                 rts
 
 
-bytebeat:
+bytebeat1:
+                
+                lda t_                
                 ldx #DATA_LENGTH
-                lda fcount
-                rol
-                sta data,x
 compute:
-                rol     
-                sta data,x
-                dex
+                adc #1
+                ; rol
+                ; sta temp
+                ; lda t_
+                ; ; REPEAT 3 ;
+                ;     rol
+                ;     rol
+                ;     rol
+                ; ; REPEND
+                ; ora t_                            
+                
+                sta data,x                
+                dex                
                 bne compute
-                rts
+                    inc t_
+                    rts
+
+bytebeat2:
+                
+                lda t_                
+                sta t2_
+                ldx #DATA_LENGTH
+.compute:
+                adc #1
+                rol
+                sta t2_
+                lda t_
+                adc #1
+                ror                
+                ora t2_                            
+                
+                sta data,x
+                dex                
+                bne .compute
+                    inc t_
+                    rts
 
 
                 org 	$FFFA

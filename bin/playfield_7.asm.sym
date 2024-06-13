@@ -1,4 +1,5 @@
 --- Symbol List (sorted by symbol)
+0.compute                f0b7              (R )
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f01e              (R )
@@ -8,15 +9,16 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-bytebeat                 f09e                  
+bytebeat1                f0a3              (R )
+bytebeat2                f0b1                  
 changeColor              0081              (R )
-COLOR_SPEED              0005              (R )
+COLOR_SPEED              0004              (R )
 colorbk                  0082                  
 COLUBK                   0009              (R )
 COLUP0                   0006              (R )
 COLUP1                   0007                  
 COLUPF                   0008              (R )
-compute                  f0a5              (R )
+compute                  f0a7              (R )
 CTRLPF                   000a              (R )
 CXBLPF                   0006                  
 CXCLR                    002c                  
@@ -27,13 +29,13 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-data                     0086              (R )
+data                     0088              (R )
 DATA_LENGTH              0060              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0084              (R )
-galois_lfsr_random       f08f              (R )
+fcount                   0084                  
+galois_lfsr_random       f094              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -50,10 +52,10 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel                   f057              (R )
-next                     f06a              (R )
+kernel                   f05b              (R )
+line                     f073              (R )
 nextframe                f01c              (R )
-noeor0                   f096              (R )
+noeor0                   f09b              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
 PF0                      000d              (R )
@@ -61,7 +63,7 @@ PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
 r_seed                   0083              (R )
-randomData               f089              (R )
+randomData               f092                  
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -74,21 +76,23 @@ RESP0                    0010
 RESP1                    0011                  
 RSYNC                    0003                  
 scanline                 0080              (R )
-setPFColors              f041                  
+setPFColors              f045                  
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
-t_                       0085                  
+t2_                      0086              (R )
+t_                       0085              (R )
+temp                     0087                  
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )
 TIM1T                    0294                  
 TIM64T                   0296              (R )
 TIM8T                    0295                  
-timer1                   f046              (R )
-timer2                   f07f              (R )
+timer1                   f04a              (R )
+timer2                   f088              (R )
 TIMINT                   0285                  
 VBLANK                   0001              (R )
 VDELBL                   0027                  
