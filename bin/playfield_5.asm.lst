@@ -389,18 +389,22 @@
      21  0000 ????	       00 9a	   BLUE       =	$9a	;		define symbol for TIA color (NTSC)
      22  0000 ????	       00 3c	   changeColorSpeed =	60	; frames to change color
      23  0000 ????	       00 0c	   lineCountChange =	192/16	; lines to change playfield
-     24 U0084 ????				      seg.u	vars	; uninitialized segment
-     25 U0080					      org	$80	; origin set at base of ram
-     26 U0080
-     27 U0080		       00	   r_seed     ds	1	; ball x pos
-     28 U0081		       00	   fcount     ds	1	; frame counter
-     29 U0082		       00	   bgcolor    ds	1	; background color
-     30 U0083		       00	   lcount     ds	1	; line counter
-     31 U0084
-     32  10000 ????				       seg	code
-     33  f000					      org	$f000
-     34  f000
-     35  f000				   reset
+     24  0000 ????	       00 0f	   PLAYER0COLOR =	$0f
+     25  0000 ????	       00 f0	   PLAYER1COLOR =	$f0
+     26  0000 ????
+     27 U0085 ????				      seg.u	vars	; uninitialized segment
+     28 U0080					      org	$80	; origin set at base of ram
+     29 U0080
+     30 U0080		       00	   r_seed     ds	1	; ball x pos
+     31 U0081		       00	   l_seed     ds	1	; ball y pos
+     32 U0082		       00	   fcount     ds	1	; frame counter
+     33 U0083		       00	   bgcolor    ds	1	; background color
+     34 U0084		       00	   lcount     ds	1	; line counter
+     35 U0085
+     36  10000 ????				       seg	code
+     37  f000					      org	$f000
+     38  f000
+     39  f000				   reset
       0  f000					      CLEAN_START
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -413,124 +417,142 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     37  f00b							; generate a random see from the interval timer
-     38  f00b		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
-     39  f00e		       85 80		      sta	r_seed	; random seed
-     40  f010
-     41  f010				   clear		;		define a label
-     42  f010		       a9 9a		      lda	#BLUE	;		load the value from the symbol 'blue' into (a)
-     43  f012		       85 09		      sta	COLUBK	;		store (a) into the TIA background color register
-     44  f014
-     45  f014				   startFrame
-     46  f014
-     47  f014							; start of new frame
-     48  f014							; start of vertical blank processing
-     49  f014		       a9 00		      lda	#0	;		load the value 0 into (a)
-     50  f016		       85 01		      sta	VBLANK	;		store (a) into the TIA VBLANK register
-     51  f018		       85 0d		      sta	PF0
-     52  f01a		       85 0e		      sta	PF1
-     53  f01c		       85 0f		      sta	PF2
-     54  f01e		       85 09		      sta	COLUBK
-     55  f020
-     56  f020		       a9 02		      lda	#2	;		load the value 2 into (a).
-     57  f022		       85 00		      sta	VSYNC	;		store (a) into TIA VSYNC register to turn on vsync
-     58  f024
-     59  f024		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
-     60  f026		       85 02		      sta	WSYNC
-     61  f028		       85 02		      sta	WSYNC	;		we need 3 scanlines of VSYNC for a stable frame
-     62  f02a
-     63  f02a							;---------------------------------------
-     64  f02a		       a9 00		      lda	#0
-     65  f02c		       85 00		      sta	VSYNC	;		store 0 into TIA VSYNC register to turn off vsync
+     41  f00b							; generate a random see from the interval timer
+     42  f00b		       ad 84 02 	      lda	INTIM	; unknown value to use as an initial random seed
+     43  f00e		       85 80		      sta	r_seed	; random seed
+     44  f010		       85 81		      sta	l_seed	; random seed
+     45  f012
+     46  f012				   clear		;		define a label
+     47  f012		       a9 9a		      lda	#BLUE	;		load the value from the symbol 'blue' into (a)
+     48  f014		       85 09		      sta	COLUBK	;		store (a) into the TIA background color register
+     49  f016		       a9 03		      lda	#%00000011	; Set D0 to reflect the playfield, and D1 for Two color
+     50  f018		       85 0a		      sta	CTRLPF	; Apply to the CTRLPF register
+     51  f01a
+     52  f01a		       a9 0f		      lda	#PLAYER0COLOR
+     53  f01c		       85 06		      sta	COLUP0
+     54  f01e		       a9 f0		      lda	#PLAYER1COLOR
+     55  f020		       85 07		      sta	COLUP1
+     56  f022				   startFrame
+     57  f022
+     58  f022							; start of new frame
+     59  f022							; start of vertical blank processing
+     60  f022		       a9 00		      lda	#0	;		load the value 0 into (a)
+     61  f024		       85 01		      sta	VBLANK	;		store (a) into the TIA VBLANK register
+     62  f026		       85 0d		      sta	PF0
+     63  f028		       85 0e		      sta	PF1
+     64  f02a		       85 0f		      sta	PF2
+     65  f02c		       85 09		      sta	COLUBK
      66  f02e
-     67  f02e							;---------------------------------------
-     68  f02e							; generate 37 scanlines of vertical blank
-     69  f02e		       a2 00		      ldx	#0
-     70  f030				   verticalBlank
-     71  f030		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
-     72  f032		       e8		      inx
-     73  f033		       e0 25		      cpx	#37	;		compare the value in (x) to the immeadiate value of 37
-     74  f035		       d0 f9		      bne	verticalBlank	;		branch to 'verticalBlank' label if compare not equal
-     75  f037							;---------------------------------------
-     76  f037
-     77  f037		       a5 82		      lda	bgcolor
-     78  f039		       85 09		      sta	COLUBK
-     79  f03b
-     80  f03b		       a2 00		      ldx	#0	; counter for lines
-     81  f03d		       20 81 f0 	      jsr	setPlayfield
-     82  f040		       a5 81		      lda	fcount
-     83  f042		       c9 3c		      cmp	#changeColorSpeed
-     84  f044		       d0 09		      bne	playfield
-     85  f046		       20 8d f0 	      jsr	changeBackground
-     86  f049
-     87  f049		       a9 00		      lda	#0
-     88  f04b		       85 83		      sta	lcount
-     89  f04d		       85 81		      sta	fcount
-     90  f04f
-     91  f04f							; jsr setPlayfield  ; first time set the playfield
-     92  f04f
-     93  f04f				   playfield
-     94  f04f
-     95  f04f		       85 02		      sta	WSYNC
-     96  f051		       e6 83		      inc	lcount
-     97  f053		       a5 83		      lda	lcount
-     98  f055		       c9 0c		      cmp	#lineCountChange
-     99  f057		       d0 07		      bne	noChangeColor
-    100  f059		       20 81 f0 	      jsr	setPlayfield
-    101  f05c		       a9 00		      lda	#0
-    102  f05e		       85 83		      sta	lcount
-    103  f060
-    104  f060				   noChangeColor
-    105  f060
-    106  f060		       e8		      inx
-    107  f061		       e0 c0		      cpx	#192	;		compare the value in (x) to the immeadiate value of 192
-    108  f063		       d0 ea		      bne	playfield	;		branch to 'drawField' label if compare not equal
-    109  f065
-    110  f065							; end of playfield - turn on vertical blank
-    111  f065		       a9 42		      lda	#%01000010
-    112  f067		       85 01		      sta	VBLANK
-    113  f069
-    114  f069							; generate 30 scanlines of overscan
-    115  f069		       a2 00		      ldx	#0
-    116  f06b				   overscan
-    117  f06b		       85 02		      sta	WSYNC
-    118  f06d							;---------------------------------------
-    119  f06d		       e8		      inx
-    120  f06e		       e0 1e		      cpx	#30	;		compare value in (x) to immeadiate value of 30
-    121  f070		       d0 f9		      bne	overscan	;		branch up to 'overscan' label, compare if not equal
-    122  f072		       e6 81		      inc	fcount
-    123  f074		       4c 14 f0 	      jmp	startFrame	;		frame completed, branch up to the 'startFrame' label
-    124  f077							;------------------------------------------------
-    125  f077
-    126  f077
-    127  f077							; Galois 8-bit Linear Feedback Shift Registers
-    128  f077							; https://samiam.org/blog/20130617.html
-    129  f077				   galois_lfsr_random
-    130  f077		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
-    131  f079		       4a		      lsr		; shift right
-    132  f07a		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    133  f07c		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    134  f07e		       85 80	   noeor0     sta	r_seed
-    135  f080		       60		      rts
-    136  f081
-    137  f081				   setPlayfield
-    138  f081		       20 77 f0 	      jsr	galois_lfsr_random
-    139  f084		       a5 80		      lda	r_seed
-    140  f086		       85 0d		      sta	PF0
-    141  f088		       85 0e		      sta	PF1
-    142  f08a		       85 0f		      sta	PF2
-    143  f08c		       60		      rts
-    144  f08d
-    145  f08d				   changeBackground
-    146  f08d		       20 77 f0 	      jsr	galois_lfsr_random
-    147  f090		       a5 80		      lda	r_seed
-    148  f092		       85 82		      sta	bgcolor
-    149  f094		       60		      rts
-    150  f095
-    151  f095
-    152  fffa					      org	$fffa	;		set origin to last 6 bytes of 4k rom
-    153  fffa
-    154  fffa				   interruptVectors
-    155  fffa		       00 f0		      .word.w	reset	;		nmi
-    156  fffc		       00 f0		      .word.w	reset	;		reset
-    157  fffe		       00 f0		      .word.w	reset	;		irq
+     67  f02e		       a9 02		      lda	#2	;		load the value 2 into (a).
+     68  f030		       85 00		      sta	VSYNC	;		store (a) into TIA VSYNC register to turn on vsync
+     69  f032
+     70  f032		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     71  f034		       85 02		      sta	WSYNC
+     72  f036		       85 02		      sta	WSYNC	;		we need 3 scanlines of VSYNC for a stable frame
+     73  f038
+     74  f038							;---------------------------------------
+     75  f038		       a9 00		      lda	#0
+     76  f03a		       85 00		      sta	VSYNC	;		store 0 into TIA VSYNC register to turn off vsync
+     77  f03c
+     78  f03c							;---------------------------------------
+     79  f03c							; generate 37 scanlines of vertical blank
+     80  f03c		       a2 00		      ldx	#0
+     81  f03e				   verticalBlank
+     82  f03e		       85 02		      sta	WSYNC	;		write any value to TIA WSYNC register to wait for hsync
+     83  f040		       e8		      inx
+     84  f041		       e0 25		      cpx	#37	;		compare the value in (x) to the immeadiate value of 37
+     85  f043		       d0 f9		      bne	verticalBlank	;		branch to 'verticalBlank' label if compare not equal
+     86  f045							;---------------------------------------
+     87  f045
+     88  f045		       a5 83		      lda	bgcolor
+     89  f047		       85 09		      sta	COLUBK
+     90  f049
+     91  f049		       a2 00		      ldx	#0	; counter for lines
+     92  f04b		       20 8b f0 	      jsr	setPlayfield
+     93  f04e
+     94  f04e							; lda l_seed
+     95  f04e							; sta r_seed
+     96  f04e
+     97  f04e
+     98  f04e		       a5 82		      lda	fcount
+     99  f050		       c9 3c		      cmp	#changeColorSpeed
+    100  f052		       d0 07		      bne	playfield
+    101  f054		       20 9b f0 	      jsr	changeBackground
+    102  f057
+    103  f057		       a9 00		      lda	#0
+    104  f059		       85 84		      sta	lcount
+    105  f05b							; sta fcount
+    106  f05b
+    107  f05b
+    108  f05b
+    109  f05b				   playfield
+    110  f05b
+    111  f05b		       85 02		      sta	WSYNC
+    112  f05d
+    113  f05d		       e6 84		      inc	lcount
+    114  f05f							; lda lcount
+    115  f05f		       c9 0c		      cmp	#lineCountChange
+    116  f061		       d0 07		      bne	noChangeColor
+    117  f063
+    118  f063		       20 8b f0 	      jsr	setPlayfield
+    119  f066		       a9 00		      lda	#0
+    120  f068		       85 84		      sta	lcount
+    121  f06a
+    122  f06a				   noChangeColor
+    123  f06a
+    124  f06a		       e8		      inx
+    125  f06b		       e0 c0		      cpx	#192	;		compare the value in (x) to the immeadiate value of 192
+    126  f06d		       d0 ec		      bne	playfield	;		branch to 'drawField' label if compare not equal
+    127  f06f
+    128  f06f							; end of playfield - turn on vertical blank
+    129  f06f		       a9 42		      lda	#%01000010
+    130  f071		       85 01		      sta	VBLANK
+    131  f073
+    132  f073							; generate 30 scanlines of overscan
+    133  f073		       a2 00		      ldx	#0
+    134  f075				   overscan
+    135  f075		       85 02		      sta	WSYNC
+    136  f077							;---------------------------------------
+    137  f077		       e8		      inx
+    138  f078		       e0 1e		      cpx	#30	;		compare value in (x) to immeadiate value of 30
+    139  f07a		       d0 f9		      bne	overscan	;		branch up to 'overscan' label, compare if not equal
+    140  f07c		       e6 82		      inc	fcount
+    141  f07e		       4c 22 f0 	      jmp	startFrame	;		frame completed, branch up to the 'startFrame' label
+    142  f081							;------------------------------------------------
+    143  f081
+    144  f081
+    145  f081							; Galois 8-bit Linear Feedback Shift Registers
+    146  f081							; https://samiam.org/blog/20130617.html
+    147  f081				   galois_lfsr_random
+    148  f081		       a5 80		      lda	r_seed	; keep calling funtion to for better entropy
+    149  f083		       4a		      lsr		; shift right
+    150  f084		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
+    151  f086		       49 d4		      eor	#$D4	; d4 tap (11010100)
+    152  f088		       85 80	   noeor0     sta	r_seed
+    153  f08a		       60		      rts
+    154  f08b
+    155  f08b				   setPlayfield
+    156  f08b		       20 81 f0 	      jsr	galois_lfsr_random
+    157  f08e		       a5 80		      lda	r_seed
+    158  f090		       85 0d		      sta	PF0
+    159  f092		       85 0e		      sta	PF1
+    160  f094		       85 0f		      sta	PF2
+    161  f096
+    162  f096		       85 06		      sta	COLUP0
+    163  f098		       85 07		      sta	COLUP1
+    164  f09a
+    165  f09a		       60		      rts
+    166  f09b
+    167  f09b				   changeBackground
+    168  f09b		       20 81 f0 	      jsr	galois_lfsr_random
+    169  f09e		       a5 80		      lda	r_seed
+    170  f0a0		       85 83		      sta	bgcolor
+    171  f0a2		       60		      rts
+    172  f0a3
+    173  f0a3
+    174  fffa					      org	$fffa	;		set origin to last 6 bytes of 4k rom
+    175  fffa
+    176  fffa				   interruptVectors
+    177  fffa		       00 f0		      .word.w	reset	;		nmi
+    178  fffc		       00 f0		      .word.w	reset	;		reset
+    179  fffe		       00 f0		      .word.w	reset	;		irq

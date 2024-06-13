@@ -26,6 +26,7 @@ lineCountChange = 192/16     ; lines to change playfield
         org	$80             ; origin set at base of ram
 
 r_seed             ds 1            ; ball x pos
+l_seed             ds 1            ; ball y pos
 fcount             ds 1            ; frame counter
 bgcolor            ds 1            ; background color
 lcount             ds 1            ; line counter
@@ -38,11 +39,18 @@ reset:
     ; generate a random see from the interval timer
     lda INTIM               ; unknown value to use as an initial random seed
     sta r_seed              ; random seed
+    sta l_seed              ; random seed
 
 clear:                       ;              define a label 
 	lda #BLUE                ;              load the value from the symbol 'blue' into (a)
 	sta COLUBK               ;              store (a) into the TIA background color register
-
+    lda		#%00000011		; Set D0 to reflect the playfield, and D1 for Two color
+	sta		CTRLPF			; Apply to the CTRLPF register
+    
+    lda		#PLAYER0COLOR
+    sta		COLUP0
+    lda		#PLAYER1COLOR
+    sta		COLUP1
 startFrame:
 
 	; start of new frame
@@ -77,9 +85,14 @@ verticalBlank:
     
     lda bgcolor
     sta COLUBK
-    
+
     ldx #0   ; counter for lines
     jsr setPlayfield
+
+    ; lda l_seed
+    ; sta r_seed
+    
+
     lda fcount
     cmp #changeColorSpeed
     bne playfield
@@ -87,17 +100,19 @@ verticalBlank:
 
 	lda #0
     sta lcount
-    sta fcount
+    ; sta fcount
 
-    ; jsr setPlayfield  ; first time set the playfield
+    
 
 playfield:
     
     sta WSYNC    
+    
     inc lcount
     lda lcount
     cmp #lineCountChange
-    bne noChangeColor
+    bne noChangeColor    
+
     jsr setPlayfield
     lda #0
     sta lcount
@@ -141,6 +156,10 @@ setPlayfield:
     sta PF0    
     sta PF1    
     sta PF2
+    
+    sta		COLUP0
+    sta		COLUP1
+    
     rts
 
 changeBackground:
