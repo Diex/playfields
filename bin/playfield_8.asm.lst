@@ -493,7 +493,7 @@
     109  f042
     110  f042							; generate data:
     111  f042							; jsr randomData
-    112  f042		       20 9e f0 	      jsr	bytebeat1
+    112  f042		       20 ab f0 	      jsr	bytebeat1
     113  f045							; jsr bytebeat2
     114  f045
     115  f045
@@ -505,147 +505,127 @@
     121  f04c		       85 02		      sta	WSYNC	; (3) end with a clean scanline
     122  f04e		       85 01		      sta	VBLANK	; (3) turn on the beam
     123  f050
-    124  f050		       b5 88		      lda	data,x
-    125  f052		       85 09		      sta	COLUBK	; set the playfield color
-    126  f054
-    127  f054
-    128  f054		       a2 60		      ldx	#DATA_LENGTH
-    129  f056
-    130  f056				   kernel		; 38 machine cycles per half line
-    131  f056		       b5 88		      lda	data,x
-    132  f058		       85 0d		      sta	PF0
-    133  f05a		       ca		      dex
-    134  f05b		       b5 88		      lda	data,x
-    135  f05d		       85 0e		      sta	PF1
-    136  f05f		       ca		      dex
-    137  f060		       b5 88		      lda	data,x
-    138  f062		       85 0f		      sta	PF2
-    139  f064		       ca		      dex
-    140  f065
-    141  f065							; nop
-    142  f065							; nop
-    143  f065							; nop
-    144  f065							; nop
-    145  f065							; nop
-    146  f065							; nop
-    147  f065							; nop
-    148  f065							; nop
-    149  f065							; nop ; 45
-    150  f065							; nop
-    151  f065							; nop
-    152  f065
-    153  f065		       b5 88		      lda	data,x
-    154  f067							; sta PF0
-    155  f067		       ca		      dex
-    156  f068							; lda data,x
-    157  f068							; sta PF1
-    158  f068							; dex
-    159  f068							; lda data,x
-    160  f068							; sta PF2
-    161  f068							; dex
-    162  f068
-    163  f068		       d0 04		      bne	line	; (2) loop back up to kernel
-    164  f06a
-    165  f06a		       a2 60		      ldx	#DATA_LENGTH	; resets the count
-    166  f06c		       a0 04		      ldy	#4
-    167  f06e
-    168  f06e		       85 02	   line       sta	WSYNC	; (3)
-    169  f070		       c6 80		      dec	scanline	; (5)
-    170  f072							; sta WSYNC	       ; (3)
-    171  f072							; dec	scanline	 ; (5)
-    172  f072							; sta WSYNC	       ; (3)
-    173  f072							; dec	scanline	 ; (5)
-    174  f072							; sta WSYNC	       ; (3)
-    175  f072							; dec	scanline	 ; (5)
-    176  f072							; sta WSYNC	       ; (3)
-    177  f072							; dec	scanline	 ; (5)
-    178  f072							; sta WSYNC	       ; (3)
-    179  f072							; dec	scanline	 ; (5)
-    180  f072
-    181  f072		       d0 e2		      bne	kernel	; (2) loop back up to next
-    182  f074
-    183  f074
-    184  f074
-    185  f074		       85 02		      sta	WSYNC	; (3) end kernel with a clean scan line
-    186  f076		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-    187  f078		       85 01		      sta	VBLANK	; turn off the beam
-    188  f07a
-    189  f07a							; ---- Overscan (30 scanlines)
-    190  f07a
-    191  f07a							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-    192  f07a							; 2280 machine cycles / 64 clocks = 35.625
-    193  f07a
-    194  f07a		       a2 23		      ldx	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-    195  f07c		       8e 96 02 	      stx	TIM64T	; Set a count of 35 with 64-clock interval
-    196  f07f
-    197  f07f		       a9 00		      lda	#0	; background clear
-    198  f081		       85 09		      sta	COLUBK
-    199  f083
-    200  f083
-    201  f083							; timer2 -----------
-    202  f083
-    203  f083		       ae 84 02    timer2     ldx	INTIM
-    204  f086		       d0 fb		      bne	timer2
-    205  f088
-    206  f088		       85 02		      sta	WSYNC
-    207  f08a
-    208  f08a
-    209  f08a		       4c 1c f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-    210  f08d
-    211  f08d
-    212  f08d							; ////////////////////////////////////////////////////////
-    213  f08d				   randomData
-    214  f08d
-    215  f08d		       a2 60		      ldx	#DATA_LENGTH
-    216  f08f				   galois_lfsr_random
-    217  f08f		       a5 83		      lda	r_seed	; keep calling funtion to for better entropy
-    218  f091		       4a		      lsr		; shift right
-    219  f092		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    220  f094		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    221  f096		       85 83	   noeor0     sta	r_seed
-    222  f098		       95 88		      sta	data,X
-    223  f09a		       ca		      dex
-    224  f09b		       d0 f2		      bne	galois_lfsr_random
-    225  f09d		       60		      rts
-    226  f09e
-    227  f09e
-    228  f09e				   bytebeat1
-    229  f09e
-    230  f09e		       a5 85		      lda	t_
-    231  f0a0		       a2 60		      ldx	#DATA_LENGTH
-    232  f0a2				   compute
-    233  f0a2							; ror
-    234  f0a2		       69 01		      adc	#1
-    235  f0a4
-    236  f0a4							; sta temp
-    237  f0a4							; lda t_
-    238  f0a4							; ; REPEAT 3 ;
-    239  f0a4							;     rol
-    240  f0a4							;     rol
-    241  f0a4							;     rol
-    242  f0a4							; ; REPEND
-    243  f0a4							; ora t_
-    244  f0a4
-    245  f0a4		       95 88		      sta	data,x
-    246  f0a6		       ca		      dex
-    247  f0a7		       d0 f9		      bne	compute
-    248  f0a9		       e6 85		      inc	t_
-    249  f0ab		       60		      rts
-    250  f0ac
-    251  f0ac
-    252  f0ac
-    253  fffa					      org	$FFFA
-    254  fffa
-    255  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    256  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    257  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    258  10000
-    259  10000
-    260  10000
-    261  10000
-    262  10000
-    263  10000
-    264  10000
-    265  10000
-    266  10000
-    267  10000
+    124  f050
+    125  f050
+    126  f050							; ldx #73	       ; We'll round down, and clean up the remaining cycles with a WSYNC
+    127  f050							; stx TIM1T	      ; Set a count of 43 with 64-clock interval
+    128  f050
+    129  f050		       a2 60		      ldx	#DATA_LENGTH
+    130  f052
+    131  f052				   kernel		; 38 machine cycles per half line
+    132  f052							; 304 machine cycles per 4 lines
+    133  f052		       b5 88		      lda	data,x
+    134  f054		       85 0d		      sta	PF0
+    135  f056		       ca		      dex
+    136  f057		       b5 88		      lda	data,x
+    137  f059		       85 0e		      sta	PF1
+    138  f05b		       ca		      dex
+    139  f05c		       b5 88		      lda	data,x
+    140  f05e		       85 0f		      sta	PF2
+    141  f060		       ca		      dex
+    142  f061
+    143  f061							; wait2:	   ldx INTIM	       ; check the timer
+    144  f061							;		   bne wait2	      ; if it's not 0 then branch back up to kernel
+    145  f061		       c6 80		      dec	scanline	; (5)
+    146  f063		       d0 ed		      bne	kernel	; (2) loop back up to next
+    147  f065
+    148  f065				   line
+    149  f065		       85 02		      sta	WSYNC	; (3)
+    150  f067		       c6 80		      dec	scanline	; (5)
+    151  f069		       85 02		      sta	WSYNC	; (3)
+    152  f06b		       c6 80		      dec	scanline	; (5)
+    153  f06d		       85 02		      sta	WSYNC	; (3)
+    154  f06f		       c6 80		      dec	scanline	; (5)
+    155  f071		       85 02		      sta	WSYNC	; (3)
+    156  f073		       85 02		      sta	WSYNC	; (3)
+    157  f075		       c6 80		      dec	scanline	; (5)
+    158  f077		       85 02		      sta	WSYNC	; (3)
+    159  f079		       c6 80		      dec	scanline	; (5)
+    160  f07b		       85 02		      sta	WSYNC	; (3)
+    161  f07d		       c6 80		      dec	scanline	; (5)
+    162  f07f		       85 02		      sta	WSYNC	; (3)
+    163  f081
+    164  f081
+    165  f081		       85 02		      sta	WSYNC	; (3) end kernel with a clean scan line
+    166  f083		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+    167  f085		       85 01		      sta	VBLANK	; turn off the beam
+    168  f087
+    169  f087							; ---- Overscan (30 scanlines)
+    170  f087
+    171  f087							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+    172  f087							; 2280 machine cycles / 64 clocks = 35.625
+    173  f087
+    174  f087		       a2 23		      ldx	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+    175  f089		       8e 96 02 	      stx	TIM64T	; Set a count of 35 with 64-clock interval
+    176  f08c
+    177  f08c		       a9 00		      lda	#0	; background clear
+    178  f08e		       85 09		      sta	COLUBK
+    179  f090
+    180  f090
+    181  f090							; timer2 -----------
+    182  f090
+    183  f090		       ae 84 02    timer2     ldx	INTIM
+    184  f093		       d0 fb		      bne	timer2
+    185  f095
+    186  f095		       85 02		      sta	WSYNC
+    187  f097
+    188  f097
+    189  f097		       4c 1c f0 	      jmp	nextframe	; (3) jump back up to start the next frame
+    190  f09a
+    191  f09a
+    192  f09a							; ////////////////////////////////////////////////////////
+    193  f09a				   randomData
+    194  f09a
+    195  f09a		       a2 60		      ldx	#DATA_LENGTH
+    196  f09c				   galois_lfsr_random
+    197  f09c		       a5 83		      lda	r_seed	; keep calling funtion to for better entropy
+    198  f09e		       4a		      lsr		; shift right
+    199  f09f		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
+    200  f0a1		       49 d4		      eor	#$D4	; d4 tap (11010100)
+    201  f0a3		       85 83	   noeor0     sta	r_seed
+    202  f0a5		       95 88		      sta	data,X
+    203  f0a7		       ca		      dex
+    204  f0a8		       d0 f2		      bne	galois_lfsr_random
+    205  f0aa		       60		      rts
+    206  f0ab
+    207  f0ab
+    208  f0ab				   bytebeat1
+    209  f0ab
+    210  f0ab		       a5 85		      lda	t_
+    211  f0ad		       a2 60		      ldx	#DATA_LENGTH
+    212  f0af				   compute
+    213  f0af							; ror
+    214  f0af		       69 01		      adc	#1
+    215  f0b1
+    216  f0b1							; sta temp
+    217  f0b1							; lda t_
+    218  f0b1							; ; REPEAT 3 ;
+    219  f0b1							;     rol
+    220  f0b1							;     rol
+    221  f0b1							;     rol
+    222  f0b1							; ; REPEND
+    223  f0b1							; ora t_
+    224  f0b1
+    225  f0b1		       95 88		      sta	data,x
+    226  f0b3		       ca		      dex
+    227  f0b4		       d0 f9		      bne	compute
+    228  f0b6		       e6 85		      inc	t_
+    229  f0b8		       60		      rts
+    230  f0b9
+    231  f0b9
+    232  f0b9
+    233  fffa					      org	$FFFA
+    234  fffa
+    235  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    236  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    237  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+    238  10000
+    239  10000
+    240  10000
+    241  10000
+    242  10000
+    243  10000
+    244  10000
+    245  10000
+    246  10000
+    247  10000

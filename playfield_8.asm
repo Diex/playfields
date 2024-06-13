@@ -114,20 +114,22 @@ setPFColors:
 
 
 
-wait1:         ldx INTIM           ; check the timer          
+wait1:          ldx INTIM           ; check the timer          
                 bne wait1          ; if it's not 0 then branch back up to timer1
 
                 lda #0	            ; (2) set D1 to 0 to end VBLANK
                 sta	WSYNC		    ; (3) end with a clean scanline
                 sta VBLANK		    ; (3) turn on the beam
 
-                lda data,x
-                sta COLUBK          ; set the playfield color
                 
 
+                ; ldx #73             ; We'll round down, and clean up the remaining cycles with a WSYNC
+                ; stx TIM1T          ; Set a count of 43 with 64-clock interval
+
                 ldx #DATA_LENGTH
-                
+                                
 kernel:		                        ; 38 machine cycles per half line
+                                    ; 304 machine cycles per 4 lines
                 lda data,x
                 sta PF0
                 dex                
@@ -137,49 +139,21 @@ kernel:		                        ; 38 machine cycles per half line
                 lda data,x
                 sta PF2
                 dex
-                
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-                ; nop ; 45
-                ; nop
-                ; nop
 
-                lda data,x
-                ; sta PF0
-                dex                
-                ; lda data,x
-                ; sta PF1
-                ; dex
-                ; lda data,x
-                ; sta PF2
-                ; dex
-
-                bne line		    ; (2) loop back up to kernel                
-                
-                ldx #DATA_LENGTH    ; resets the count                
-                ldy #4
-
-line:           sta WSYNC           ; (3)                                 
-                dec	scanline        ; (5)                                
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)                                
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)                                
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)  
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)  
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)  
-                
+; wait2:          ldx INTIM           ; check the timer
+;                 bne wait2          ; if it's not 0 then branch back up to kernel                
+                dec	scanline        ; (5)                                                
                 bne kernel            ; (2) loop back up to next
             
+line:           
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)                                                
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)                                                
+                ; sta WSYNC           ; (3)                                 
+                ; dec	scanline        ; (5)                                                
+                ; sta WSYNC           ; (3)                                 
+                
 
 
                 sta WSYNC           ; (3) end kernel with a clean scan line

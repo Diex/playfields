@@ -8,14 +8,14 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-bytebeat1                f09e              (R )
+bytebeat1                f0ab              (R )
 CHANGE_T                 0002              (R )
 colorbk                  0082                  
 COLUBK                   0009              (R )
 COLUP0                   0006              (R )
 COLUP1                   0007                  
 COLUPF                   0008              (R )
-compute                  f0a2              (R )
+compute                  f0af              (R )
 count1                   0081              (R )
 CTRLPF                   000a              (R )
 CXBLPF                   0006                  
@@ -33,7 +33,7 @@ ENABL                    001f
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   0084                  
-galois_lfsr_random       f08f              (R )
+galois_lfsr_random       f09c              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -50,10 +50,10 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel                   f056              (R )
-line                     f06e              (R )
+kernel                   f052              (R )
+line                     f065                  
 nextframe                f01c              (R )
-noeor0                   f096              (R )
+noeor0                   f0a3              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
 PF0                      000d              (R )
@@ -61,7 +61,7 @@ PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
 r_seed                   0083              (R )
-randomData               f08d                  
+randomData               f09a                  
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -89,7 +89,7 @@ TIA_BASE_WRITE_ADDRESS   0000              (R )
 TIM1T                    0294                  
 TIM64T                   0296              (R )
 TIM8T                    0295                  
-timer2                   f083              (R )
+timer2                   f090              (R )
 TIMINT                   0285                  
 VBLANK                   0001              (R )
 VDELBL                   0027                  
