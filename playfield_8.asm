@@ -37,7 +37,7 @@
 
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H                equ #192            ; playfield height
-CHANGE_T         equ 2     ; frames to change color
+CHANGE_T         equ 6     ; frames to change color
 DATA_LENGTH         equ 96
                 seg.u	vars		; uninitialized segment
                 org	$80             ; origin set at base of ram
@@ -93,7 +93,7 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta COLUPF
                 
                 
-                lda #%00000001
+                lda #%00000000
                 sta CTRLPF           ; enable playfield                
                 
 
@@ -116,47 +116,75 @@ setPFColors:
 
 wait1:          ldx INTIM           ; check the timer          
                 bne wait1          ; if it's not 0 then branch back up to timer1
-
+                
                 lda #0	            ; (2) set D1 to 0 to end VBLANK
                 sta	WSYNC		    ; (3) end with a clean scanline
                 sta VBLANK		    ; (3) turn on the beam
 
+
+
+                ldx #32
+                ldy #6
+
+kernel:		           	
+	            sta WSYNC           ; no lo cuento en la snl
+
+                lda 80                 ; 4
+                sta PF0             ; 3
+                lda data,x          ; 4             
+                sta PF1             ; 3
+                lda data,x          ; 4         
+                sta PF2             ; 3
+                nop                 ; 2         
+                nop                 ; 2         
+                ; 25 cycles begginning to draw pf
                 
+                nop                 ; 2         
+                nop                 ; 2         
+                nop                 ; 2         
+                ; 31 ok to change PF0
+                
+                lda #%0             ; 2
+                sta PF0             ; 3
 
-                ; ldx #73             ; We'll round down, and clean up the remaining cycles with a WSYNC
-                ; stx TIM1T          ; Set a count of 43 with 64-clock interval
+                nop ; 2
+                nop ; 2
 
-                ldx #DATA_LENGTH
-                                
-kernel:		                        ; 38 machine cycles per half line
-                                    ; 304 machine cycles per 4 lines
-                lda data,x
+                ; 40 ok to change PF1
+                lda #$FF ; 2
+                sta PF1 ; 3
+
+                nop ; 2
+                nop ; 2
+                nop ; 2
+
+                ; 51 ok to change PF2
+                
+                ; lda #%0 ; 2
+                sta PF2 ; 3
+                
+                dey     ; 5
+                bne next ; 3
+                    
+                    lda data,x ; 2
+                    sta COLUBK ; 3
+                    ; 69
+                    
+                    ldy #6  ; 2
+                    dex ; 5
+                    beq DoneWithFrame ; 3
+next	            
+                jmp kernel ;loop back up to draw the next pixel
+
+DoneWithFrame	
+	
+                ;clear out the playfield registers for obvious reasons	
+                lda #0
+                sta PF2 ;clear out PF2 first, I found out through experience
                 sta PF0
-                dex                
-                lda data,x
                 sta PF1
-                dex
-                lda data,x
-                sta PF2
-                dex
-
-; wait2:          ldx INTIM           ; check the timer
-;                 bne wait2          ; if it's not 0 then branch back up to kernel                
-                dec	scanline        ; (5)                                                
-                bne kernel            ; (2) loop back up to next
-            
-line:           
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)                                                
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)                                                
-                ; sta WSYNC           ; (3)                                 
-                ; dec	scanline        ; (5)                                                
-                ; sta WSYNC           ; (3)                                 
-                
-
-
-                sta WSYNC           ; (3) end kernel with a clean scan line
+   
+                sta WSYNC
                 lda #$2     	    ; set D1 = 1 to initiate VBLANK
                 sta VBLANK		    ; turn off the beam
 
@@ -206,7 +234,7 @@ bytebeat1:
 compute:
                 ; ror
                 adc #1
-                
+                eor #$d4
                 ; sta temp
                 ; lda t_
                 ; ; REPEAT 3 ;

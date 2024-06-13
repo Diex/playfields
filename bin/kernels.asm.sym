@@ -1,22 +1,18 @@
 --- Symbol List (sorted by symbol)
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
-2.VSLP1                  f01e              (R )
+2.VSLP1                  f015              (R )
+3.CYCLES                 000c              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
-bytebeat1                f0b7              (R )
-CHANGE_T                 0006              (R )
-colorbk                  0082                  
 COLUBK                   0009              (R )
-COLUP0                   0006              (R )
+COLUP0                   0006                  
 COLUP1                   0007                  
 COLUPF                   0008              (R )
-compute                  f0bb              (R )
-count1                   0081              (R )
 CTRLPF                   000a              (R )
 CXBLPF                   0006                  
 CXCLR                    002c                  
@@ -27,22 +23,19 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-data                     0088              (R )
-DATA_LENGTH              0060              (R )
-DoneWithFrame            f085              (R )
-ENABL                    001f                  
+DivideLoop               f0c6              (R )
+DoneWithTitle            f09d              (R )
+ENABL                    001f              (R )
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0084                  
-galois_lfsr_random       f0a8              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
 HMCLR                    002b                  
 HMM0                     0022                  
 HMM1                     0023                  
-HMOVE                    002a                  
-HMP0                     0020                  
+HMOVE                    002a              (R )
+HMP0                     0020              (R )
 HMP1                     0021                  
 INPT0                    0008                  
 INPT1                    0009                  
@@ -51,22 +44,26 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel                   f054              (R )
-next                     f082              (R )
-nextframe                f01c              (R )
-noeor0                   f0af              (R )
+macro.h                  0000 ????         (R )
+MainLoop                 f013              (R )
+NO_ILLEGAL_OPCODES       0000 ????         (R )
+NotChangingWhatTitlePixel f09a              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
+OverScanWait             f0b7              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
-PF_H                     00c0              (R )
-r_seed                   0083              (R )
-randomData               f0a6                  
+PFData0Left              f0d3              (R )
+PFData0Right             f0eb              (R )
+PFData1Left              f0db              (R )
+PFData1Right             f0f3              (R )
+PFData2Left              f0e3              (R )
+PFData2Right             f0fb              (R )
+pixelHeightOfTitle       0006              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
-reset                    f000              (R )
 RESM0                    0012                  
 RESM1                    0013                  
 RESMP0                   0028                  
@@ -74,31 +71,32 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-scanline                 0080              (R )
-setPFColors              f042                  
+scanlinesPerTitlePixel   0006              (R )
+SetHorizPos              f0bf              (R )
+Start                    f000              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
-t2_                      0086                  
-t_                       0085              (R )
-temp                     0087                  
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )
 TIM1T                    0294                  
 TIM64T                   0296              (R )
 TIM8T                    0295                  
-timer2                   f09c              (R )
 TIMINT                   0285                  
+TitlePostLoop            f0a9              (R )
+TitlePreLoop             f02c              (R )
+TitleShowLoop            f06f              (R )
 VBLANK                   0001              (R )
+vcs.h                    0000 ????         (R )
 VDELBL                   0027                  
 VDELP0                   0025                  
 VDELP1                   0026                  
 VERSION_MACRO            006a                  
 VERSION_VCS              0069                  
 VSYNC                    0000              (R )
-wait1                    f045              (R )
+WaitForVblankEnd         f021              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.

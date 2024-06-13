@@ -405,7 +405,7 @@
      37  0000 ????
      38  0000 ????						; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
      39  0000 ????	       00 c0	   PF_H       equ	#192	; playfield height
-     40  0000 ????	       00 02	   CHANGE_T   equ	2	; frames to change color
+     40  0000 ????	       00 06	   CHANGE_T   equ	6	; frames to change color
      41  0000 ????	       00 60	   DATA_LENGTH equ	96
      42 U00e8 ????				      seg.u	vars	; uninitialized segment
      43 U0080					      org	$80	; origin set at base of ram
@@ -444,7 +444,7 @@
      65  f00f		       a9 a8		      lda	#$A8
      66  f011		       85 09		      sta	COLUBK
      67  f013
-     68  f013		       a9 02		      lda	#CHANGE_T
+     68  f013		       a9 06		      lda	#CHANGE_T
      69  f015		       85 81		      sta	count1
      70  f017
      71  f017		       ad 84 02 	      lda	INTIM
@@ -477,7 +477,7 @@
      93  f034		       85 08		      sta	COLUPF
      94  f036
      95  f036
-     96  f036		       a9 01		      lda	#%00000001
+     96  f036		       a9 00		      lda	#%00000000
      97  f038		       85 0a		      sta	CTRLPF	; enable playfield
      98  f03a
      99  f03a
@@ -485,7 +485,7 @@
     101  f03a		       c6 81		      dec	count1
     102  f03c		       d0 07		      bne	wait1
     103  f03e
-    104  f03e		       a9 02		      lda	#CHANGE_T	; resets the color change counter
+    104  f03e		       a9 06		      lda	#CHANGE_T	; resets the color change counter
     105  f040		       85 81		      sta	count1
     106  f042				   setPFColors
     107  f042							; lda		r_seed
@@ -493,7 +493,7 @@
     109  f042
     110  f042							; generate data:
     111  f042							; jsr randomData
-    112  f042		       20 ab f0 	      jsr	bytebeat1
+    112  f042		       20 b7 f0 	      jsr	bytebeat1
     113  f045							; jsr bytebeat2
     114  f045
     115  f045
@@ -507,125 +507,147 @@
     123  f050
     124  f050
     125  f050
-    126  f050							; ldx #73	       ; We'll round down, and clean up the remaining cycles with a WSYNC
-    127  f050							; stx TIM1T	      ; Set a count of 43 with 64-clock interval
-    128  f050
-    129  f050		       a2 60		      ldx	#DATA_LENGTH
-    130  f052
-    131  f052				   kernel		; 38 machine cycles per half line
-    132  f052							; 304 machine cycles per 4 lines
-    133  f052		       b5 88		      lda	data,x
-    134  f054		       85 0d		      sta	PF0
-    135  f056		       ca		      dex
-    136  f057		       b5 88		      lda	data,x
-    137  f059		       85 0e		      sta	PF1
-    138  f05b		       ca		      dex
-    139  f05c		       b5 88		      lda	data,x
-    140  f05e		       85 0f		      sta	PF2
-    141  f060		       ca		      dex
-    142  f061
-    143  f061							; wait2:	   ldx INTIM	       ; check the timer
-    144  f061							;		   bne wait2	      ; if it's not 0 then branch back up to kernel
-    145  f061		       c6 80		      dec	scanline	; (5)
-    146  f063		       d0 ed		      bne	kernel	; (2) loop back up to next
-    147  f065
-    148  f065				   line
-    149  f065		       85 02		      sta	WSYNC	; (3)
-    150  f067		       c6 80		      dec	scanline	; (5)
-    151  f069		       85 02		      sta	WSYNC	; (3)
-    152  f06b		       c6 80		      dec	scanline	; (5)
-    153  f06d		       85 02		      sta	WSYNC	; (3)
-    154  f06f		       c6 80		      dec	scanline	; (5)
-    155  f071		       85 02		      sta	WSYNC	; (3)
-    156  f073		       85 02		      sta	WSYNC	; (3)
-    157  f075		       c6 80		      dec	scanline	; (5)
-    158  f077		       85 02		      sta	WSYNC	; (3)
-    159  f079		       c6 80		      dec	scanline	; (5)
-    160  f07b		       85 02		      sta	WSYNC	; (3)
-    161  f07d		       c6 80		      dec	scanline	; (5)
-    162  f07f		       85 02		      sta	WSYNC	; (3)
-    163  f081
-    164  f081
-    165  f081		       85 02		      sta	WSYNC	; (3) end kernel with a clean scan line
-    166  f083		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-    167  f085		       85 01		      sta	VBLANK	; turn off the beam
-    168  f087
-    169  f087							; ---- Overscan (30 scanlines)
-    170  f087
-    171  f087							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-    172  f087							; 2280 machine cycles / 64 clocks = 35.625
-    173  f087
-    174  f087		       a2 23		      ldx	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-    175  f089		       8e 96 02 	      stx	TIM64T	; Set a count of 35 with 64-clock interval
-    176  f08c
-    177  f08c		       a9 00		      lda	#0	; background clear
-    178  f08e		       85 09		      sta	COLUBK
-    179  f090
-    180  f090
-    181  f090							; timer2 -----------
-    182  f090
-    183  f090		       ae 84 02    timer2     ldx	INTIM
-    184  f093		       d0 fb		      bne	timer2
-    185  f095
-    186  f095		       85 02		      sta	WSYNC
-    187  f097
-    188  f097
-    189  f097		       4c 1c f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-    190  f09a
-    191  f09a
-    192  f09a							; ////////////////////////////////////////////////////////
-    193  f09a				   randomData
-    194  f09a
-    195  f09a		       a2 60		      ldx	#DATA_LENGTH
-    196  f09c				   galois_lfsr_random
-    197  f09c		       a5 83		      lda	r_seed	; keep calling funtion to for better entropy
-    198  f09e		       4a		      lsr		; shift right
-    199  f09f		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    200  f0a1		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    201  f0a3		       85 83	   noeor0     sta	r_seed
-    202  f0a5		       95 88		      sta	data,X
-    203  f0a7		       ca		      dex
-    204  f0a8		       d0 f2		      bne	galois_lfsr_random
-    205  f0aa		       60		      rts
-    206  f0ab
-    207  f0ab
-    208  f0ab				   bytebeat1
-    209  f0ab
-    210  f0ab		       a5 85		      lda	t_
-    211  f0ad		       a2 60		      ldx	#DATA_LENGTH
-    212  f0af				   compute
-    213  f0af							; ror
-    214  f0af		       69 01		      adc	#1
-    215  f0b1
-    216  f0b1							; sta temp
-    217  f0b1							; lda t_
-    218  f0b1							; ; REPEAT 3 ;
-    219  f0b1							;     rol
-    220  f0b1							;     rol
-    221  f0b1							;     rol
-    222  f0b1							; ; REPEND
-    223  f0b1							; ora t_
-    224  f0b1
-    225  f0b1		       95 88		      sta	data,x
-    226  f0b3		       ca		      dex
-    227  f0b4		       d0 f9		      bne	compute
-    228  f0b6		       e6 85		      inc	t_
-    229  f0b8		       60		      rts
-    230  f0b9
-    231  f0b9
-    232  f0b9
-    233  fffa					      org	$FFFA
-    234  fffa
-    235  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    236  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    237  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    238  10000
-    239  10000
-    240  10000
-    241  10000
-    242  10000
-    243  10000
-    244  10000
-    245  10000
-    246  10000
-    247  10000
+    126  f050		       a2 20		      ldx	#32
+    127  f052		       a0 06		      ldy	#6
+    128  f054
+    129  f054				   kernel
+    130  f054		       85 02		      sta	WSYNC	; no lo cuento en la snl
+    131  f056
+    132  f056		       a5 50		      lda	80	; 4
+    133  f058		       85 0d		      sta	PF0	; 3
+    134  f05a		       b5 88		      lda	data,x	; 4
+    135  f05c		       85 0e		      sta	PF1	; 3
+    136  f05e		       b5 88		      lda	data,x	; 4
+    137  f060		       85 0f		      sta	PF2	; 3
+    138  f062		       ea		      nop		; 2
+    139  f063		       ea		      nop		; 2
+    140  f064							; 25 cycles begginning to draw pf
+    141  f064
+    142  f064		       ea		      nop		; 2
+    143  f065		       ea		      nop		; 2
+    144  f066		       ea		      nop		; 2
+    145  f067							; 31 ok to change PF0
+    146  f067
+    147  f067		       a9 00		      lda	#%0	; 2
+    148  f069		       85 0d		      sta	PF0	; 3
+    149  f06b
+    150  f06b		       ea		      nop		; 2
+    151  f06c		       ea		      nop		; 2
+    152  f06d
+    153  f06d							; 40 ok to change PF1
+    154  f06d		       a9 ff		      lda	#$FF	; 2
+    155  f06f		       85 0e		      sta	PF1	; 3
+    156  f071
+    157  f071		       ea		      nop		; 2
+    158  f072		       ea		      nop		; 2
+    159  f073		       ea		      nop		; 2
+    160  f074
+    161  f074							; 51 ok to change PF2
+    162  f074
+    163  f074							; lda #%0 ; 2
+    164  f074		       85 0f		      sta	PF2	; 3
+    165  f076
+    166  f076		       88		      dey		; 5
+    167  f077		       d0 09		      bne	next	; 3
+    168  f079
+    169  f079		       b5 88		      lda	data,x	; 2
+    170  f07b		       85 09		      sta	COLUBK	; 3
+    171  f07d							; 69
+    172  f07d
+    173  f07d		       a0 06		      ldy	#6	; 2
+    174  f07f		       ca		      dex		; 5
+    175  f080		       f0 03		      beq	DoneWithFrame	; 3
+    176  f082				   next
+    177  f082		       4c 54 f0 	      jmp	kernel	;loop back up to draw the next pixel
+    178  f085
+    179  f085				   DoneWithFrame
+    180  f085
+    181  f085							;clear out the playfield registers for obvious reasons
+    182  f085		       a9 00		      lda	#0
+    183  f087		       85 0f		      sta	PF2	;clear out PF2 first, I found out through experience
+    184  f089		       85 0d		      sta	PF0
+    185  f08b		       85 0e		      sta	PF1
+    186  f08d
+    187  f08d		       85 02		      sta	WSYNC
+    188  f08f		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+    189  f091		       85 01		      sta	VBLANK	; turn off the beam
+    190  f093
+    191  f093							; ---- Overscan (30 scanlines)
+    192  f093
+    193  f093							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+    194  f093							; 2280 machine cycles / 64 clocks = 35.625
+    195  f093
+    196  f093		       a2 23		      ldx	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+    197  f095		       8e 96 02 	      stx	TIM64T	; Set a count of 35 with 64-clock interval
+    198  f098
+    199  f098		       a9 00		      lda	#0	; background clear
+    200  f09a		       85 09		      sta	COLUBK
+    201  f09c
+    202  f09c
+    203  f09c							; timer2 -----------
+    204  f09c
+    205  f09c		       ae 84 02    timer2     ldx	INTIM
+    206  f09f		       d0 fb		      bne	timer2
+    207  f0a1
+    208  f0a1		       85 02		      sta	WSYNC
+    209  f0a3
+    210  f0a3
+    211  f0a3		       4c 1c f0 	      jmp	nextframe	; (3) jump back up to start the next frame
+    212  f0a6
+    213  f0a6
+    214  f0a6							; ////////////////////////////////////////////////////////
+    215  f0a6				   randomData
+    216  f0a6
+    217  f0a6		       a2 60		      ldx	#DATA_LENGTH
+    218  f0a8				   galois_lfsr_random
+    219  f0a8		       a5 83		      lda	r_seed	; keep calling funtion to for better entropy
+    220  f0aa		       4a		      lsr		; shift right
+    221  f0ab		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
+    222  f0ad		       49 d4		      eor	#$D4	; d4 tap (11010100)
+    223  f0af		       85 83	   noeor0     sta	r_seed
+    224  f0b1		       95 88		      sta	data,X
+    225  f0b3		       ca		      dex
+    226  f0b4		       d0 f2		      bne	galois_lfsr_random
+    227  f0b6		       60		      rts
+    228  f0b7
+    229  f0b7
+    230  f0b7				   bytebeat1
+    231  f0b7
+    232  f0b7		       a5 85		      lda	t_
+    233  f0b9		       a2 60		      ldx	#DATA_LENGTH
+    234  f0bb				   compute
+    235  f0bb							; ror
+    236  f0bb		       69 01		      adc	#1
+    237  f0bd		       49 d4		      eor	#$d4
+    238  f0bf							; sta temp
+    239  f0bf							; lda t_
+    240  f0bf							; ; REPEAT 3 ;
+    241  f0bf							;     rol
+    242  f0bf							;     rol
+    243  f0bf							;     rol
+    244  f0bf							; ; REPEND
+    245  f0bf							; ora t_
+    246  f0bf
+    247  f0bf		       95 88		      sta	data,x
+    248  f0c1		       ca		      dex
+    249  f0c2		       d0 f7		      bne	compute
+    250  f0c4		       e6 85		      inc	t_
+    251  f0c6		       60		      rts
+    252  f0c7
+    253  f0c7
+    254  f0c7
+    255  fffa					      org	$FFFA
+    256  fffa
+    257  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    258  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    259  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+    260  10000
+    261  10000
+    262  10000
+    263  10000
+    264  10000
+    265  10000
+    266  10000
+    267  10000
+    268  10000
+    269  10000
