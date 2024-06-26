@@ -40,13 +40,13 @@ DATA_LENGTH     equ 96
 
 scanline        ds 1                ; 1 byte - current scanline
 ; count1     ds 1                ; 1 byte - change color counter
-colorbk         ds 1                ; 1 byte - background color
-r_seed          ds 1                ; 1 byte - random seed
+; colorbk         ds 1                ; 1 byte - background color
+; r_seed          ds 1                ; 1 byte - random seed
 fcount          ds 1                ; 1 byte - frame counter
-t_              ds 1                ; 1 byte - temp
-t2_             ds 1                ; 1 byte - temp
-temp            ds 1                ; 1 byte - temp
-data            ds 96            ; 48 bytes - data
+; t_              ds 1                ; 1 byte - temp
+; t2_             ds 1                ; 1 byte - temp
+; temp            ds 1                ; 1 byte - temp
+; data            ds 96            ; 48 bytes - data
 
 
                 seg	main    		; start of main segment
@@ -189,41 +189,41 @@ background:
                     sta COLUBK     ; 3
                     rts            ; 6
 ; ////////////////////////////////////////////////////////
-randomData:                    
-                ldx #DATA_LENGTH
-galois_lfsr_random:              
-                lda r_seed              ; keep calling funtion to for better entropy
-                lsr                     ; shift right
-                bcc noeor0              ; if carry 1, then exclusive OR the bits
-                eor #$D4                ; d4 tap (11010100)
-noeor0:         sta r_seed
-                sta data,X
-                dex
-                bne galois_lfsr_random
-                rts
+; randomData:                    
+;                 ldx #DATA_LENGTH
+; galois_lfsr_random:              
+;                 lda r_seed              ; keep calling funtion to for better entropy
+;                 lsr                     ; shift right
+;                 bcc noeor0              ; if carry 1, then exclusive OR the bits
+;                 eor #$D4                ; d4 tap (11010100)
+; noeor0:         sta r_seed
+;                 sta data,X
+;                 dex
+;                 bne galois_lfsr_random
+;                 rts
 
 
-bytebeat1:                
-                lda t_                
-                ldx #DATA_LENGTH
-compute:
-                ; ror
-                adc #1
-                ; eor #$d4
-                ; sta temp
-                ; lda t_
-                ; ; REPEAT 3 ;
-                ;     rol
-                ;     rol
-                ;     rol
-                ; ; REPEND
-                ; ora t_                            
+; bytebeat1:                
+;                 lda t_                
+;                 ldx #DATA_LENGTH
+; compute:
+;                 ; ror
+;                 adc #1
+;                 ; eor #$d4
+;                 ; sta temp
+;                 ; lda t_
+;                 ; ; REPEAT 3 ;
+;                 ;     rol
+;                 ;     rol
+;                 ;     rol
+;                 ; ; REPEND
+;                 ; ora t_                            
                 
-                sta data,x                
-                dex                
-                bne compute
-                    inc t_
-                rts
+;                 sta data,x                
+;                 dex                
+;                 bne compute
+;                     inc t_
+;                 rts
 
 
 

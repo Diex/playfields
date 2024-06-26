@@ -403,20 +403,20 @@
      35 U0080					      org	$80	; origin set at base of ram
      36 U0080							; 16 bytes of uninitialized memory
      37 U0080
-     38 U00f7 ????				      seg.u	vars	; uninitialized segment
+     38 U0092 ????				      seg.u	vars	; uninitialized segment
      39 U0090					      org	$90	; origin set at base of ram
      40 U0090
      41 U0090		       00	   scanline   ds	1	; 1 byte - current scanline
      42 U0091							; count1     ds 1		  ; 1 byte - change color counter
-     43 U0091		       00	   colorbk    ds	1	; 1 byte - background color
-     44 U0092		       00	   r_seed     ds	1	; 1 byte - random seed
-     45 U0093		       00	   fcount     ds	1	; 1 byte - frame counter
-     46 U0094		       00	   t_	      ds	1	; 1 byte - temp
-     47 U0095		       00	   t2_	      ds	1	; 1 byte - temp
-     48 U0096		       00	   temp       ds	1	; 1 byte - temp
-     49 U0097		       00 00 00 00*data       ds	96	; 48 bytes - data
-     50 U00f7
-     51 U00f7
+     43 U0091							; colorbk	   ds 1 	       ; 1 byte - background color
+     44 U0091							; r_seed	   ds 1 	       ; 1 byte - random seed
+     45 U0091		       00	   fcount     ds	1	; 1 byte - frame counter
+     46 U0092							; t_		   ds 1 	       ; 1 byte - temp
+     47 U0092							; t2_		   ds 1 	       ; 1 byte - temp
+     48 U0092							; temp 	   ds 1 	       ; 1 byte - temp
+     49 U0092							; data 	   ds 96	    ; 48 bytes - data
+     50 U0092
+     51 U0092
      52  10000 ????				       seg	main	; start of main segment
      53  f000					      org	$F000
      54  f000
@@ -541,7 +541,7 @@
     157  f034
     158  f034				   DoneWithFrame
     159  f034
-    160  f034		       e6 93		      inc	fcount
+    160  f034		       e6 91		      inc	fcount
     161  f036							;clear out the playfield registers for obvious reasons
     162  f036		       a9 00		      lda	#0
     163  f038		       85 0f		      sta	PF2	;clear out PF2 first, I found out through experience
@@ -567,50 +567,50 @@
     183  f050		       4c 0b f0 	      jmp	nextframe	; (3) jump back up to start the next frame
     184  f053
     185  f053				   background
-    186  f053		       a5 93		      lda	fcount	; 2
+    186  f053		       a5 91		      lda	fcount	; 2
     187  f055							; stx $80
     188  f055							; adc $80
     189  f055		       85 09		      sta	COLUBK	; 3
     190  f057		       60		      rts		; 6
     191  f058							; ////////////////////////////////////////////////////////
-    192  f058				   randomData
-    193  f058		       a2 60		      ldx	#DATA_LENGTH
-    194  f05a				   galois_lfsr_random
-    195  f05a		       a5 92		      lda	r_seed	; keep calling funtion to for better entropy
-    196  f05c		       4a		      lsr		; shift right
-    197  f05d		       90 02		      bcc	noeor0	; if carry 1, then exclusive OR the bits
-    198  f05f		       49 d4		      eor	#$D4	; d4 tap (11010100)
-    199  f061		       85 92	   noeor0     sta	r_seed
-    200  f063		       95 97		      sta	data,X
-    201  f065		       ca		      dex
-    202  f066		       d0 f2		      bne	galois_lfsr_random
-    203  f068		       60		      rts
-    204  f069
-    205  f069
-    206  f069				   bytebeat1
-    207  f069		       a5 94		      lda	t_
-    208  f06b		       a2 60		      ldx	#DATA_LENGTH
-    209  f06d				   compute
-    210  f06d							; ror
-    211  f06d		       69 01		      adc	#1
-    212  f06f							; eor #$d4
-    213  f06f							; sta temp
-    214  f06f							; lda t_
-    215  f06f							; ; REPEAT 3 ;
-    216  f06f							;     rol
-    217  f06f							;     rol
-    218  f06f							;     rol
-    219  f06f							; ; REPEND
-    220  f06f							; ora t_
-    221  f06f
-    222  f06f		       95 97		      sta	data,x
-    223  f071		       ca		      dex
-    224  f072		       d0 f9		      bne	compute
-    225  f074		       e6 94		      inc	t_
-    226  f076		       60		      rts
-    227  f077
-    228  f077
-    229  f077
+    192  f058							; randomData:
+    193  f058							;		   ldx #DATA_LENGTH
+    194  f058							; galois_lfsr_random:
+    195  f058							;		   lda r_seed		   ; keep calling funtion to for better entropy
+    196  f058							;		   lsr			   ; shift right
+    197  f058							;		   bcc noeor0		   ; if carry 1, then exclusive OR the bits
+    198  f058							;		   eor #$D4		   ; d4 tap (11010100)
+    199  f058							; noeor0:	   sta r_seed
+    200  f058							;		   sta data,X
+    201  f058							;		   dex
+    202  f058							;		   bne galois_lfsr_random
+    203  f058							;		   rts
+    204  f058
+    205  f058
+    206  f058							; bytebeat1:
+    207  f058							;		   lda t_
+    208  f058							;		   ldx #DATA_LENGTH
+    209  f058							; compute:
+    210  f058							;		   ; ror
+    211  f058							;		   adc #1
+    212  f058							;		   ; eor #$d4
+    213  f058							;		   ; sta temp
+    214  f058							;		   ; lda t_
+    215  f058							;		   ; ; REPEAT 3 ;
+    216  f058							;		   ;	 rol
+    217  f058							;		   ;	 rol
+    218  f058							;		   ;	 rol
+    219  f058							;		   ; ; REPEND
+    220  f058							;		   ; ora t_
+    221  f058
+    222  f058							;		   sta data,x
+    223  f058							;		   dex
+    224  f058							;		   bne compute
+    225  f058							;		       inc t_
+    226  f058							;		   rts
+    227  f058
+    228  f058
+    229  f058
     230  fffa					      org	$FFFA
     231  fffa
     232  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)

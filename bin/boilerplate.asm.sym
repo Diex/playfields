@@ -9,14 +9,11 @@ AUDF1                    0018
 AUDV0                    0019                  
 AUDV1                    001a                  
 background               f053                  
-bytebeat1                f069                  
 CHANGE_T                 0006                  
-colorbk                  0091                  
 COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
 COLUPF                   0008                  
-compute                  f06d              (R )
 CTRLPF                   000a                  
 CXBLPF                   0006                  
 CXCLR                    002c                  
@@ -27,14 +24,12 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-data                     0097              (R )
-DATA_LENGTH              0060              (R )
+DATA_LENGTH              0060                  
 DoneWithFrame            f034              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0093              (R )
-galois_lfsr_random       f05a              (R )
+fcount                   0091              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -54,15 +49,12 @@ INTIM                    0284              (R )
 kernel                   f02a              (R )
 next                     f031              (R )
 nextframe                f00b              (R )
-noeor0                   f061              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
-r_seed                   0092              (R )
-randomData               f058                  
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
@@ -81,9 +73,6 @@ SWBCNT                   0283
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
-t2_                      0095                  
-t_                       0094              (R )
-temp                     0096                  
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )
