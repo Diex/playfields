@@ -2,7 +2,7 @@
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f00d              (R )
-add                      f046              (R )
+add                      f048              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -49,7 +49,7 @@ my16bit_msb              0091              (R )
 nextframe                f00b              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-ok                       f051              (R )
+ok                       f053              (R )
 PF0                      000d                  
 PF1                      000e                  
 PF2                      000f                  

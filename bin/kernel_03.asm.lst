@@ -417,7 +417,7 @@
      33  f016		       8d 96 02 	      sta	TIM64T	; Set a count of 43 with 64-clock interval
      34  f019							; -------- do stuff  -------------------------------
      35  f019
-     36  f019		       20 46 f0 	      jsr	add
+     36  f019		       20 48 f0 	      jsr	add
      37  f01c
      38  f01c							; -------- wait ------------------------------------
      39  f01c		       ad 84 02 	      lda	INTIM	; check the timer
@@ -435,64 +435,60 @@
      51  f02b		       85 02	   kernel     sta	WSYNC	; no lo cuento en la snl
      52  f02d
      53  f02d
-     54  f02d
-     55  f02d
+     54  f02d							; lda scanline
+     55  f02d							; cmp my16bit_lsb
      56  f02d
-     57  f02d
-     58  f02d
-     59  f02d
-     60  f02d
-     61  f02d
-     62  f02d
-     63  f02d		       a5 91		      lda	my16bit_msb	; (3)
-     64  f02f		       85 09		      sta	COLUBK	;(3)
-     65  f031
-     66  f031		       c6 92		      dec	scanline	; (2)
-     67  f033		       d0 f6		      bne	kernel	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-     68  f035
-     69  f035							; --------------- DoneWithFrame	---------------
-     70  f035
-     71  f035							; ---- Overscan (30 scanlines)
-     72  f035							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-     73  f035							; 2280 machine cycles / 64 clocks = 35.625
-     74  f035		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-     75  f037		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
-     76  f03a
-     77  f03a
-     78  f03a
-     79  f03a
-     80  f03a		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-     81  f03c		       85 01		      sta	VBLANK	; turn off the beam
-     82  f03e
-     83  f03e							; -------- wait ------------------------------------
-     84  f03e		       ad 84 02 	      lda	INTIM	; check the timer
-     85  f041		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
-     86  f043							; -------- done ------------------------------------
-     87  f043
-     88  f043		       4c 0b f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-     89  f046
-     90  f046		       18	   add	      clc
-     91  f047		       a5 90		      lda	my16bit_lsb
-     92  f049		       69 01		      adc	#1
-     93  f04b		       85 90		      sta	my16bit_lsb
-     94  f04d		       90 02		      bcc	ok
-     95  f04f		       e6 91		      inc	my16bit_msb
-     96  f051				   ok
-     97  f051		       60		      rts
-     98  f052
-     99  f052
-    100  fffa					      org	$FFFA
-    101  fffa
-    102  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    103  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    104  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+     57  f02d		       a5 92		      lda	scanline
+     58  f02f		       65 90		      adc	my16bit_lsb
+     59  f031		       85 09		      sta	COLUBK	;(3)
+     60  f033
+     61  f033
+     62  f033		       c6 92		      dec	scanline	; (2)
+     63  f035		       d0 f4		      bne	kernel	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+     64  f037
+     65  f037							; --------------- DoneWithFrame	---------------
+     66  f037
+     67  f037							; ---- Overscan (30 scanlines)
+     68  f037							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+     69  f037							; 2280 machine cycles / 64 clocks = 35.625
+     70  f037		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+     71  f039		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
+     72  f03c
+     73  f03c
+     74  f03c
+     75  f03c
+     76  f03c		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+     77  f03e		       85 01		      sta	VBLANK	; turn off the beam
+     78  f040
+     79  f040							; -------- wait ------------------------------------
+     80  f040		       ad 84 02 	      lda	INTIM	; check the timer
+     81  f043		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
+     82  f045							; -------- done ------------------------------------
+     83  f045
+     84  f045		       4c 0b f0 	      jmp	nextframe	; (3) jump back up to start the next frame
+     85  f048
+     86  f048		       18	   add	      clc
+     87  f049		       a5 90		      lda	my16bit_lsb
+     88  f04b		       69 01		      adc	#1
+     89  f04d		       85 90		      sta	my16bit_lsb
+     90  f04f		       90 02		      bcc	ok
+     91  f051		       e6 91		      inc	my16bit_msb
+     92  f053				   ok
+     93  f053		       60		      rts
+     94  f054
+     95  f054
+     96  fffa					      org	$FFFA
+     97  fffa
+     98  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+     99  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    100  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+    101  10000
+    102  10000
+    103  10000
+    104  10000
     105  10000
     106  10000
     107  10000
     108  10000
     109  10000
     110  10000
-    111  10000
-    112  10000
-    113  10000
-    114  10000
