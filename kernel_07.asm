@@ -72,27 +72,18 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta WSYNC           ; primera linea visible
                 
           
-                lda colors+5
-                sta COLUPF
-          
+                
                 
 
 
                 
                 
 kernel:		    sta WSYNC           ; no lo cuento en la snl  
-                dec scanline                 ; (2)
-                sta WSYNC
-                dec scanline                 ; (2)
-                sta WSYNC
-                dec scanline                 ; (2)
-                sta WSYNC
-                ; ((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7
-                ; PF0
-
-                ; jsr reverseBits
-                ; rol
-                ; rol
+                lda scanline
+                ror
+                ror
+                sta COLUPF
+          
                 lda c24_1+1
                 adc scanline
                 rol
@@ -107,16 +98,30 @@ kernel:		    sta WSYNC           ; no lo cuento en la snl
                 ror
                 ror
                 ror
-                ror
+                ; ror
                 adc temp
                 sta PF2
+
+                dec scanline                 ; (2)
+                sta WSYNC
+                
+                
                 
                 ; ; PF1
-                ; lda c24_1+2                
+                ; (((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7)
+
+                lda c24_1+0    
+                adc scanline
+                rol
+                sta temp
+                lda c24_1+0
+                rol
+                eor temp
+
                 ; rol
                 ; eor #15
                 ; eor scanline
-                ; sta PF1
+                sta PF1
                 
                 ; ; PF2
                 ; lda c24_1
@@ -183,7 +188,7 @@ inc16	        clc
 
 inc24	        clc		
                 lda c24_1+2
-                adc #32
+                adc #31
                 sta c24_1+2
                 bcc ok     
                 clc   

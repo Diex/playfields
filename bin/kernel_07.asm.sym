@@ -2,7 +2,7 @@
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f015              (R )
-asl16                    f074                  
+asl16                    f07a                  
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -11,7 +11,7 @@ AUDV0                    0019
 AUDV1                    001a                  
 c16_1                    008b              (R )
 c24_1                    0080              (R )
-colors                   f0a3              (R )
+colors                   f0a9                  
 COLUBK                   0009                  
 COLUP0                   0006                  
 COLUP1                   0007                  
@@ -39,8 +39,8 @@ HMM1                     0023
 HMOVE                    002a                  
 HMP0                     0020                  
 HMP1                     0021                  
-inc16                    f079                  
-inc24                    f085              (R )
+inc16                    f07f                  
+inc24                    f08b              (R )
 INPT0                    0008                  
 INPT1                    0009                  
 INPT2                    000a                  
@@ -48,15 +48,15 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel                   f038              (R )
+kernel                   f033              (R )
 mod_1                    00a8                  
 nextframe                f013              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-ok                       f09d              (R )
+ok                       f0a3              (R )
 params                   0083              (R )
 PF0                      000d                  
-PF1                      000e                  
+PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
 plfys                    008d                  
@@ -71,8 +71,8 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 revbits                  0090                  
-reverseBits              f09e                  
-reversedOrderBits        f0ab              (R )
+reverseBits              f0a4                  
+reversedOrderBits        f0b1              (R )
 RSYNC                    0003                  
 scanline                 00a4              (R )
 SWACNT                   0281                  
