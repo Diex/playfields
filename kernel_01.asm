@@ -28,24 +28,18 @@
 
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-
+                
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
                 ; 16 bytes of uninitialized memory
-                
+temp            ds 1                
                 seg.u	vars		; uninitialized segment
                 org	$90             ; origin set at base of ram
 
+my16bit_lsb     ds 1                ; 1 byte - 16 bit counter lsb
+my16bit_msb     ds 1                ; 1 byte - 16 bit counter msb
 scanline        ds 1                ; 1 byte - current scanline
-; count1     ds 1                ; 1 byte - change color counter
-; colorbk         ds 1                ; 1 byte - background color
-; r_seed          ds 1                ; 1 byte - random seed
 fcount          ds 1                ; 1 byte - frame counter
-; t_              ds 1                ; 1 byte - temp
-; t2_             ds 1                ; 1 byte - temp
-; temp            ds 1                ; 1 byte - temp
-; data            ds 96            ; 48 bytes - data
-
 
                 seg	main    		; start of main segment
                 org $F000
@@ -56,49 +50,87 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 ; -------- set timer -------------------------------
                                     ; 37 scanlines x 76 machine cycles per scanline = 2812 machine cycles
                                     ; 2812 machine cycles / 64 clocks = 43.9375
-                ldx #44             ; We'll round down, and clean up the remaining cycles with a WSYNC
-                stx TIM64T          ; Set a count of 43 with 64-clock interval
+                lda #44             ; We'll round down, and clean up the remaining cycles with a WSYNC
+                sta TIM64T          ; Set a count of 43 with 64-clock interval
+; -------- do stuff  -------------------------------
 
-; -------- wait ------------------------------------                
+                ; lda #0	            ; (2) set D1 to 0 to end VBLANK
+                ; sta WSYNC           ; (3) wait for end of scanline                    
+                ; sta COLUBK          ;(3)
+                ; ldy #PF_H
+
+; -------- wait ------------------------------------                                
                 lda INTIM           ; check the timer          
                 bne .-3             ; 2 bytes del opcode (bne) + 1 byte operando                                    
 ; -------- done ------------------------------------
+                lda #0
+                sta WSYNC
+                sta VBLANK
                 
-                lda #0	            ; (2) set D1 to 0 to end VBLANK
-                sta	WSYNC		    ; (3) end with a clean scanline
-                sta VBLANK		    ; (3) turn on the beam
-
+                
                 ldy #PF_H
+kernel:		    sta WSYNC           ; no lo cuento en la snl       		            
+
+                sty temp            ; (3)
                 
-kernel:		    sta WSYNC           ; no lo cuento en la snl       	
-	            
-                ; do the line
-                sty COLUBK
-                dey    
-                bne .+4             ; 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-                beq .+3   
-    	        jmp kernel          ;loop back up to draw the next pixel 
+                lda temp            ; (3)
+                sta COLUBK          ;(3)                
+                sleep 4             ; (4)
+                
+                sta COLUBK          ;(3)                
+                rol                 ; (2)
+                sleep 4             ; (4)
+
+                sta COLUBK          ;(3)                
+                rol                 ; (2)
+                sleep 4             ; (4)
+
+                sta COLUBK          ;(3)                
+                rol                 ; (2)
+                sleep 4             ; (4)
+
+                sta COLUBK          ;(3)                
+                rol                 ; (2)
+                sleep 4             ; (4)
+
+                sta COLUBK          ;(3)                
+                rol                 ; (2)
+                sleep 4             ; (4)
+
+
+                sta COLUBK          ;(3)                
+                ; ror                 ; (2)
+                
+
+                nop                 ; (2)
+                nop                 ; (2)
+                
+                
+                
+
+                dey                 ; (2)
+                bne kernel          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
                 
 ; --------------- DoneWithFrame	---------------
-                inc fcount
                                     ;clear out the playfield registers for obvious reasons	
+                ; ---- Overscan (30 scanlines)
+                ; 30 scanlines x 76 machine cycles = 2280 machine cycles
+                ; 2280 machine cycles / 64 clocks = 35.625
+
+                lda #35             ; We'll round down, and clean up the remaining cycles with a WSYNC
+                sta TIM64T          ; Set a count of 35 with 64-clock interval
+
                 lda #0
                 sta PF2             
                 sta PF0
                 sta PF1
 
                 lda #$2     	    ; set D1 = 1 to initiate VBLANK
-                sta VBLANK		    ; turn off the beam
+                sta VBLANK		    ; turn off the beam                
+               
+                ; lda #0
+                ; sta COLUBK
 
-                ; ---- Overscan (30 scanlines)
-                ; 30 scanlines x 76 machine cycles = 2280 machine cycles
-                ; 2280 machine cycles / 64 clocks = 35.625
-
-                ldx #35             ; We'll round down, and clean up the remaining cycles with a WSYNC
-                stx TIM64T          ; Set a count of 35 with 64-clock interval
-
-                lda #0              ; background clear
-                sta COLUBK
 
 ; -------- wait ------------------------------------
                 lda INTIM           ; check the timer          

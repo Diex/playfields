@@ -2,6 +2,12 @@
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f00d              (R )
+3.CYCLES                 0004              (R )
+4.CYCLES                 0004              (R )
+5.CYCLES                 0004              (R )
+6.CYCLES                 0004              (R )
+7.CYCLES                 0004              (R )
+8.CYCLES                 0004              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -25,7 +31,7 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0091              (R )
+fcount                   0093                  
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -43,7 +49,10 @@ INPT4                    000c
 INPT5                    000d                  
 INTIM                    0284              (R )
 kernel                   f026              (R )
+my16bit_lsb              0090                  
+my16bit_msb              0091                  
 nextframe                f00b              (R )
+NO_ILLEGAL_OPCODES       0000 ????         (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
 PF0                      000d              (R )
@@ -61,12 +70,13 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-scanline                 0090                  
+scanline                 0092                  
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
+temp                     0080              (R )
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )

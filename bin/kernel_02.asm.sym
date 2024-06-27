@@ -25,7 +25,7 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   0091              (R )
+fcount                   0093                  
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -42,7 +42,9 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel                   f026              (R )
+kernel                   f028              (R )
+my16bit_lsb              0090                  
+my16bit_msb              0091                  
 nextframe                f00b              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
@@ -61,12 +63,13 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-scanline                 0090                  
+scanline                 0092              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
+temp                     0080                  
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )
