@@ -2,7 +2,7 @@
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f015              (R )
-asl16                    f06a                  
+asl16                    f074                  
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -11,7 +11,7 @@ AUDV0                    0019
 AUDV1                    001a                  
 c16_1                    008b              (R )
 c24_1                    0080              (R )
-colors                   f099              (R )
+colors                   f0a3              (R )
 COLUBK                   0009                  
 COLUP0                   0006                  
 COLUP1                   0007                  
@@ -29,7 +29,7 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   00a2                  
+fcount                   00a5                  
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -39,8 +39,8 @@ HMM1                     0023
 HMOVE                    002a                  
 HMP0                     0020                  
 HMP1                     0021                  
-inc16                    f06f                  
-inc24                    f07b              (R )
+inc16                    f079                  
+inc24                    f085              (R )
 INPT0                    0008                  
 INPT1                    0009                  
 INPT2                    000a                  
@@ -49,15 +49,14 @@ INPT4                    000c
 INPT5                    000d                  
 INTIM                    0284              (R )
 kernel                   f038              (R )
-MEM                      0092                  
-mod_1                    00a5                  
+mod_1                    00a8                  
 nextframe                f013              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-ok                       f093              (R )
+ok                       f09d              (R )
 params                   0083              (R )
 PF0                      000d                  
-PF1                      000e              (R )
+PF1                      000e                  
 PF2                      000f              (R )
 PF_H                     00c0              (R )
 plfys                    008d                  
@@ -72,17 +71,17 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 revbits                  0090                  
-reverseBits              f094              (R )
-reversedOrderBits        f0a1              (R )
+reverseBits              f09e                  
+reversedOrderBits        f0ab              (R )
 RSYNC                    0003                  
-scanline                 00a1              (R )
+scanline                 00a4              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
 T1024T                   0297                  
-t_                       00a3                  
-temp                     00a0                  
+t_                       00a6                  
+temp                     00a0              (R )
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
 TIA_BASE_WRITE_ADDRESS   0000              (R )
