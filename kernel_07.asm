@@ -63,8 +63,10 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 
                 lda #PF_H
                 sta scanline
-
-                jsr inc24 ; inc24 es muy larga y flickea
+                ; flickering tipico error:
+                ; la llamada a la subrutina es muy larga.
+                ; inc24 es muy larga y flickea
+                jsr inc24 ; 
                 
                 
                 sta WSYNC           ; primera linea visible
