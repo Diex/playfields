@@ -229,8 +229,13 @@ reversedOrderBits
             .word $17, $97, $57, $d7, $37, $b7, $77, $f7
             .word $0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
             .word $1f, $9f, $5f, $df, $3f, $bf, $7f, $ff    
-
-                
+            
+            org 	$FFD0
+            .word $0000,$0000
+                org 	$FFD4
+            .word $B3A1, $1077
+                .word $0000,$2420
+                .word $0000,$0000
                 org 	$FFFA
 
                 .word reset     	; NMI  ($FFFA)

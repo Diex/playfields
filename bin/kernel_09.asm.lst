@@ -614,13 +614,18 @@
     230  f29a		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
     231  f2aa		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
     232  f2ba
-    233  f2ba
-    234  fffa					      org	$FFFA
-    235  fffa
-    236  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    237  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    238  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    239  10000
-    240  10000
-    241  10000
-    242  10000
+    233  ffd0					      org	$FFD0
+    234  ffd0		       00 00 00 00	      .word.w	$0000,$0000
+    235  ffd4					      org	$FFD4
+    236  ffd4		       a1 b3 77 10	      .word.w	$B3A1, $1077
+    237  ffd8		       00 00 20 24	      .word.w	$0000,$2420
+    238  ffdc		       00 00 00 00	      .word.w	$0000,$0000
+    239  fffa					      org	$FFFA
+    240  fffa
+    241  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    242  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    243  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+    244  10000
+    245  10000
+    246  10000
+    247  10000
