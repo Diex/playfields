@@ -10,11 +10,12 @@ PF_H            equ 192            ; playfield height
                 
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
-                                    ; up to 9F
-c24_1           ds 3
-params          ds 8
-c16_1           ds 2
 
+                                    ; up to 9F
+c16_1           ds 2
+c24_1           ds 3
+
+params          ds 8
 plfys           ds 3
 revbits         ds 2
 
@@ -64,86 +65,40 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 lda #PF_H
                 sta scanline
 
-                jsr inc24 ; inc24 es muy larga y flickea
-                
+                ; jsr inc24 ; inc24 es muy larga y flickea
+                jsr inc16                
                 
                 sta WSYNC           ; primera linea visible
                 
           
+        
                 
                 
-
-
+render:		    sta WSYNC           ; no lo cuento en la snl  
                 
-                
-kernel:		    sta WSYNC           ; no lo cuento en la snl  
                 lda scanline
-                ror
-                ror
+                ror                
                 sta COLUPF
           
-                lda c24_1+1
-                adc scanline
-                rol
-                sta temp
-                lda c24_1+1
-                rol
-                eor temp
-                sta temp
-                
-                lda c24_1+1
-                ror
-                ror
-                ror
-                ror
-                ; ror
-                adc temp
-                sta PF2
 
+                jsr kernel1
+                sta PF2
                 dec scanline                 ; (2)
+
+
+
                 sta WSYNC
                 
-                
-                
-                ; ; PF1
-                ; (((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7)
-
-                lda c24_1+0    
-                adc scanline
-                rol
-                sta temp
-                lda c24_1+0
-                rol
-                eor temp
-
-                ; rol
-                ; eor #15
-                ; eor scanline
+                lda scanline
+                ror                                             
+                sta COLUPF
+          
+                ; jsr kernel2
                 sta PF1
+            
                 
-                ; ; PF2
-                ; lda c24_1
-                ; ror
-                ; eor #7
-                ; jsr reverseBits
-                ; eor scanline
-                ; sta PF0
-                
-                ; ldy #0
-                ; lda plfys,y
-                ; sta PF0                
-                
-                ; iny
-                ; lda plfys,y
-                ; sta PF1                
-                
-                ; iny
-                ; lda plfys,y                
-                ; sta PF2
-
-
                 dec scanline                 ; (2)
-                bne kernel          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+                bne render          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
                 
 ; --------------- DoneWithFrame	---------------
                                     
@@ -167,6 +122,37 @@ kernel:		    sta WSYNC           ; no lo cuento en la snl
                 jmp nextframe       ; (3) jump back up to start the next frame
 
 
+kernel1:
+                
+                lda c24_1+1
+                adc scanline
+                rol
+                sta temp
+                lda c24_1+1
+                rol
+                eor temp
+                sta temp
+                
+                lda c24_1+1
+                ror
+                ror
+                ror
+                ror
+                ; ror
+                adc temp                
+                rts
+
+kernel2:
+
+                lda c24_1+0    
+                adc scanline
+                rol
+                sta temp
+                lda c24_1+0
+                rol
+                eor temp
+                
+                rts
 
 
             ; Shift a 16bit value by one place left (e.g. multiply by two)

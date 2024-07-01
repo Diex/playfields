@@ -1,4 +1,4 @@
-------- FILE kernel_07.asm LEVEL 1 PASS 2
+------- FILE kernel_09.asm LEVEL 1 PASS 2
       1  10000					       processor	6502	; -----------------------------------------------------
 ------- FILE vcs.h LEVEL 2 PASS 2
       0  10000 ????				       include	"vcs.h"	;
@@ -202,7 +202,7 @@
     198  0000 ????				      SEG
     199  0000 ????
     200  0000 ????						; EOF
-------- FILE kernel_07.asm
+------- FILE kernel_09.asm
 ------- FILE macro.h LEVEL 2 PASS 2
       0  0000 ????				      include	"macro.h"	;
       1  0000 ????						; MACRO.H
@@ -368,7 +368,7 @@
     161  0000 ????
     162  0000 ????
     163  0000 ????						; EOF
-------- FILE kernel_07.asm
+------- FILE kernel_09.asm
       4  0000 ????						;
       5  0000 ????						; This Episode on Youtube - https://youtu.be/KJYeQjJTkj4
       6  0000 ????						; Email - 8blit0@gmail.com
@@ -378,28 +378,29 @@
      10  0000 ????
      11 U0092 ????				      seg.u	temp	; uninitialized segment
      12 U0080					      org	$80	; origin set at base of ram
-     13 U0080							; up to 9F
-     14 U0080		       00 00 00    c24_1      ds	3
-     15 U0083		       00 00 00 00*params     ds	8
-     16 U008b		       00 00	   c16_1      ds	2
-     17 U008d
-     18 U008d		       00 00 00    plfys      ds	3
-     19 U0090		       00 00	   revbits    ds	2
-     20 U0092
+     13 U0080
+     14 U0080							; up to 9F
+     15 U0080		       00 00	   c16_1      ds	2
+     16 U0082		       00 00 00    c24_1      ds	3
+     17 U0085
+     18 U0085		       00 00 00 00*params     ds	8
+     19 U008d		       00 00 00    plfys      ds	3
+     20 U0090		       00 00	   revbits    ds	2
      21 U0092
-     22 U00a9 ????				      seg.u	vars
-     23 U00a0					      org	$A0
-     24 U00a0
-     25 U00a0		       00 00 00 00 temp       ds	4
-     26 U00a4		       00	   scanline   ds	1	; 1 byte - current scanline
-     27 U00a5		       00	   fcount     ds	1	; 1 byte - frame counter
-     28 U00a6		       00 00	   t_	      ds	2	; 1 byte - temp
-     29 U00a8		       00	   mod_1      ds	1	; 1 byte - modulo 1
-     30 U00a9
+     22 U0092
+     23 U00a9 ????				      seg.u	vars
+     24 U00a0					      org	$A0
+     25 U00a0
+     26 U00a0		       00 00 00 00 temp       ds	4
+     27 U00a4		       00	   scanline   ds	1	; 1 byte - current scanline
+     28 U00a5		       00	   fcount     ds	1	; 1 byte - frame counter
+     29 U00a6		       00 00	   t_	      ds	2	; 1 byte - temp
+     30 U00a8		       00	   mod_1      ds	1	; 1 byte - modulo 1
      31 U00a9
-     32  10000 ????				       seg	main	; start of main segment
-     33  f000					      org	$F000
-     34  f000
+     32 U00a9
+     33  10000 ????				       seg	main	; start of main segment
+     34  f000					      org	$F000
+     35  f000
       0  f000				   reset      CLEAN_START		; ouput: all ram registers 0
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -412,229 +413,214 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     36  f00b
-     37  f00b		       a9 01		      lda	#1
-     38  f00d		       85 0a		      sta	CTRLPF
-     39  f00f
-     40  f00f		       a9 1e		      lda	#$1E
-     41  f011		       85 08		      sta	COLUPF
-     42  f013
-     43  f013							; lda #255
-     44  f013							; sta c24_1+1
-     45  f013
+     37  f00b
+     38  f00b		       a9 01		      lda	#1
+     39  f00d		       85 0a		      sta	CTRLPF
+     40  f00f
+     41  f00f		       a9 1e		      lda	#$1E
+     42  f011		       85 08		      sta	COLUPF
+     43  f013
+     44  f013							; lda #255
+     45  f013							; sta c24_1+1
+     46  f013
       0  f013				   nextframe  VERTICAL_SYNC		; output: a = 0; 3 scanlines
       1  f013		       a9 0e		      lda	#%1110
       2  f015		       85 02	   .VSLP1     sta	WSYNC
       3  f017		       85 00		      sta	VSYNC
       4  f019		       4a		      lsr
       5  f01a		       d0 f9		      bne	.VSLP1
-     47  f01c							; -------- set timer -------------------------------
-     48  f01c							; 37 scanlines x 76 machine cycles per scanline = 2812 machine cycles
-     49  f01c							; 2812 machine cycles / 64 clocks = 43.9375
-     50  f01c		       a9 2c		      lda	#44	; We'll round down, and clean up the remaining cycles with a WSYNC
-     51  f01e		       8d 96 02 	      sta	TIM64T	; Set a count of 43 with 64-clock interval
-     52  f021							; -------- do stuff  -------------------------------
-     53  f021							; jsr add
-     54  f021
-     55  f021							; -------- wait ------------------------------------
-     56  f021		       ad 84 02 	      lda	INTIM	; check the timer
-     57  f024		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
-     58  f026							; -------- done ------------------------------------
-     59  f026
-     60  f026		       a9 00		      lda	#0
-     61  f028
-     62  f028		       85 01		      sta	VBLANK
-     63  f02a
-     64  f02a		       a9 c0		      lda	#PF_H
-     65  f02c		       85 a4		      sta	scanline
-     66  f02e
-     67  f02e		       20 8b f0 	      jsr	inc24	; inc24 es muy larga y flickea
-     68  f031
-     69  f031
-     70  f031		       85 02		      sta	WSYNC	; primera linea visible
-     71  f033
+     48  f01c							; -------- set timer -------------------------------
+     49  f01c							; 37 scanlines x 76 machine cycles per scanline = 2812 machine cycles
+     50  f01c							; 2812 machine cycles / 64 clocks = 43.9375
+     51  f01c		       a9 2c		      lda	#44	; We'll round down, and clean up the remaining cycles with a WSYNC
+     52  f01e		       8d 96 02 	      sta	TIM64T	; Set a count of 43 with 64-clock interval
+     53  f021							; -------- do stuff  -------------------------------
+     54  f021							; jsr add
+     55  f021
+     56  f021							; -------- wait ------------------------------------
+     57  f021		       ad 84 02 	      lda	INTIM	; check the timer
+     58  f024		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
+     59  f026							; -------- done ------------------------------------
+     60  f026
+     61  f026		       a9 00		      lda	#0
+     62  f028
+     63  f028		       85 01		      sta	VBLANK
+     64  f02a
+     65  f02a		       a9 c0		      lda	#PF_H
+     66  f02c		       85 a4		      sta	scanline
+     67  f02e
+     68  f02e							; jsr inc24 ; inc24 es muy larga y flickea
+     69  f02e		       20 88 f0 	      jsr	inc16
+     70  f031
+     71  f031		       85 02		      sta	WSYNC	; primera linea visible
      72  f033
      73  f033
      74  f033
      75  f033
      76  f033
-     77  f033
-     78  f033
-     79  f033		       85 02	   kernel     sta	WSYNC	; no lo cuento en la snl
-     80  f035		       a5 a4		      lda	scanline
-     81  f037		       6a		      ror
-     82  f038		       6a		      ror
-     83  f039		       85 08		      sta	COLUPF
-     84  f03b
-     85  f03b		       a5 81		      lda	c24_1+1
-     86  f03d		       65 a4		      adc	scanline
-     87  f03f		       2a		      rol
-     88  f040		       85 a0		      sta	temp
-     89  f042		       a5 81		      lda	c24_1+1
-     90  f044		       2a		      rol
-     91  f045		       45 a0		      eor	temp
-     92  f047		       85 a0		      sta	temp
-     93  f049
-     94  f049		       a5 81		      lda	c24_1+1
-     95  f04b		       6a		      ror
-     96  f04c		       6a		      ror
-     97  f04d		       6a		      ror
-     98  f04e		       6a		      ror
-     99  f04f							; ror
-    100  f04f		       65 a0		      adc	temp
-    101  f051		       85 0f		      sta	PF2
-    102  f053
-    103  f053		       c6 a4		      dec	scanline	; (2)
-    104  f055		       85 02		      sta	WSYNC
-    105  f057
-    106  f057
-    107  f057
-    108  f057							; ; PF1
-    109  f057							; (((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7)
-    110  f057
-    111  f057		       a5 80		      lda	c24_1+0
-    112  f059		       65 a4		      adc	scanline
-    113  f05b		       2a		      rol
-    114  f05c		       85 a0		      sta	temp
-    115  f05e		       a5 80		      lda	c24_1+0
-    116  f060		       2a		      rol
-    117  f061		       45 a0		      eor	temp
-    118  f063
-    119  f063							; rol
-    120  f063							; eor #15
-    121  f063							; eor scanline
-    122  f063		       85 0e		      sta	PF1
-    123  f065
-    124  f065							; ; PF2
-    125  f065							; lda c24_1
-    126  f065							; ror
-    127  f065							; eor #7
-    128  f065							; jsr reverseBits
-    129  f065							; eor scanline
-    130  f065							; sta PF0
-    131  f065
-    132  f065							; ldy #0
-    133  f065							; lda plfys,y
-    134  f065							; sta PF0
-    135  f065
-    136  f065							; iny
-    137  f065							; lda plfys,y
-    138  f065							; sta PF1
-    139  f065
-    140  f065							; iny
-    141  f065							; lda plfys,y
-    142  f065							; sta PF2
-    143  f065
-    144  f065
-    145  f065		       c6 a4		      dec	scanline	; (2)
-    146  f067		       d0 ca		      bne	kernel	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-    147  f069
-    148  f069							; --------------- DoneWithFrame	---------------
-    149  f069
-    150  f069							; ---- Overscan (30 scanlines)
-    151  f069							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-    152  f069							; 2280 machine cycles / 64 clocks = 35.625
-    153  f069		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-    154  f06b		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
-    155  f06e
-    156  f06e
-    157  f06e
-    158  f06e
-    159  f06e		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-    160  f070		       85 01		      sta	VBLANK	; turn off the beam
-    161  f072
-    162  f072							; -------- wait ------------------------------------
-    163  f072		       ad 84 02 	      lda	INTIM	; check the timer
-    164  f075		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
-    165  f077							; -------- done ------------------------------------
-    166  f077
-    167  f077		       4c 13 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-    168  f07a
-    169  f07a
-    170  f07a
-    171  f07a
-    172  f07a							; Shift a 16bit value by one place left (e.g. multiply by two)
-    173  f07a		       06 83	   asl16      ASL	params+0	;Shift the LSB
-    174  f07c		       26 84		      ROL	params+1	;Rotate the MSB
-    175  f07e		       60		      rts
-    176  f07f
-    177  f07f
-    178  f07f		       18	   inc16      clc
-    179  f080		       a5 8c		      lda	c16_1+1
-    180  f082		       69 01		      adc	#1
-    181  f084		       85 8c		      sta	c16_1+1
-    182  f086		       90 01		      bcc	.+3
-    183  f088		       e6 8b		      inc	c16_1+0
-    184  f08a							; ok
-    185  f08a		       60		      rts
-    186  f08b
-    187  f08b		       18	   inc24      clc
-    188  f08c		       a5 82		      lda	c24_1+2
-    189  f08e		       69 1f		      adc	#31
-    190  f090		       85 82		      sta	c24_1+2
-    191  f092		       90 0f		      bcc	ok
-    192  f094		       18		      clc
-    193  f095		       a5 81		      lda	c24_1+1
-    194  f097		       69 01		      adc	#1
-    195  f099		       85 81		      sta	c24_1+1
-    196  f09b		       90 06		      bcc	ok
-    197  f09d		       a5 80		      lda	c24_1+0
-    198  f09f		       69 01		      adc	#1
-    199  f0a1		       85 80		      sta	c24_1+0
-    200  f0a3		       60	   ok	      rts
-    201  f0a4
-    202  f0a4
-    203  f0a4
-    204  f0a4				   reverseBits
-    205  f0a4		       aa		      tax
-    206  f0a5		       bd b1 f0 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
-    207  f0a8		       60		      rts
-    208  f0a9
-    209  f0a9				   colors
-    210  f0a9		       36 48 76 b4*	      .byte.b	$36, $48, $76, $b4, $ea, $4c, $8a, $a4	; Player 0-7 colors
-    211  f0b1
-    212  f0b1
-    213  f0b1				   reversedOrderBits
-    214  f0b1		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
-    215  f0c1		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
-    216  f0d1		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
-    217  f0e1		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
-    218  f0f1		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
-    219  f101		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
-    220  f111		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
-    221  f121		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
-    222  f131		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
-    223  f141		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
-    224  f151		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
-    225  f161		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
-    226  f171		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
-    227  f181		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
-    228  f191		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
-    229  f1a1		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
-    230  f1b1		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
-    231  f1c1		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
-    232  f1d1		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
-    233  f1e1		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
-    234  f1f1		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
-    235  f201		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
-    236  f211		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
-    237  f221		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
-    238  f231		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
-    239  f241		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
-    240  f251		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
-    241  f261		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
-    242  f271		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
-    243  f281		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
-    244  f291		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
-    245  f2a1		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
-    246  f2b1
-    247  f2b1
-    248  fffa					      org	$FFFA
-    249  fffa
-    250  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    251  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    252  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    253  10000
-    254  10000
-    255  10000
-    256  10000
+     77  f033		       85 02	   render     sta	WSYNC	; no lo cuento en la snl
+     78  f035
+     79  f035		       a5 a4		      lda	scanline
+     80  f037		       6a		      ror
+     81  f038		       85 08		      sta	COLUPF
+     82  f03a
+     83  f03a
+     84  f03a		       20 5f f0 	      jsr	kernel1
+     85  f03d		       85 0f		      sta	PF2
+     86  f03f		       c6 a4		      dec	scanline	; (2)
+     87  f041
+     88  f041
+     89  f041
+     90  f041		       85 02		      sta	WSYNC
+     91  f043
+     92  f043		       a5 a4		      lda	scanline
+     93  f045		       6a		      ror
+     94  f046		       85 08		      sta	COLUPF
+     95  f048
+     96  f048							; jsr kernel2
+     97  f048		       85 0e		      sta	PF1
+     98  f04a
+     99  f04a
+    100  f04a		       c6 a4		      dec	scanline	; (2)
+    101  f04c		       d0 e5		      bne	render	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+    102  f04e
+    103  f04e							; --------------- DoneWithFrame	---------------
+    104  f04e
+    105  f04e							; ---- Overscan (30 scanlines)
+    106  f04e							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+    107  f04e							; 2280 machine cycles / 64 clocks = 35.625
+    108  f04e		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+    109  f050		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
+    110  f053
+    111  f053
+    112  f053
+    113  f053
+    114  f053		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+    115  f055		       85 01		      sta	VBLANK	; turn off the beam
+    116  f057
+    117  f057							; -------- wait ------------------------------------
+    118  f057		       ad 84 02 	      lda	INTIM	; check the timer
+    119  f05a		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
+    120  f05c							; -------- done ------------------------------------
+    121  f05c
+    122  f05c		       4c 13 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
+    123  f05f
+    124  f05f
+    125  f05f				   kernel1
+    126  f05f
+    127  f05f		       a5 83		      lda	c24_1+1
+    128  f061		       65 a4		      adc	scanline
+    129  f063		       2a		      rol
+    130  f064		       85 a0		      sta	temp
+    131  f066		       a5 83		      lda	c24_1+1
+    132  f068		       2a		      rol
+    133  f069		       45 a0		      eor	temp
+    134  f06b		       85 a0		      sta	temp
+    135  f06d
+    136  f06d		       a5 83		      lda	c24_1+1
+    137  f06f		       6a		      ror
+    138  f070		       6a		      ror
+    139  f071		       6a		      ror
+    140  f072		       6a		      ror
+    141  f073							; ror
+    142  f073		       65 a0		      adc	temp
+    143  f075		       60		      rts
+    144  f076
+    145  f076				   kernel2
+    146  f076
+    147  f076		       a5 82		      lda	c24_1+0
+    148  f078		       65 a4		      adc	scanline
+    149  f07a		       2a		      rol
+    150  f07b		       85 a0		      sta	temp
+    151  f07d		       a5 82		      lda	c24_1+0
+    152  f07f		       2a		      rol
+    153  f080		       45 a0		      eor	temp
+    154  f082
+    155  f082		       60		      rts
+    156  f083
+    157  f083
+    158  f083							; Shift a 16bit value by one place left (e.g. multiply by two)
+    159  f083		       06 85	   asl16      ASL	params+0	;Shift the LSB
+    160  f085		       26 86		      ROL	params+1	;Rotate the MSB
+    161  f087		       60		      rts
+    162  f088
+    163  f088
+    164  f088		       18	   inc16      clc
+    165  f089		       a5 81		      lda	c16_1+1
+    166  f08b		       69 01		      adc	#1
+    167  f08d		       85 81		      sta	c16_1+1
+    168  f08f		       90 01		      bcc	.+3
+    169  f091		       e6 80		      inc	c16_1+0
+    170  f093							; ok
+    171  f093		       60		      rts
+    172  f094
+    173  f094		       18	   inc24      clc
+    174  f095		       a5 84		      lda	c24_1+2
+    175  f097		       69 1f		      adc	#31
+    176  f099		       85 84		      sta	c24_1+2
+    177  f09b		       90 0f		      bcc	ok
+    178  f09d		       18		      clc
+    179  f09e		       a5 83		      lda	c24_1+1
+    180  f0a0		       69 01		      adc	#1
+    181  f0a2		       85 83		      sta	c24_1+1
+    182  f0a4		       90 06		      bcc	ok
+    183  f0a6		       a5 82		      lda	c24_1+0
+    184  f0a8		       69 01		      adc	#1
+    185  f0aa		       85 82		      sta	c24_1+0
+    186  f0ac		       60	   ok	      rts
+    187  f0ad
+    188  f0ad
+    189  f0ad
+    190  f0ad				   reverseBits
+    191  f0ad		       aa		      tax
+    192  f0ae		       bd ba f0 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
+    193  f0b1		       60		      rts
+    194  f0b2
+    195  f0b2				   colors
+    196  f0b2		       36 48 76 b4*	      .byte.b	$36, $48, $76, $b4, $ea, $4c, $8a, $a4	; Player 0-7 colors
+    197  f0ba
+    198  f0ba
+    199  f0ba				   reversedOrderBits
+    200  f0ba		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
+    201  f0ca		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
+    202  f0da		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
+    203  f0ea		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
+    204  f0fa		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
+    205  f10a		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
+    206  f11a		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
+    207  f12a		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
+    208  f13a		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
+    209  f14a		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
+    210  f15a		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
+    211  f16a		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
+    212  f17a		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
+    213  f18a		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
+    214  f19a		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
+    215  f1aa		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
+    216  f1ba		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
+    217  f1ca		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
+    218  f1da		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
+    219  f1ea		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
+    220  f1fa		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
+    221  f20a		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
+    222  f21a		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
+    223  f22a		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
+    224  f23a		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
+    225  f24a		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
+    226  f25a		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
+    227  f26a		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
+    228  f27a		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
+    229  f28a		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
+    230  f29a		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
+    231  f2aa		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
+    232  f2ba
+    233  f2ba
+    234  fffa					      org	$FFFA
+    235  fffa
+    236  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    237  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    238  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
+    239  10000
+    240  10000
+    241  10000
+    242  10000
