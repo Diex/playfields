@@ -68,16 +68,13 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 ; jsr inc24 ; inc24 es muy larga y flickea
                 jsr inc16                
                 
-                sta WSYNC           ; primera linea visible
-                
-          
-        
-                
+                sta WSYNC           ; primera linea visible                
                 
 render:		    sta WSYNC           ; no lo cuento en la snl  
                 
                 lda scanline
                 ror                
+                ror
                 sta COLUPF
           
 
@@ -93,7 +90,7 @@ render:		    sta WSYNC           ; no lo cuento en la snl
                 ror                                             
                 sta COLUPF
           
-                ; jsr kernel2
+                jsr kernel2
                 sta PF1
             
                 
@@ -124,19 +121,16 @@ render:		    sta WSYNC           ; no lo cuento en la snl
 
 kernel1:
                 
-                lda c24_1+1
+                lda c16_1+1
                 adc scanline
                 rol
                 sta temp
-                lda c24_1+1
+                lda c16_1+1
                 rol
                 eor temp
                 sta temp
                 
-                lda c24_1+1
-                ror
-                ror
-                ror
+                lda c16_1+1
                 ror
                 ; ror
                 adc temp                
@@ -144,11 +138,12 @@ kernel1:
 
 kernel2:
 
-                lda c24_1+0    
+                lda c16_1+0    
                 adc scanline
                 rol
+                eor temp
                 sta temp
-                lda c24_1+0
+                lda c16_1+0
                 rol
                 eor temp
                 
