@@ -7,7 +7,7 @@
      
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-SPEED           equ 4                             
+SPEED           equ 8                             
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
@@ -18,7 +18,7 @@ c16_1           ds 2
 params          ds 8
 plfys           ds 3
 revbits         ds 2
-
+ghostColPtr     ds 2                ; Pointer to which color palette to use
 
                 seg.u	vars		
                 org	$A0             
@@ -135,8 +135,33 @@ render:		    sta WSYNC           ; no lo cuento en la snl
                 lda INTIM           ; check the timer          
                 bne .-3             ; 2 bytes del opcode (bne) + 1 byte operando                                                    
 ; -------- done ------------------------------------
+
+                ; Read button input
+                ldy #0               ; color index set to default yellow
+                bit INPT4            ; check D7 of INPT4
+                bmi button_nopress   ; branch if minus. D7 will me 0 is button is pressed
+                ldy #1
+button_nopress: 
+                lda (ghostColPtr),y
+                sta COLUBK          ; set the P0 color                
+           
+switch_color:                
+                lda ghost_pColLSB
+                sta ghostColPtr     ; (3)
+                lda ghost_pColMSB
+                sta ghostColPtr+1   ; (3)
+
+                ; ldy #0
+                ; lda (ghostColPtr),y
+                ; sta COLUBK
+
+                ; ldy #3
+                ; lda (ghostColPtr),y
+                ; sta COLUPF
+
                 
                 jmp nextframe       ; (3) jump back up to start the next frame
+
 
 
 kernel1:
@@ -208,8 +233,25 @@ reverseBits:
 
 colors:
                     .byte $36, $48, $76, $b4, $ea, $4c, $8a, $a4  ; Player 0-7 colors
-                    
-                
+
+
+
+; ghost_bw:       .byte #$08          ; lightest gray
+;                 .byte #$02          ; darker gray
+;                 .byte #$0C          ; mid gray
+;                 .byte #$0E          ; light gray
+
+ghost_color:    .byte #$1E          ; Bright Yellow
+                .byte #$42          ; Dark Red
+                .byte #$98          ; Mid Blue
+                .byte #$AE          ; Bright Blue         
+
+ghost_pColLSB:  .byte <ghost_color  ; LSB
+                ; .byte <ghost_bw
+
+ghost_pColMSB:  .byte >ghost_color  ; MSB
+                ; .byte >ghost_bw
+
 reversedOrderBits
             .word $00, $80, $40, $c0, $20, $a0, $60, $e0
             .word $10, $90, $50, $d0, $30, $b0, $70, $f0

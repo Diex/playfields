@@ -2,16 +2,17 @@
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f01d              (R )
-asl16                    f09c                  
+asl16                    f0b2                  
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
+button_nopress           f07e              (R )
 c16_1                    0080              (R )
-colors                   f0b2                  
-COLUBK                   0009                  
+colors                   f0c8                  
+COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
 COLUPF                   0008              (R )
@@ -29,6 +30,10 @@ ENABL                    001f
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   00a5                  
+ghost_color              f0d0              (R )
+ghost_pColLSB            f0d4              (R )
+ghost_pColMSB            f0d5              (R )
+ghostColPtr              008f              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -38,16 +43,16 @@ HMM1                     0023
 HMOVE                    002a                  
 HMP0                     0020                  
 HMP1                     0021                  
-inc16                    f0a1              (R )
+inc16                    f0b7              (R )
 INPT0                    0008                  
 INPT1                    0009                  
 INPT2                    000a                  
 INPT3                    000b                  
-INPT4                    000c                  
+INPT4                    000c              (R )
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel1                  f079              (R )
-kernel2                  f08d              (R )
+kernel1                  f08f              (R )
+kernel2                  f0a3              (R )
 mod_1                    00a8              (R )
 nextframe                f01b              (R )
 NUSIZ0                   0004                  
@@ -70,15 +75,16 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 revbits                  008d                  
-reverseBits              f0ad                  
-reversedOrderBits        f0ba              (R )
+reverseBits              f0c3                  
+reversedOrderBits        f0d6              (R )
 RSYNC                    0003                  
 scanline                 00a4              (R )
-SPEED                    0004              (R )
+SPEED                    0008              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
 SWCHB                    0282                  
+switch_color             f082                  
 T1024T                   0297                  
 t_                       00a6                  
 temp                     00a0              (R )
