@@ -1,0 +1,114 @@
+--- Symbol List (sorted by symbol)
+0.FREE_BYTES             0000                  
+1.CLEAR_STACK            f006              (R )
+2.VSLP1                  f01d              (R )
+asl16                    f0bc                  
+AUDC0                    0015              (R )
+AUDC1                    0016                  
+AUDF0                    0017              (R )
+AUDF1                    0018                  
+AUDV0                    0019              (R )
+AUDV1                    001a                  
+button_nopress           f088              (R )
+c16_1                    0080              (R )
+colors                   f104                  
+COLUBK                   0009              (R )
+COLUP0                   0006                  
+COLUP1                   0007                  
+COLUPF                   0008              (R )
+CTRLPF                   000a              (R )
+CXBLPF                   0006                  
+CXCLR                    002c                  
+CXM0FB                   0004                  
+CXM0P                    0000                  
+CXM1FB                   0005                  
+CXM1P                    0001                  
+CXP0FB                   0002                  
+CXP1FB                   0003                  
+CXPPMM                   0007                  
+ENABL                    001f                  
+ENAM0                    001d                  
+ENAM1                    001e                  
+fcount                   00a5                  
+ghost_color              f10c              (R )
+ghost_pColLSB            f110              (R )
+ghost_pColMSB            f111              (R )
+ghostColPtr              008f              (R )
+GRP0                     001b                  
+GRP1                     001c                  
+HMBL                     0024                  
+HMCLR                    002b                  
+HMM0                     0022                  
+HMM1                     0023                  
+HMOVE                    002a                  
+HMP0                     0020                  
+HMP1                     0021                  
+inc16                    f0c1              (R )
+INPT0                    0008                  
+INPT1                    0009                  
+INPT2                    000a                  
+INPT3                    000b                  
+INPT4                    000c              (R )
+INPT5                    000d                  
+INTIM                    0284              (R )
+kernel1                  f099              (R )
+kernel2                  f0ad              (R )
+mod_1                    00a8              (R )
+nextframe                f01b              (R )
+NUSIZ0                   0004                  
+NUSIZ1                   0005                  
+params                   0082              (R )
+PF0                      000d                  
+PF1                      000e              (R )
+PF2                      000f              (R )
+PF_H                     00c0              (R )
+plfys                    008a                  
+REFP0                    000b                  
+REFP1                    000c                  
+render                   f046              (R )
+RESBL                    0014                  
+reset                    f000              (R )
+RESM0                    0012                  
+RESM1                    0013                  
+RESMP0                   0028                  
+RESMP1                   0029                  
+RESP0                    0010                  
+RESP1                    0011                  
+revbits                  008d                  
+RSYNC                    0003                  
+scanline                 00a4              (R )
+snd_ch                   f0e4              (R )
+snd_cont                 f0f0              (R )
+snd_done                 f0f0              (R )
+snd_on                   0091              (R )
+snd_play                 f0cd              (R )
+snd_process              f0e2              (R )
+sndbank_len              f100              (R )
+sndbank_pitch            f0fc              (R )
+sndbank_type             f0f4              (R )
+sndbank_vol              f0f8              (R )
+SPEED                    0008              (R )
+SWACNT                   0281                  
+SWBCNT                   0283                  
+SWCHA                    0280                  
+SWCHB                    0282                  
+switch_color             f08c                  
+T1024T                   0297                  
+t_                       00a6                  
+temp                     00a0              (R )
+TIA_BASE_ADDRESS         0000              (R )
+TIA_BASE_READ_ADDRESS    0000              (R )
+TIA_BASE_WRITE_ADDRESS   0000              (R )
+TIM1T                    0294                  
+TIM64T                   0296              (R )
+TIM8T                    0295                  
+TIMINT                   0285                  
+VBLANK                   0001              (R )
+VDELBL                   0027                  
+VDELP0                   0025                  
+VDELP1                   0026                  
+VERSION_MACRO            006a                  
+VERSION_VCS              0069                  
+VSYNC                    0000              (R )
+WSYNC                    0002              (R )
+--- End of Symbol List.
