@@ -6830,3 +6830,6 @@ Start Address: 0000
 Write complete. Check with Read/Compare
 
 Select Read, Write, Verify, Erase, BlankCheck [R/W/V/E/B]
+eeprom programmer v1.1
+
+Select Read, Write, Verify, Erase, BlankCheck [R/W/V/E/B]
