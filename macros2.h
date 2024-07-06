@@ -41,6 +41,36 @@ _DONE      EQU *
       ENDIF
       ENDM
 
+      
+
+
+; Calculate the 16 bit product of two 16 bit
+; unsigned numbers. Any overflow during the
+; calculation is lost. The number at location
+; VLA is destroyed.
+;
+; On exit: A = ??, X = $FF, Y is unchanged.
+
+  MAC _MUL16      ;MACRO VLA,VLB,RES
+    _CLR16 {3}
+    LDX #16
+._LOOP
+    _ASL16 {3},{3}
+    _ASL16 {1},{1}
+    BCC ._NEXT
+    _ADD16 {2},{3},{3}
+._NEXT
+    DEX
+    BPL ._LOOP
+  ; Count cycles for macro calls
+  ; _CLR16: 6 cycles
+  ; _ASL16: 6 cycles
+  ; _ASL16: 6 cycles
+  ; _ADD16: 12 cycles
+  ; Total cycles: 30 cycles
+  ENDM
+
+
 ;------------------------------------------------
 ; Shift Operations
 ;------------------------------------------------
@@ -200,5 +230,28 @@ _DONE      EQU *
        STA {3}+1
       ELSE
        _CLR16 {3}
+      ENDIF
+      ENDM
+
+
+
+
+; Calculate the logical AND of the two 16 bit
+; values at locations VLA and VLB. The result is
+; stored in location RES. If VLA and VLB are the
+; same the macro expands to a _XFR16.
+;
+; On exit: A = ??, X & Y are unchanged.
+
+      MAC _AND16      ;MACRO VLA,VLB,RES
+      IF {1} != {2}
+       LDA {1}+0
+       AND {2}+0
+       STA {3}+0
+       LDA {1}+1
+       AND {2}+1
+       STA {3}+1
+      ELSE
+       _XFR16 {1},{3}
       ENDIF
       ENDM

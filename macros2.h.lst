@@ -1,0 +1,258 @@
+------- FILE macros2.h LEVEL 1 PASS 1
+      1  0000					      MAC	_clr16
+      2  0000					      LDA	#0
+      3  0000					      STA	{1}+0
+      4  0000					      STA	{1}+1
+      5  0000					      ENDM
+      6  0000 ????
+      7  0000 ????
+      8  0000 ????						;------------------------------------------------
+      9  0000 ????						; Arithmetic Operations
+     10  0000 ????						;------------------------------------------------
+     11  0000 ????
+     12  0000 ????						; Increment the 16 bit value at location MEM
+     13  0000 ????						; by one.
+     14  0000 ????						;
+     15  0000 ????						; On exit: A, X & Y are unchanged.
+     16  0000 ????
+     17  0000 ????				      MAC	_inc16
+     18  0000 ????				      INC	{1}+0
+     19  0000 ????				      BNE	_DONE
+     20  0000 ????				      INC	{1}+1
+     21  0000 ????			   _DONE      EQU	*
+     22  0000 ????				      ENDM		;MACRO MEM
+     23  0000 ????
+     24  0000 ????						; Add two 16 bit numbers together and store the
+     25  0000 ????						; result in another memory location. RES may be
+     26  0000 ????						; the same as either VLA or VLB.
+     27  0000 ????						;
+     28  0000 ????						; On exit: A = ??, X & Y are unchanged.
+     29  0000 ????
+     30  0000 ????				      MAC	_add16
+     31  0000 ????				      IF	{1} != {2}
+     32  0000 ????				      CLC
+     33  0000 ????				      LDA	{1}+0
+     34  0000 ????				      ADC	{2}+0
+     35  0000 ????				      STA	{3}+0
+     36  0000 ????				      LDA	{1}+1
+     37  0000 ????				      ADC	{2}+1
+     38  0000 ????				      STA	{3}+1
+     39  0000 ????				      ELSE
+     40  0000 ????				      _ASL16	{1},{3}
+     41  0000 ????				      ENDIF
+     42  0000 ????				      ENDM		;MACRO VLA,VLB,RES
+     43  0000 ????
+     44  0000 ????
+     45  0000 ????
+     46  0000 ????
+     47  0000 ????						; Calculate the 16 bit product of two 16 bit
+     48  0000 ????						; unsigned numbers. Any overflow during the
+     49  0000 ????						; calculation is lost. The number at location
+     50  0000 ????						; VLA is destroyed.
+     51  0000 ????						;
+     52  0000 ????						; On exit: A = ??, X = $FF, Y is unchanged.
+     53  0000 ????
+     54  0000 ????				      MAC	_mul16
+     55  0000 ????				      _CLR16	{3}
+     56  0000 ????				      LDX	#16
+     57  0000 ????			   ._LOOP
+     58  0000 ????				      _ASL16	{3},{3}
+     59  0000 ????				      _ASL16	{1},{1}
+     60  0000 ????				      BCC	._NEXT
+     61  0000 ????				      _ADD16	{2},{3},{3}
+     62  0000 ????			   ._NEXT
+     63  0000 ????				      DEX
+     64  0000 ????				      BPL	._LOOP
+     65  0000 ????						; Count cycles for macro calls
+     66  0000 ????						; _CLR16: 6 cycles
+     67  0000 ????						; _ASL16: 6 cycles
+     68  0000 ????						; _ASL16: 6 cycles
+     69  0000 ????						; _ADD16: 12 cycles
+     70  0000 ????						; Total cycles: 30 cycles
+     71  0000 ????				      ENDM		;MACRO VLA,VLB,RES
+     72  0000 ????
+     73  0000 ????
+     74  0000 ????						;------------------------------------------------
+     75  0000 ????						; Shift Operations
+     76  0000 ????						;------------------------------------------------
+     77  0000 ????
+     78  0000 ????						; Perform an arithmetic shift left on the 16 bit
+     79  0000 ????						; number at location VLA and store the result at
+     80  0000 ????						; location RES. If VLA and RES are the same then
+     81  0000 ????						; the operation is applied directly to the memory
+     82  0000 ????						; otherwise it is done in the accumulator.
+     83  0000 ????						;
+     84  0000 ????						; On exit: A = ??, X & Y are unchanged.
+     85  0000 ????
+     86  0000 ????				      MAC	_asl16
+     87  0000 ????				      IF	{1} != {2}
+     88  0000 ????				      LDA	{1}+0
+     89  0000 ????				      ASL
+     90  0000 ????				      STA	{2}+0
+     91  0000 ????				      LDA	{1}+1
+     92  0000 ????				      ROL
+     93  0000 ????				      STA	{2}+1
+     94  0000 ????				      ELSE
+     95  0000 ????				      ASL	{1}+0
+     96  0000 ????				      ROL	{1}+1
+     97  0000 ????				      ENDIF
+     98  0000 ????				      ENDM		;MACRO VLA,RES
+     99  0000 ????
+    100  0000 ????						; Perform a right rotation on the 16 bit number
+    101  0000 ????						; at location VLA and store the result at
+    102  0000 ????						; location RES. If VLA and RES are the same then
+    103  0000 ????						; the operation is applied directly to the memory
+    104  0000 ????						; otherwise it is done in the accumulator.
+    105  0000 ????						;
+    106  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    107  0000 ????
+    108  0000 ????				      MAC	_ror16
+    109  0000 ????				      IF	{1} != {2}
+    110  0000 ????				      LDA	{1}+1
+    111  0000 ????				      ROR
+    112  0000 ????				      STA	{2}+1
+    113  0000 ????				      LDA	{1}+0
+    114  0000 ????				      ROR
+    115  0000 ????				      STA	{2}+0
+    116  0000 ????				      ELSE
+    117  0000 ????				      ROR	{1}+1
+    118  0000 ????				      ROR	{1}+0
+    119  0000 ????				      ENDIF
+    120  0000 ????				      ENDM
+    121  0000 ????
+    122  0000 ????						; Perform a left rotation on the 16 bit number at
+    123  0000 ????						; location VLA and store the result at location
+    124  0000 ????						; RES. If VLA and RES are the same then the
+    125  0000 ????						; operation is applied directly to the memory,
+    126  0000 ????						; otherwise it is done in the accumulator.
+    127  0000 ????						;
+    128  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    129  0000 ????
+    130  0000 ????				      MAC	_rol16
+    131  0000 ????				      IF	{1} != {2}
+    132  0000 ????				      LDA	{1}+0
+    133  0000 ????				      ROL
+    134  0000 ????				      STA	{2}+0
+    135  0000 ????				      LDA	{1}+1
+    136  0000 ????				      ROL
+    137  0000 ????				      STA	{2}+1
+    138  0000 ????				      ELSE
+    139  0000 ????				      ROL	{1}+0
+    140  0000 ????				      ROL	{1}+1
+    141  0000 ????				      ENDIF
+    142  0000 ????				      ENDM		;MACRO VLA,RES
+    143  0000 ????
+    144  0000 ????						; Calculate the logical OR of the two 16 bit
+    145  0000 ????						; values at locations VLA and VLB. The result is
+    146  0000 ????						; stored in location RES. If VLA and VLB are the
+    147  0000 ????						; same the macro expands to a _XFR16.
+    148  0000 ????						;
+    149  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    150  0000 ????
+    151  0000 ????				      MAC	_ora16
+    152  0000 ????				      IF	{1} != {2}
+    153  0000 ????				      LDA	{1}+0
+    154  0000 ????				      ORA	{2}+0
+    155  0000 ????				      STA	{3}+0
+    156  0000 ????				      LDA	{1}+1
+    157  0000 ????				      ORA	{2}+1
+    158  0000 ????				      STA	{3}+1
+    159  0000 ????				      ELSE
+    160  0000 ????				      _XFR16	{1},{3}
+    161  0000 ????				      ENDIF
+    162  0000 ????				      ENDM		;MACRO VLA,VLB,RES
+    163  0000 ????
+    164  0000 ????
+    165  0000 ????
+    166  0000 ????						; Transfer 2 bytes of memory from one location to
+    167  0000 ????						; another using the accumulator. The order in
+    168  0000 ????						; which the bytes are moved depends on the
+    169  0000 ????						; relative positions of SRC and DST. If SRC and
+    170  0000 ????						; DST are the same then no code is generated.
+    171  0000 ????						;
+    172  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    173  0000 ????
+    174  0000 ????				      MAC	_xfr16
+    175  0000 ????				      IF	{1} != {2}
+    176  0000 ????				      IF	{1} > {2}
+    177  0000 ????				      LDA	{1}+0
+    178  0000 ????				      STA	{2}+0
+    179  0000 ????				      LDA	{1}+1
+    180  0000 ????				      STA	{2}+1
+    181  0000 ????				      ELSE
+    182  0000 ????				      LDA	{1}+1
+    183  0000 ????				      STA	{2}+1
+    184  0000 ????				      LDA	{1}+0
+    185  0000 ????				      STA	{2}+0
+    186  0000 ????				      ENDIF
+    187  0000 ????				      ENDIF
+    188  0000 ????				      ENDM		;MACRO SRC,DST
+    189  0000 ????
+    190  0000 ????
+    191  0000 ????						; Calculate the exclusive OR of a 16 value at
+    192  0000 ????						; location VLA with a constant value and
+    193  0000 ????						; store the result at location RES.
+    194  0000 ????						;
+    195  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    196  0000 ????
+    197  0000 ????				      MAC	_eor16i
+    198  0000 ????				      LDA	{1}+0
+    199  0000 ????				      EOR	<{2}
+    200  0000 ????				      STA	{3}+0
+    201  0000 ????				      LDA	{1}+1
+    202  0000 ????				      EOR	>{2}
+    203  0000 ????				      STA	{3}+1
+    204  0000 ????				      ENDM		;MACRO VLA,NUM,RES
+    205  0000 ????
+    206  0000 ????				      MAC	_revbits
+    207  0000 ????				      ldx	{1}+0
+    208  0000 ????				      lda	reversedOrderBits,x	; Load the value to be reversed from memory
+    209  0000 ????				      sta	{1}+0
+    210  0000 ????				      ldx	{1}+1
+    211  0000 ????				      lda	reversedOrderBits,x	; Load the value to be reversed from memory
+    212  0000 ????				      sta	{1}+1
+    213  0000 ????				      ENDM
+    214  0000 ????
+    215  0000 ????
+    216  0000 ????						; Calculate the exclusive OR of the two 16 bit
+    217  0000 ????						; values at locations VLA and VLB. The result is
+    218  0000 ????						; stored in location RES. If VLA and VLB are the
+    219  0000 ????						; same the macro expands to a _CLR16.
+    220  0000 ????						;
+    221  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    222  0000 ????
+    223  0000 ????				      MAC	_eor16
+    224  0000 ????				      IF	{1} != {2}
+    225  0000 ????				      LDA	{1}+0
+    226  0000 ????				      EOR	{2}+0
+    227  0000 ????				      STA	{3}+0
+    228  0000 ????				      LDA	{1}+1
+    229  0000 ????				      EOR	{2}+1
+    230  0000 ????				      STA	{3}+1
+    231  0000 ????				      ELSE
+    232  0000 ????				      _CLR16	{3}
+    233  0000 ????				      ENDIF
+    234  0000 ????				      ENDM		;MACRO VLA,VLB,RES
+    235  0000 ????
+    236  0000 ????
+    237  0000 ????
+    238  0000 ????
+    239  0000 ????						; Calculate the logical AND of the two 16 bit
+    240  0000 ????						; values at locations VLA and VLB. The result is
+    241  0000 ????						; stored in location RES. If VLA and VLB are the
+    242  0000 ????						; same the macro expands to a _XFR16.
+    243  0000 ????						;
+    244  0000 ????						; On exit: A = ??, X & Y are unchanged.
+    245  0000 ????
+    246  0000 ????				      MAC	_and16
+    247  0000 ????				      IF	{1} != {2}
+    248  0000 ????				      LDA	{1}+0
+    249  0000 ????				      AND	{2}+0
+    250  0000 ????				      STA	{3}+0
+    251  0000 ????				      LDA	{1}+1
+    252  0000 ????				      AND	{2}+1
+    253  0000 ????				      STA	{3}+1
+    254  0000 ????				      ELSE
+    255  0000 ????				      _XFR16	{1},{3}
+    256  0000 ????				      ENDIF
+    257  0000 ????				      ENDM		;MACRO VLA,VLB,RES
