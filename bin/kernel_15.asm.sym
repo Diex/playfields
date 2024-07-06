@@ -91,7 +91,7 @@ sndbank_len              f0e8              (R )
 sndbank_pitch            f0e4              (R )
 sndbank_type             f0dc              (R )
 sndbank_vol              f0e0              (R )
-SPEED                    0001              (R )
+SPEED                    0005              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  

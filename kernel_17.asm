@@ -14,18 +14,24 @@ SPEED           equ 1
 
                                     ; up to 9F
 c16_1           ds 2
-; c24_1           ds 3
 
-params          ds 8
-plfys           ds 3
-revbits         ds 2
+
 ghostColPtr     ds 2                ; Pointer to which color palette to use
+p0_x            ds 1
+p0_y            ds 1
+selectMode      ds 1
+selDebounceOn   ds 1
+selDebounceTm   ds 1
+
+; plfys           ds 3
+; revbits         ds 2
+
 snd_on          ds 2            ; 1 byte per audio channel - greater than 0 if sound is playing
 
                 seg.u	vars		
                 org	$A0             
 
-temp            ds 4                
+temp            ds 2                
 scanline        ds 1                ; 1 byte - current scanline
 fcount          ds 1                ; 1 byte - frame counter
 t_              ds 2                ; 1 byte - temp
@@ -43,10 +49,10 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #$1E
                 sta COLUPF          
 
-                lda #$55          ;$80  10000000
+                lda #$0          ;$80  10000000
                 sta c16_1
 
-                lda #$55          ;$AA     ; $55  10101010
+                lda #$80          ;$AA     ; $55  10101010
                 sta c16_1+1
 
                 lda SPEED
@@ -60,11 +66,12 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta TIM64T          ; Set a count of 43 with 64-clock interval
 ; -------- do stuff  -------------------------------
 
-                ; jsr inc16      
-                ; ASL c16_1+0       ;Shift the LSB
-                ; ROL c16_1+1       ;Rotate the MSB
-          
-                ; process the sound channels to turn off volume when counter runs out
+                dec mod_1
+                bne .cont
+                lda SPEED
+                sta mod_1
+                _INC16 c16_1  
+.cont:
                 jsr snd_process
 
                 
@@ -78,32 +85,46 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta VBLANK                
                 
                 ldx #PF_H
-                stx scanline                
-                
-                
+                stx scanline                                
                 sta WSYNC           ; primera linea visible                
                 
-          
-render:		    sta WSYNC           ; no lo cuento en la snl  
+                ; sample = t * (( (t>>12) | (t>>8)) &(63&(t>>4)));
+render:		   
                 
                 
+kernel1:        sta WSYNC           ; no lo cuento en la snl  
 
-                jsr kernel2
+                _ADD16 c16_1, scanline, temp
+                _EOR16 temp, scanline, temp
+                
+                
+                lda temp+0    
                 sta PF1         
+               
+
+
                 dec scanline                 ; (2)
 
 
-
-
                 sta WSYNC
+                dec scanline                 ; (2)
+                
+                
 
-                jsr kernel1
-                jsr reverseBits 
+kernel2:        sta WSYNC
+                _ADD16 c16_1, scanline, temp
+
+                _REVBITS temp
+                lda temp+0           
+                
                 
                 sta PF2
 
                 dec scanline                 ; (2)
             
+                sta WSYNC
+                dec scanline                 ; (2)
+                
                 bne render          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
                 
                 
@@ -115,7 +136,7 @@ render:		    sta WSYNC           ; no lo cuento en la snl
                 lda #35             ; We'll round down, and clean up the remaining cycles with a WSYNC
                 sta TIM64T          ; Set a count of 35 with 64-clock interval
 
-                
+                inc fcount
                
             
                 lda #$2     	    ; set D1 = 1 to initiate VBLANK
@@ -126,77 +147,34 @@ render:		    sta WSYNC           ; no lo cuento en la snl
                 bne .-3             ; 2 bytes del opcode (bne) + 1 byte operando                                                    
 ; -------- done ------------------------------------
 
-                ; Read button input
-                ldy #1               ; color index set to default yellow
-                bit INPT4            ; check D7 of INPT4
-                bmi button_nopress   ; branch if minus. D7 will me 0 is button is pressed
-                ldy #2
+;                 ; Read button input
+;                 ldy #1               ; color index set to default yellow
+;                 bit INPT4            ; check D7 of INPT4
+;                 bmi button_nopress   ; branch if minus. D7 will me 0 is button is pressed
+;                 ldy #2
                 
-                ldx #0                  ; channel 0
-                ldy #0                  ; sound parameter index from sndbank_*
-                jsr snd_play            ; call the subroutine to load the audio registers
-                _CLR16 c16_1
-button_nopress: 
-                lda (ghostColPtr),y
-                sta COLUBK          ; set the P0 color                
+;                 ldx #0                  ; channel 0
+;                 ldy #0                  ; sound parameter index from sndbank_*
+;                 jsr snd_play            ; call the subroutine to load the audio registers
+;                 _CLR16 c16_1
+; button_nopress: 
+;                 lda (ghostColPtr),y
+;                 sta COLUBK          ; set the P0 color                
            
-switch_color:                
-                lda ghost_pColLSB
-                sta ghostColPtr     ; (3)
-                lda ghost_pColMSB
-                sta ghostColPtr+1   ; (3)
-
+; switch_color:                
+;                 lda ghost_pColLSB
+;                 sta ghostColPtr     ; (3)
+;                 lda ghost_pColMSB
+;                 sta ghostColPtr+1   ; (3)
+                ; jmp checkInput
                 jmp nextframe       ; (3) jump back up to start the next frame
 
                 ; --- END OF FRAME -------
 
 
-kernel1:
-                
-                lda c16_1+1
- 
-                sta temp
-                
-                           
-                rts
-
-kernel2:
-
-                lda c16_1+0    
-                
-                sta temp
-            
-                
-                rts
 
 
-            ; Shift a 16bit value by one place left (e.g. multiply by two)
-asl16       ASL params+0       ;Shift the LSB
-            ROL params+1       ;Rotate the MSB
-            rts
-
-ror16       lsr
-            bcc *+2   ; or *+3 for 16-bit mode
-            ora #$80  ; or #$8000 for 16-bit mode            
-            rts
-
-rol16       cmp #$80
-            rol
-            rts
-
-
-inc16	        clc		
-                lda c16_1+1
-                adc #1
-                sta c16_1+1
-                bcc .+4             
-                inc c16_1+0
-                rts
-
-reverseBits:
-                tax
-                lda reversedOrderBits,x      ; Load the value to be reversed from memory
-                rts        
+    
 
 ; cues a sound to play. sets audio registers based on table lookup sndbank.
 ; parameters: x = channel (0|1), y = sound to play
@@ -227,6 +205,140 @@ snd_cont
         dex                     ; do it again for channel 0
         beq snd_ch              
         rts
+
+
+
+checkInput:     lda #%00000001      ; (2) read reset input
+                bit SWCHB
+                bne switch_noreset
+                jmp reset
+switch_noreset: 
+    
+; Game Select
+switch_select_chkbounced:
+                lda selDebounceOn   ; (2)
+                bne switch_select_decrease   ; if debounce already on then branch out
+
+                lda #%00000010
+                bit SWCHB
+                bne switch_select_end
+
+                lda #1
+                sta selDebounceOn
+                lda #40
+                sta selDebounceTm
+
+                asl selectMode
+                bcc switch_select_solid
+                inc selectMode
+                
+switch_select_stripped: 
+                lda #%10101010
+                sta PF0
+                sta PF2
+                lda #%01010101
+                sta PF1
+                jmp switch_select_end
+
+switch_select_solid:
+                lda #0
+                sta PF0
+                sta PF1
+                sta PF2
+
+switch_select_decrease:
+                dec selDebounceTm
+                bne switch_select_end
+                lda #0
+                sta selDebounceOn
+switch_select_end:
+
+
+; B/W input
+                ldx #0
+                lda #%00001000
+                bit SWCHB
+                bne switch_color
+                ldx #1
+switch_color:                
+                lda ghost_pColLSB,x ; (5)
+                sta ghostColPtr     ; (3)
+                lda ghost_pColMSB,x ; (5)
+                sta ghostColPtr+1   ; (3)
+
+                ldy #2
+                lda (ghostColPtr),y
+                sta COLUBK
+
+                ldy #3
+                lda (ghostColPtr),y
+                sta COLUPF
+
+; Player 0 Difficulty
+                ldx #0
+                lda #%01000000
+                bit SWCHB
+                bne switch_P0Diff1
+switch_P0Diff2: ; Difficulty 2
+switch_P0Diff1: ; Difficulty 1       
+
+; Player 1 Difficulty
+                ldx #0
+                lda #%10000000
+                bit SWCHB
+                bne switch_P1Diff1
+switch_P1Diff2: ; Difficulty 2
+switch_P1Diff1: ; Difficulty 1       
+
+; Read button input
+                ldy #0               ; color index set to default yellow
+                bit INPT4            ; check D7 of INPT4
+                bmi button_nopress   ; branch if minus. D7 will me 0 is button is pressed
+                ldy #1
+button_nopress: 
+                lda (ghostColPtr),y
+                sta COLUP0          ; set the P0 color                
+
+; read direction input
+                ldx p0_x
+                lda #%10000000      ; check for right movement
+                bit SWCHA
+                bne pos_noright
+                cpx #152
+                bcs pos_noright
+                inx
+                lda #%00001000
+                sta REFP0                
+pos_noright                
+                lda #%01000000      ; check left movement
+                bit SWCHA
+                bne pos_noleft
+                cpx #1
+                bcc pos_noleft
+                dex
+                lda #0
+                sta REFP0                
+pos_noleft:
+                stx p0_x
+
+                ldx p0_y
+                lda #%00100000                
+                bit SWCHA
+                bne pos_nodown
+                cpx #74
+                bcc pos_nodown
+                dex
+pos_nodown:
+                lda #%00010000                
+                bit SWCHA
+                bne pos_noup
+                cpx #255
+                bcs pos_noup
+                inx
+pos_noup:
+                stx p0_y
+
+                rts
 
 
 ; define sounds, bounce, reset, backward, forward

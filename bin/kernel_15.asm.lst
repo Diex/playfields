@@ -375,7 +375,7 @@
       7  0000 ????
       8  0000 ????						; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
       9  0000 ????	       00 c0	   PF_H       equ	192	; playfield height
-     10  0000 ????	       00 01	   SPEED      equ	1
+     10  0000 ????	       00 05	   SPEED      equ	5
      11 U0093 ????				      seg.u	temp	; uninitialized segment
      12 U0080					      org	$80	; origin set at base of ram
      13 U0080
@@ -424,7 +424,7 @@
      45  f013		       a9 02		      lda	#$02
      46  f015		       85 80		      sta	c16_1+0
      47  f017
-     48  f017		       a5 01		      lda	SPEED
+     48  f017		       a5 05		      lda	SPEED
      49  f019		       85 a8		      sta	mod_1
      50  f01b
       0  f01b				   nextframe  VERTICAL_SYNC		; output: a = 0; 3 scanlines
@@ -442,7 +442,7 @@
      58  f029
      59  f029		       c6 a8		      dec	mod_1
      60  f02b		       d0 08		      bne	.+10
-     61  f02d		       a5 01		      lda	SPEED
+     61  f02d		       a5 05		      lda	SPEED
      62  f02f		       85 a8		      sta	mod_1
      63  f031		       20 a4 f0 	      jsr	inc16
      64  f034

@@ -1,19 +1,21 @@
 --- Symbol List (sorted by symbol)
+0.cont                   f03b              (R )
 0.FREE_BYTES             0000                  
 1.CLEAR_STACK            f006              (R )
 2.VSLP1                  f021              (R )
-asl16                    f094                  
+_DONE                    f03b                  
 AUDC0                    0015              (R )
 AUDC1                    0016                  
 AUDF0                    0017              (R )
 AUDF1                    0018                  
 AUDV0                    0019              (R )
 AUDV1                    001a                  
-button_nopress           f079              (R )
+button_nopress           f150              (R )
 c16_1                    0080              (R )
-colors                   f0eb                  
+checkInput               f0d5                  
+colors                   f1a5                  
 COLUBK                   0009              (R )
-COLUP0                   0006                  
+COLUP0                   0006              (R )
 COLUP1                   0007                  
 COLUPF                   0008              (R )
 CTRLPF                   000a              (R )
@@ -29,11 +31,11 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-fcount                   00a5                  
-ghost_color              f0f3              (R )
-ghost_pColLSB            f0f7              (R )
-ghost_pColMSB            f0f8              (R )
-ghostColPtr              008f              (R )
+fcount                   00a3              (R )
+ghost_color              f1ad              (R )
+ghost_pColLSB            f1b1              (R )
+ghost_pColMSB            f1b2              (R )
+ghostColPtr              0082              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -43,7 +45,6 @@ HMM1                     0023
 HMOVE                    002a                  
 HMP0                     0020                  
 HMP1                     0021                  
-inc16                    f0a3                  
 INPT0                    0008                  
 INPT1                    0009                  
 INPT2                    000a                  
@@ -51,21 +52,25 @@ INPT3                    000b
 INPT4                    000c              (R )
 INPT5                    000d                  
 INTIM                    0284              (R )
-kernel1                  f08a              (R )
-kernel2                  f08f              (R )
-mod_1                    00a8              (R )
+kernel1                  f04d                  
+kernel2                  f072                  
+mod_1                    00a6              (R )
 nextframe                f01f              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-params                   0082              (R )
-PF0                      000d                  
+p0_x                     0084              (R )
+p0_y                     0085              (R )
+PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
-plfys                    008a                  
-REFP0                    000b                  
+pos_nodown               f186              (R )
+pos_noleft               f176              (R )
+pos_noright              f166              (R )
+pos_noup                 f192              (R )
+REFP0                    000b              (R )
 REFP1                    000c                  
-render                   f03f              (R )
+render                   f04d              (R )
 RESBL                    0014                  
 reset                    f000              (R )
 RESM0                    0012                  
@@ -74,31 +79,40 @@ RESMP0                   0028
 RESMP1                   0029                  
 RESP0                    0010                  
 RESP1                    0011                  
-revbits                  008d                  
-reverseBits              f0af              (R )
-reversedOrderBits        f0f9              (R )
-rol16                    f09f                  
-ror16                    f099                  
+reversedOrderBits        f1b3              (R )
 RSYNC                    0003                  
-scanline                 00a4              (R )
-snd_ch                   f0cb              (R )
-snd_cont                 f0d7              (R )
-snd_done                 f0d7              (R )
-snd_on                   0091              (R )
-snd_play                 f0b4              (R )
-snd_process              f0c9              (R )
-sndbank_len              f0e7              (R )
-sndbank_pitch            f0e3              (R )
-sndbank_type             f0db              (R )
-sndbank_vol              f0df              (R )
+scanline                 00a2              (R )
+selDebounceOn            0087              (R )
+selDebounceTm            0088              (R )
+selectMode               0086              (R )
+snd_ch                   f0c5              (R )
+snd_cont                 f0d1              (R )
+snd_done                 f0d1              (R )
+snd_on                   0089              (R )
+snd_play                 f0ae                  
+snd_process              f0c3              (R )
+sndbank_len              f1a1              (R )
+sndbank_pitch            f19d              (R )
+sndbank_type             f195              (R )
+sndbank_vol              f199              (R )
 SPEED                    0001              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
-SWCHA                    0280                  
-SWCHB                    0282                  
-switch_color             f07d                  
+SWCHA                    0280              (R )
+SWCHB                    0282              (R )
+switch_color             f120              (R )
+switch_noreset           f0df              (R )
+switch_P0Diff1           f13f              (R )
+switch_P0Diff2           f13f                  
+switch_P1Diff1           f148              (R )
+switch_P1Diff2           f148                  
+switch_select_chkbounced f0df                  
+switch_select_decrease   f10d              (R )
+switch_select_end        f115              (R )
+switch_select_solid      f105              (R )
+switch_select_stripped   f0f8                  
 T1024T                   0297                  
-t_                       00a6                  
+t_                       00a4                  
 temp                     00a0              (R )
 TIA_BASE_ADDRESS         0000              (R )
 TIA_BASE_READ_ADDRESS    0000              (R )
