@@ -1,0 +1,6 @@
+------- FILE maths.h LEVEL 1 PASS 1
+      1  0000					      MAC	_clr16 macro mem
+      2  0000					      LDA	#0
+      3  0000					      STA	MEM+0
+      4  0000					      STA	MEM+1
+      5  0000					      ENDM
