@@ -7,26 +7,16 @@
      
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-; SPEED           equ 1                             
-   
+
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
                                     ; up to 9F
 c16_1           ds 2
-; plfys           ds 3
 revbits         ds 2
-
-; MEM             ds 2
-
-                seg.u	vars		
-                org	$A0             
 speed           ds 1                ; 1 byte - speed
-; temp            ds 1                
 scanline        ds 2                ; 1 byte - current scanline
 fcount          ds 1                ; 1 byte - frame counter
-; t_              ds 2                ; 1 byte - temp
 mod_1           ds 1                ; 1 byte - modulo 1
-; pfcolor         ds 1                ; 1 byte - playfield color
 
 selDebounceTm   ds 1                ; 1 byte - select debounce timer
 selDebounceOn   ds 1                ; 1 byte - select debounce on
@@ -35,6 +25,8 @@ selectMode      ds 1                ; 1 byte - select mode
 p0_x            ds 1                ; 1 byte - player 0 x position
 p0_y            ds 1                ; 1 byte - player 0 y position
 
+snd_on          ds 2            ; 1 byte per audio channel - greater than 0 if sound is playing
+
                 seg	main    		; start of main segment
                 org $F000
 
@@ -42,14 +34,6 @@ reset:			CLEAN_START			; ouput: all ram registers 0
 
                 lda #1
                 sta CTRLPF
-
-                lda #$2B
-                sta COLUBK
-                lda #$1E
-                sta COLUPF          
-
-                ; lda #2
-                ; sta pfcolor
 
                 lda #1
                 sta speed
@@ -69,18 +53,23 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 dec mod_1
                 bne cont
                 lda speed
-                sta mod_1
-                
+                sta mod_1                
                 _INC16 c16_1
 
+                
+
+                ; jsr snd_play            ; call the subroutine to load the audio registers
+
+
 cont:            
-                ; jsr snd_process
+                jsr snd_process
 
                 ldx p0_x        
                 stx COLUPF
                 ldx p0_y
                 stx COLUBK
 
+                
 
 ; -------- wait ------------------------------------                                
                 lda INTIM           ; check the timer          
@@ -251,6 +240,7 @@ switch_P1Diff1: ; Difficulty 1
                 bit INPT4
                 bmi pos_nofire
                 ldy #1
+                jsr snd_play
 pos_nofire:                
                 sty speed
 
@@ -306,16 +296,67 @@ pos_noup:
 ; -------- done ------------------------------------
 
 
+; cues a sound to play. sets audio registers based on table lookup sndbank.
+; parameters: x = channel (0|1), y = sound to play
+snd_play:
+            ; lda sndbank_type,y
+            lda #$0C
+            sta AUDC0,x             ; audio control   
+            
+            lda #4
+            sta AUDV0,x             ; audio volume (0 a 15)
 
-reverseBits:
-    tax
-    lda reversedOrderBits,x      ; Load the value to be reversed from memory
-    rts        
+            lda c16_1
+            ror
+            ror
+            ror
+            sta AUDF0,x             ; audio frequence (0 a 31 - divisiones del clock)
+            
+            lda #12
+            sta snd_on,x            ; len of audio in frames (>0 = sound on)
+        rts
+
+; process sound channels to turn off volume when sound length counter runs out
+snd_process:
+        ldx #1                  ; channel to process, start with channel 1
+snd_ch     
+        lda snd_on,x            ; get sound length counter for this channel
+        beq snd_done            ; are we playing a sound? a>1 
+        dec snd_on,x            ; yes, decrese the sound length counter for this channel
+        bne snd_cont            ; did we reach the end of the sound length?
+        lda #0                  ; yes
+        sta AUDV0,x             ; turn off the volume for this channel 
+snd_done
+
+snd_cont
+        dex                     ; do it again for channel 0
+        beq snd_ch              
+        rts
+
+       
+
+
+; define sounds, bounce, reset, backward, forward
+sndbank_type
+        .byte $0C, $02, $06, $06, $0C, $02, $06, $06, $0C, $02, $06, $06
+sndbank_vol
+        .byte $02, $06, $04, $04, $02, $06, $04, $04, $02, $06, $04, $04
+sndbank_pitch
+        .byte $1A, $0E, $1F, $09, $12, $07, $1C, $0B, $14, $03, $19, $0D
+sndbank_len
+        .byte $01, $08, $03, $03, $0C, $02, $06, $06, $0C, $02, $06, $06
+
 
 colors:
             .byte $36, $48, $76, $b4, $ea, $4c, $8a, $a4  ; Player 0-7 colors
                     
-                
+
+    
+reverseBits:
+    tax
+    lda reversedOrderBits,x      ; Load the value to be reversed from memory
+    rts 
+
 reversedOrderBits
             .word $00, $80, $40, $c0, $20, $a0, $60, $e0
             .word $10, $90, $50, $d0, $30, $b0, $70, $f0
