@@ -7,26 +7,26 @@
      
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-SPEED           equ 1                             
+; SPEED           equ 1                             
    
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
                                     ; up to 9F
 c16_1           ds 2
-plfys           ds 3
+; plfys           ds 3
 revbits         ds 2
 
-MEM             ds 2
+; MEM             ds 2
 
                 seg.u	vars		
                 org	$A0             
-
-temp            ds 1                
-scanline        ds 1                ; 1 byte - current scanline
+speed           ds 1                ; 1 byte - speed
+; temp            ds 1                
+scanline        ds 2                ; 1 byte - current scanline
 fcount          ds 1                ; 1 byte - frame counter
-t_              ds 2                ; 1 byte - temp
+; t_              ds 2                ; 1 byte - temp
 mod_1           ds 1                ; 1 byte - modulo 1
-pfcolor         ds 1                ; 1 byte - playfield color
+; pfcolor         ds 1                ; 1 byte - playfield color
 
 selDebounceTm   ds 1                ; 1 byte - select debounce timer
 selDebounceOn   ds 1                ; 1 byte - select debounce on
@@ -48,8 +48,15 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #$1E
                 sta COLUPF          
 
-                lda #2
-                sta pfcolor
+                ; lda #2
+                ; sta pfcolor
+
+                lda #1
+                sta speed
+
+                lda #$80
+                sta p0_x
+                sta p0_y
 
 nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 ; -------- set timer -------------------------------
@@ -61,15 +68,13 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 
                 dec mod_1
                 bne cont
-                lda #SPEED
+                lda speed
                 sta mod_1
                 
                 _INC16 c16_1
 
 cont:            
                 ; jsr snd_process
-
-
 
                 ldx p0_x        
                 stx COLUPF
@@ -98,12 +103,13 @@ cont:
           
 
 kernel:		    sta WSYNC           
-                dec scanline        
+                dec scanline    
+
                 sta WSYNC
                 ; PF0
 
                 lda c16_1+1
-                jsr reverseBits
+                ; jsr reverseBits
                 rol
                 rol
                 rol
@@ -111,6 +117,7 @@ kernel:		    sta WSYNC
                 eor scanline
                 sta PF2
                 
+
                 ; PF1
                 lda c16_1+0                
                 rol
@@ -238,15 +245,16 @@ switch_P1Diff2: ; Difficulty 2
 switch_P1Diff1: ; Difficulty 1       
 
 ; ------- joystick:
+
 ; Read button input
-                ; ldy #0               ; color index set to default yellow
-                bit INPT4            ; check D7 of INPT4
-                bmi button_nopress   ; branch if minus. D7 will me 0 is button is pressed
-                ; ldy #1
-button_press:
-                ; TODO
-button_nopress: 
-                
+                ldy #32      ; P0 Fire switch
+                bit INPT4
+                bmi pos_nofire
+                ldy #1
+pos_nofire:                
+                sty speed
+
+; ------------------
 ; read direction input
                 ldx p0_x            ; p0_x es la posición del jugador 0 en x
 
