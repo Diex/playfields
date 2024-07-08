@@ -160,4 +160,11 @@ VERSION_MACRO         = 106
    ENDM
 
 
+    ;-------------------------------------------------------------------------------
+    ; shortcut
+    
+    MAC _NEXTLINE
+            dec scanline
+            sta WSYNC
+    ENDM
 ; EOF

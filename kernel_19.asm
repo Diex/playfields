@@ -8,7 +8,7 @@
      
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-SPEED           equ 1                             
+SPEED           equ 16                             
                 seg.u	temp		; uninitialized segment
                 org	$80             ; origin set at base of ram
 
@@ -92,64 +92,18 @@ cont:
                 ; sample = t * (( (t>>12) | (t>>8)) &(63&(t>>4)));
                 lda #$BB
                 sta COLUPF
-render:		   
-            
-                sta WSYNC
-                
-                _ADD16 c16_1, scanline, temp
-                ; _ROL16 temp, temp
-                ; _ROL16 temp, temp
-                ; _ROL16 temp, temp
-                
-                dec scanline
-                
-                ; --------------------------------
-                
-                sta WSYNC
-
-                
-                
-                ; _ROL16 temp, temp        
-                ; _ROL16 temp, temp
-                ; _ROL16 temp, temp
-                ; ; _ROL16 temp, temp
-                
-                
-                ; _EOR16 temp, temp2, temp
-                ; _AND16 temp, temp, temp
-
-                lda temp+1
-                sta PF1                
-                
-
-                dec scanline
-                
-                ; --------------------------------
-                
-                sta WSYNC
-                
-                
-                ; _ROL16 temp, temp
-                ; _ROL16 temp2, temp2
-                ; _ROL16 temp2, temp2
-                
-
-                ; _EOR16 temp, temp2, temp
-                ; _AND16 temp, temp, temp
-                
-                lda temp+0
-                sta PF2
-
-               dec scanline
+render:		               
+                jsr kernel_1
                 
                 ; --------------------------------
                 
                 
-                bne render          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-                
+                bne gotorender          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+                jmp DoneWithFrame       ; (3) 2 bytes del opcode (jmp) + 1 byte operando + byte del salto
+gotorender      jmp render                
                 
 ; --------------- DoneWithFrame	---------------
-                                    
+DoneWithFrame                                    
                 ; ---- Overscan (30 scanlines)
                 ; 30 scanlines x 76 machine cycles = 2280 machine cycles
                 ; 2280 machine cycles / 64 clocks = 35.625
@@ -172,7 +126,51 @@ render:
                 ; --- END OF FRAME -------
 
 
+kernel_1:
+                 sta WSYNC
+                
+                _ADD16 c16_1, scanline, temp
+                _ROL16 temp, temp
+                _ROL16 temp, temp
+                _EOR16 scanline, temp, temp
+                
+                _NEXTLINE
 
+                _ADD16 c16_1, scanline, temp2
+                _ROL16 temp2, temp2
+                _ROL16 temp2, temp2
+                _ORA16 temp, temp2, temp
+
+                _NEXTLINE
+
+                _ADD16 c16_1, scanline, temp2
+                _ROL16 temp, temp        
+                _ROR16 temp2, temp2
+                _EOR16 temp, temp2, temp
+
+                lda temp+1
+                sta PF2                
+
+                _NEXTLINE
+                
+                _ADD16 c16_1, scanline, temp
+
+                _NEXTLINE
+
+                _EOR16 c16_1, #$55, temp2               
+
+                _NEXTLINE
+                
+                _ROL16 temp2, temp2
+                _ROL16 temp2, temp2
+                _EOR16 temp, temp2, temp
+                _AND16 temp, temp, temp
+                
+                lda temp+0
+                sta PF1
+
+                dec scanline
+                rts
 
     
 
@@ -415,4 +413,3 @@ reversedOrderBits:
 
 
 
-                

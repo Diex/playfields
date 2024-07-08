@@ -12,6 +12,9 @@ MIN_SPEED       equ 16              ; minimum speed
                 org	$80             ; origin set at base of ram
                                     ; up to 9F
 c16_1           ds 2
+temp            ds 2
+temp2           ds 2
+                                    ; up to AF
 revbits         ds 2
 speed           ds 1                ; 1 byte - speed
 scanline        ds 2                ; 1 byte - current scanline
@@ -79,44 +82,66 @@ cont:
                 
                 lda #0               
                 sta VBLANK          
-
                 lda #PF_H
                 sta scanline       
                 
                                 
 ; -------- ; primera linea visible  ------------------------------------                                
                 
-                sta WSYNC   
-
+              
+render:		   ; 
                 
+                sta WSYNC
+                
+                _ADD16 c16_1, scanline, temp
+                _ROL16 temp, temp
+                _ROL16 temp, temp
+                _EOR16 scanline, temp, temp
+                
+                _NEXTLINE
+
+                _ADD16 c16_1, scanline, temp2
+                _ROL16 temp2, temp2
+                _ROL16 temp2, temp2
+                _ORA16 temp, temp2, temp
+
+                _NEXTLINE
+
+                _ADD16 c16_1, scanline, temp2
+                _ROL16 temp, temp        
+                _ROR16 temp2, temp2
+                _EOR16 temp, temp2, temp
+
+                lda temp+1
+                sta PF2                
+
+                _NEXTLINE
+                
+                _ADD16 c16_1, scanline, temp
+
+                _NEXTLINE
+
+                _EOR16 c16_1, #$55, temp2               
+
+                _NEXTLINE
+                
+                _ROL16 temp2, temp2
+                _ROL16 temp2, temp2
+                _EOR16 temp, temp2, temp
+                _AND16 temp, temp, temp
+                
+                lda temp+0
+                sta PF1
 
                 dec scanline
-
-kernel:		    sta WSYNC
-                
-                lda c16_1+1
-                ; jsr reverseBits
-                rol
-                rol
-                rol
-                eor c16_1
-                eor scanline
-                sta PF2
-                
-
-                ; PF1
-                lda c16_1+0                
-                rol
-                eor #15
-                eor scanline
-                sta PF1
-                
-   
-
-                dec scanline                 ; (2)
-                bne kernel          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+           
+              
+                bne gotorender          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+                jmp DoneWithFrame       ; (3) 2 bytes del opcode (jmp) + 1 byte operando + byte del salto
+gotorender      jmp render                
                 
 ; --------------- DoneWithFrame	---------------
+DoneWithFrame                         
                                     
                 ; ---- Overscan (30 scanlines)
                 ; 30 scanlines x 76 machine cycles = 2280 machine cycles
@@ -134,7 +159,8 @@ kernel:		    sta WSYNC
                 lda INTIM           ; check the timer          
                 bne .-3             ; 2 bytes del opcode (bne) + 1 byte operando                                                    
 ; -------- done ------------------------------------
-                
+     
+  
 
 ; -------- INPUT ------------------------------------                            
 ; Reset
@@ -144,44 +170,7 @@ input:          lda #%00000001      ; (2) read reset input
                 jmp reset
 switch_noreset: 
     
-; Game Select
-switch_select_chkbounced:
-                lda selDebounceOn   ; (2)
-                bne switch_select_decrease   ; if debounce already on then branch out
 
-                lda #%00000010
-                bit SWCHB
-                bne switch_select_end
-
-                lda #1
-                sta selDebounceOn
-                lda #40
-                sta selDebounceTm
-
-                asl selectMode
-                bcc switch_select_solid
-                inc selectMode
-                
-switch_select_stripped: 
-                ; lda #%10101010
-                ; sta PF0
-                ; sta PF2
-                ; lda #%01010101
-                ; sta PF1
-                jmp switch_select_end
-
-switch_select_solid:
-                ; lda #0
-                ; sta PF0
-                ; sta PF1
-                ; sta PF2
-
-switch_select_decrease:
-                dec selDebounceTm
-                bne switch_select_end
-                lda #0
-                sta selDebounceOn
-switch_select_end:
 
 
 ; B/W input
@@ -267,13 +256,48 @@ pos_noup:
                 stx p0_y
         
 
+
 ; -------- done ------------------------------------
 
                 jmp nextframe       ; (3) jump back up to start the next frame
 
 ; -------- done ------------------------------------
+         
 
 
+; Game Select
+check_switch_select:
+switch_select_chkbounced:
+                lda selDebounceOn   ; (2)
+                bne switch_select_decrease   ; if debounce already on then branch out
+
+                lda #%00000010
+                bit SWCHB
+                bne switch_select_end
+
+                lda #1
+                sta selDebounceOn
+                lda #40
+                sta selDebounceTm
+
+                asl selectMode
+                bcc switch_select_solid
+                inc selectMode
+                
+switch_select_stripped: 
+
+                jmp switch_select_end
+
+switch_select_solid:
+
+
+switch_select_decrease:
+                dec selDebounceTm
+                bne switch_select_end
+                lda #0
+                sta selDebounceOn
+switch_select_end:
+                rts
 
 
 ; cues a sound to play. sets audio registers based on table lookup sndbank.

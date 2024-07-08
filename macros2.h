@@ -163,6 +163,11 @@ _DONE      EQU *
 
 
 
+      MAC _REV8 ;reverseBits:
+          ldx {1}+0
+          lda {2},x      ; Load the value to be reversed from memory
+      ENDM   
+
 ; Transfer 2 bytes of memory from one location to
 ; another using the accumulator. The order in
 ; which the bytes are moved depends on the
