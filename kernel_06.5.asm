@@ -7,7 +7,7 @@
      
                                     ; NTSC 262 scanlines 60 Hz, PAL 312 scanlines 50Hz
 PF_H            equ 192            ; playfield height
-MIN_SPEED       equ 16              ; minimum speed
+MIN_SPEED       equ 8              ; minimum speed
 MAX_COLORS      equ 8              ; minimum speed
 
 
@@ -34,6 +34,7 @@ p0_x            ds 1                ; 1 byte - player 0 x position
 p0_y            ds 1                ; 1 byte - player 0 y position
 
 triggerSound    ds 1                ; 1 byte - trigger sound
+pitch           ds 1                ; 1 byte - pitch
 
 snd_on          ds 2            ; 1 byte per audio channel - greater than 0 if sound is playing
 
@@ -48,10 +49,13 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #1
                 sta speed
 
-                lda #$00
+                lda #$80
                 sta p0_x
-                lda #$08
+                lda #$80
                 sta p0_y
+
+                lda #$80
+                sta c16_1+1
 
 nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 ; -------- set timer -------------------------------
@@ -92,32 +96,29 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                                 
 ; -------- ; primera linea visible  ------------------------------------                                
                 
-                lda #0
-                sta COLUPF
+                ; lda temp
+                _GET_COLOR temp, #0, colors
+                sta COLUBK
               
 render:		   ;                 
                 sta WSYNC
-                
+            
+                _GET_COLOR p0_y, scanline, colors
+                sta COLUPF
+
                 _ADD16 c16_1, scanline, temp
-                ; _ROL16 temp, temp
-                ; _ROL16 temp, temp
                 _EOR16 scanline, temp, temp
-
-                _GET_COLOR p0_y, var1
-                sta COLUBK             
-
                 
                 _NEXTLINE
+                
+                _ADD16 c16_1, scanline, temp2                
+                _ROL16 temp2, temp2
+                _ROL16 temp2, temp2
+                _ORA16 temp, p0_x, temp2
 
-                lda temp+1
+                lda temp2
                 sta PF2                
 
-                _ADD16 c16_1, scanline, temp2
-                _ROL16 temp2, temp2
-                _ROL16 temp2, temp2
-                _ORA16 temp, temp2, temp
-
-                
                 _NEXTLINE
 
                 _ADD16 c16_1, scanline, temp2
@@ -125,11 +126,9 @@ render:		   ;
                 _ROR16 temp2, temp2
                 _EOR16 temp, temp2, temp
 
+
                 
                 _NEXTLINE
-                
-                ; _GET_COLOR p0_x, scanline
-                ; sta COLUPF
                 
 
                 _ADD16 c16_1, scanline, temp
@@ -138,11 +137,6 @@ render:		   ;
 
                 _EOR16 c16_1, #$55, temp2  
 
-                lda scanline
-                lsr
-                lsr
-                sta var1
-                
                 
                 _NEXTLINE
                 
@@ -151,13 +145,13 @@ render:		   ;
                 _EOR16 temp, temp2, temp
                 _AND16 temp, temp, temp
                 
+
                 lda temp+0
                 sta PF1
                 
-                ; _GET_COLOR p0_x, scanline
+             
+                ; lda #0
                 ; sta COLUBK
-                lda #0
-                sta COLUBK
 
                 dec scanline
            
@@ -233,13 +227,16 @@ switch_P1Diff1: ; Difficulty 1
                 bit INPT4
                 bmi pos_nofire
                 ldy #1
-                jsr snd_play
+                
+                lda temp
+                sta pitch
+                _SND_PLAY #4, pitch
 pos_nofire:                
                 sty speed
 
 ; ------------------
-                lda #%00
-                sta triggerSound
+                ; lda #%00
+                ; sta triggerSound
 
 ; read direction input
                 ldx p0_x            ; p0_x es la posición del jugador 0 en x
@@ -249,9 +246,12 @@ pos_nofire:
                 cpx #$FF            ; max right position
                 bcs pos_noright     
                 inx
-                lda #%10000000      ; P0 Left switch
-                ora triggerSound
-                sta triggerSound
+                ; stx var1
+                stx p0_x
+                
+                lda temp2
+                sta pitch
+                _SND_PLAY #3, pitch
                                 
 pos_noright                
                 lda #%01000000      ; check left movement
@@ -260,10 +260,16 @@ pos_noright
                 cpx #0
                 bcc pos_noleft
                 dex
-                lda #%01000000      ; P0 Left switch
-                ora triggerSound
-pos_noleft:
+                ; stx var1
                 stx p0_x
+
+                lda temp2
+                sta pitch
+                _SND_PLAY #3, pitch
+                
+pos_noleft:
+                ; ldx var1
+                ; stx p0_x
 
                 ldx p0_y
                 lda #%00100000                
@@ -272,8 +278,11 @@ pos_noleft:
                 cpx #$00
                 bcc pos_nodown
                 dex
-                lda #%00100000      ; P0 Left switch
-                ora triggerSound
+                
+                lda c16_1
+                sta pitch
+                _SND_PLAY #1, pitch
+
 pos_nodown:
                 lda #%00010000                
                 bit SWCHA
@@ -281,8 +290,10 @@ pos_nodown:
                 cpx #255
                 bcs pos_noup
                 inx
-                lda #%00010000      ; P0 Left switch
-                ora triggerSound
+                
+                lda c16_1
+                sta pitch
+                _SND_PLAY #5, pitch
 pos_noup:
                 stx p0_y
         
@@ -369,10 +380,23 @@ snd_cont
 
        
 
-
+; -------------------------------------------------------------------
+;       CODE
+;       FOR MY
+;  TIA  MUSIC 
+;  CODE DRIVER NAME    DESCRIPTION
+;   1   110    Saw     sounds similar to a saw waveform
+;   3   111    Engine  many 2600 games use this for an engine sound
+;   4   000    Square  a high pitched square waveform
+;   6   001    Bass    fat bass sound
+;   7   010    Pitfall log sound in pitfall, low and buzzy
+;   8   011    Noise   white noise
+;  12   101    Lead    lower pitch square wave sound
+;  15   100    Buzz    atonal buzz, good for percussion
+; -------------------------------------------------------------------
 ; define sounds, bounce, reset, backward, forward
 sndbank_type
-        .byte $0C, $02, $06, $06, $0C, $02, $06, $06, $0C, $02, $06, $06
+        .byte $06, $07, $00, $01, $02, $03, $05, $04, $0C, $02, $06, $06
 sndbank_vol
         .byte $02, $06, $04, $04, $02, $06, $04, $04, $02, $06, $04, $04
 sndbank_pitch
@@ -382,7 +406,7 @@ sndbank_len
 
 
 colors:
-        .byte $00, $F0, $22, $48, $5A, $9A, $AE, $BC, $26, $54, $76, $B4, $88, $AA, $C6, $E2
+        .byte $B4, $D2, $D8, $DA, $DB, $DC, $CE, $CB
 
                           
 

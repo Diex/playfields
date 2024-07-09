@@ -177,7 +177,7 @@ VERSION_MACRO         = 106
         lsr
         lsr                       
         tax
-        lda colors,x
+        lda {3},x
         ENDM
 
     ; ldx channel
