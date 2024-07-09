@@ -104,7 +104,7 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 render:		   ;                 
                 sta WSYNC
             
-                _GET_COLOR p0_x, scanline, colors
+                _GET_COLOR p0_x, scanline, colors2
                 sta COLUPF
 
                 _ADD16 c16_1, scanline, temp
@@ -126,7 +126,7 @@ render:		   ;
                 _NEXTLINE
                 ; inc COLUPF
 
-                _GET_COLOR p0_x, scanline, colors
+                _GET_COLOR p0_x, scanline, colors2
                 sta COLUPF
                 
                 _ADD16 c16_1, scanline, temp2
@@ -435,7 +435,8 @@ sndbank_len
 
 colors:
         .byte $B4, $D2, $D8, $DA, $DB, $DC, $CE, $CB
-
+colors2:
+        .byte $30, $32, $34, $36, $38, $3a, $3c, $3e
                           
 
     

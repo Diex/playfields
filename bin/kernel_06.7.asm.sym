@@ -13,7 +13,8 @@ AUDV0                    0019              (R )
 AUDV1                    001a                  
 c16_1                    0080              (R )
 check_switch_select      f1f5                  
-colors                   f270              (R )
+colors                   f270                  
+colors2                  f278              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
@@ -81,8 +82,8 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 revbits                  0088                  
-reverseBits              f278                  
-reversedOrderBits        f27d              (R )
+reverseBits              f280                  
+reversedOrderBits        f285              (R )
 RSYNC                    0003                  
 scanline                 008b              (R )
 selDebounceOn            008f              (R )
