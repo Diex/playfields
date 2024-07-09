@@ -97,62 +97,69 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 ; -------- ; primera linea visible  ------------------------------------                                
                 
                 ; lda temp
-                _GET_COLOR temp, #0, colors
+                ; _GET_COLOR temp, #0, colors
+                lda temp
                 sta COLUBK
               
 render:		   ;                 
                 sta WSYNC
             
-                _GET_COLOR p0_y, scanline, colors
+                _GET_COLOR p0_x, scanline, colors
                 sta COLUPF
 
                 _ADD16 c16_1, scanline, temp
                 _EOR16 scanline, temp, temp
-                
+                                
                 _NEXTLINE
                 
                 _ADD16 c16_1, scanline, temp2                
                 _ROL16 temp2, temp2
-                _ROL16 temp2, temp2
-                _ORA16 temp, p0_x, temp2
+                _EOR16 temp, p0_x, temp2
 
                 lda temp2
-                sta PF2                
+                sta PF1                
 
                 _NEXTLINE
 
+                ;-------------
+
+                _GET_COLOR p0_x, scanline, colors
+                sta COLUPF
+                
                 _ADD16 c16_1, scanline, temp2
                 _ROL16 temp, temp        
-                _ROR16 temp2, temp2
-                _EOR16 temp, temp2, temp
-
-
-                
+               
                 _NEXTLINE
-                
+                 _ROR16 temp2, temp2
+                _EOR16 temp, temp2, temp
 
                 _ADD16 c16_1, scanline, temp
-
-                _NEXTLINE
-
-                _EOR16 c16_1, #$55, temp2  
-
+                _EOR16 temp, p0_y, temp2
+                
+                
                 
                 _NEXTLINE
+                lda temp2+0
+                sta PF2
                 
+                ; _EOR16 scanline, p0_x, temp2
+
+                ; lda temp2
+                ; sta PF1     
                 ; _ROL16 temp2, temp2
-                _ROL16 temp2, temp2
-                _EOR16 temp, temp2, temp
-                _AND16 temp, temp, temp
+                ; _ROL16 temp2, temp2
+                ; _EOR16 temp, temp2, temp
+                ; _AND16 temp, temp, temp
                 
+                ; _ORA16 temp, p0_y, temp2  
 
-                lda temp+0
-                sta PF1
                 
-             
-                ; lda #0
-                ; sta COLUBK
-
+                _NEXTLINE
+                
+        
+                ; lda temp2+0
+                ; sta PF1
+                
                 dec scanline
            
               
@@ -278,7 +285,9 @@ pos_noleft:
                 cpx #$00
                 bcc pos_nodown
                 dex
-                
+                stx p0_y
+
+
                 lda c16_1
                 sta pitch
                 _SND_PLAY #1, pitch
@@ -290,12 +299,13 @@ pos_nodown:
                 cpx #255
                 bcs pos_noup
                 inx
-                
+                stx p0_y
+
                 lda c16_1
                 sta pitch
                 _SND_PLAY #5, pitch
 pos_noup:
-                stx p0_y
+                ; stx p0_y
         
 
 
