@@ -17,11 +17,12 @@ MAX_COLORS      equ 8              ; minimum speed
 c16_1           ds 2
 temp            ds 2
 temp2           ds 2
-                                    ; up to AF
+
+fcount          ds 1                ; 1 byte - frame counter                                    ; up to AF
 revbits         ds 2
 speed           ds 1                ; 1 byte - speed
 scanline        ds 2                ; 1 byte - current scanline
-fcount          ds 1                ; 1 byte - frame counter
+
 mod_1           ds 1                ; 1 byte - modulo 1
 
 selDebounceTm   ds 1                ; 1 byte - select debounce timer
@@ -31,9 +32,11 @@ selectMode      ds 1                ; 1 byte - select mode
 p0_x            ds 1                ; 1 byte - player 0 x position
 p0_y            ds 1                ; 1 byte - player 0 y position
 
+triggerSound  ds 1                ; 1 byte - trigger sound
+
 snd_on          ds 2            ; 1 byte per audio channel - greater than 0 if sound is playing
 
-currentPfColor ds 1                ; 1 byte - current playfield color   
+; currentPfColor ds 1                ; 1 byte - current playfield color   
 
                 seg	main    		; start of main segment
                 org $F000
@@ -65,6 +68,11 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta mod_1                
                 _INC16 c16_1
 
+                lda triggerSound
+                cpx #%10000000
+                bne cont
+                ldx #0
+                jsr snd_play            ; call the subroutine to load the audio registers
                 
 
                 ; jsr snd_play            ; call the subroutine to load the audio registers
@@ -74,17 +82,6 @@ cont:
                 jsr snd_process
 
 
-
-                
-                lda p0_y 
-                lsr
-                lsr
-                lsr
-                lsr                       
-                tax
-                lda colors,x
-                sta COLUBK
-                
                 
 
 ; -------- wait ------------------------------------                                
@@ -130,14 +127,7 @@ render:		   ;
 
                 _NEXTLINE
                 
-                lda p0_x
-                adc scanline 
-                lsr
-                lsr
-                lsr
-                lsr                       
-                tax
-                lda colors,x
+                _GET_COLOR p0_x, scanline
                 sta COLUPF
                 
 
@@ -147,15 +137,8 @@ render:		   ;
 
                 _EOR16 c16_1, #$55, temp2  
 
-                lda p0_y
-                adc scanline 
-                lsr
-                lsr
-                lsr
-                lsr                       
-                tax
-                lda colors,x
-                sta COLUPF             
+                _GET_COLOR p0_y, scanline
+                sta COLUBK             
 
                 _NEXTLINE
                 
@@ -241,34 +224,35 @@ switch_P1Diff1: ; Difficulty 1
                 bit INPT4
                 bmi pos_nofire
                 ldy #1
-                jsr snd_play
+                _SND_PLAY #4, #15
 pos_nofire:                
                 sty speed
 
 ; ------------------
+                lda #%00
+                sta triggerSound
+
 ; read direction input
                 ldx p0_x            ; p0_x es la posición del jugador 0 en x
-
                 lda #%10000000      ; P0 Right switch
                 bit SWCHA
                 bne pos_noright     ; z es el estado del boton: branch if no se movió.
-
-
                 cpx #$FF            ; max right position
                 bcs pos_noright     
                 inx
+                lda #%10000000      ; P0 Left switch
+                ora triggerSound
+                sta triggerSound
                                 
-                ; lda #%00001000    ; invertir el playfield
-                ; sta REFP0                
 pos_noright                
                 lda #%01000000      ; check left movement
                 bit SWCHA
                 bne pos_noleft
-                cpx #1
+                cpx #0
                 bcc pos_noleft
                 dex
-                ; lda #0
-                ; sta REFP0                
+                lda #%01000000      ; P0 Left switch
+                ora triggerSound
 pos_noleft:
                 stx p0_x
 
@@ -279,6 +263,8 @@ pos_noleft:
                 cpx #$00
                 bcc pos_nodown
                 dex
+                lda #%00100000      ; P0 Left switch
+                ora triggerSound
 pos_nodown:
                 lda #%00010000                
                 bit SWCHA
@@ -286,6 +272,8 @@ pos_nodown:
                 cpx #255
                 bcs pos_noup
                 inx
+                lda #%00010000      ; P0 Left switch
+                ora triggerSound
 pos_noup:
                 stx p0_y
         

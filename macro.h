@@ -162,9 +162,40 @@ VERSION_MACRO         = 106
 
     ;-------------------------------------------------------------------------------
     ; shortcut
-    
+
     MAC _NEXTLINE
             dec scanline
             sta WSYNC
     ENDM
+
+    MAC _GET_COLOR
+        
+        lda {1}
+        adc {2} 
+        lsr
+        lsr
+        lsr
+        lsr                       
+        tax
+        lda colors,x
+        ENDM
+
+    ; ldx channel
+    ; {1}     = type
+    ; {2}     = pitch
+    MAC _SND_PLAY
+            ; lda sndbank_type,y
+            ldx #0
+            lda {1}
+            sta AUDC0,x             ; audio control               
+            lda #3
+            sta AUDV0,x             ; audio volume (0 a 15)
+
+            lda {2}
+            sta AUDF0,x             ; audio frequence (0 a 31 - divisiones del clock)
+            
+            lda #20
+            sta snd_on,x            ; len of audio in frames (>0 = sound on)
+        ENDM
+
 ; EOF
