@@ -37,6 +37,9 @@ triggerSound    ds 1                ; 1 byte - trigger sound
 pitch           ds 1                ; 1 byte - pitch
 
 snd_on          ds 2            ; 1 byte per audio channel - greater than 0 if sound is playing
+r_seed          ds 1            ; random seed
+invertColors    ds 1            ; random seed
+
 
                 seg	main    		; start of main segment
                 org $F000
@@ -57,6 +60,10 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #$80
                 sta c16_1+1
 
+                ; generate a random see from the interval timer
+                lda INTIM               ; unknown value to use as an initial random seed
+                sta r_seed              ; random seed
+
 nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
 ; -------- set timer -------------------------------
                                     ; 37 scanlines x 76 machine cycles per scanline = 2812 machine cycles
@@ -71,12 +78,10 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 sta mod_1                
                 _INC16 c16_1
 
-.cont:            
-                ; lda triggerSound
-                ; cpx #%10000000
-                ; bne .sndproc
-                ; ldx #0
-                ; jsr snd_play            ; call the subroutine to load the audio registers
+.cont            
+                
+                    ; 'randomly' select an initial bearing (direction)
+                ; sta random1  
 
 .sndproc                jsr snd_process
 
@@ -93,40 +98,43 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
                 lda #PF_H
                 sta scanline       
                 
+                lda #0
+                sta COLUBK
+
+                lda invertColors
+                beq render
+                ldx #0
+                stx invertColors
+                _GET_COLOR p0_x, scanline, colors2                
+                sta COLUBK
                                 
 ; -------- ; primera linea visible  ------------------------------------                                
                 
-                ; lda temp
-                ; _GET_COLOR temp, #0, colors
-                lda #0
-                sta COLUBK
               
-render:		   ;                 
-                sta WSYNC
-            
-                _GET_COLOR p0_x, scanline, colors2
+render:		    sta WSYNC            
+                
+                _GET_COLOR p0_x, scanline, colors2                
                 sta COLUPF
+                
 
                 _ADD16 c16_1, scanline, temp
                 _EOR16 scanline, temp, temp
                                 
+                
                 _NEXTLINE
-                
-                
+                                
                 lda #0
                 sta COLUPF
 
                 _ADD16 c16_1, scanline, temp2                
-                _ROL16 temp2, temp2
                 _EOR16 temp, p0_x, temp2
 
                 lda temp2
                 sta PF1                
 
                 _NEXTLINE
-                ; inc COLUPF
-
-                _GET_COLOR p0_x, scanline, colors2
+                
+                _GET_COLOR p0_y, scanline, colors2
                 sta COLUPF
                 
                 _ADD16 c16_1, scanline, temp2
@@ -134,8 +142,8 @@ render:		   ;
                
                 _NEXTLINE
 
-                ; lda #0
-                ; sta COLUPF
+                lda #0
+                sta COLUPF
 
                  _ROR16 temp2, temp2
                 _EOR16 temp, temp2, temp
@@ -146,38 +154,23 @@ render:		   ;
                 
                 _NEXTLINE
 
+                _GET_COLOR p0_y, scanline, colors2
+                sta COLUPF
+                
                 _EOR16 temp, p0_y, temp2
-                ; inc COLUPF
-                ; lda #0
-                ; sta COLUPF
+                
 
                 lda temp
                 eor p0_y
                 sta PF2
-                
-                ; lda temp2+1
-                ; sta PF2
-                
-                ; _EOR16 scanline, p0_x, temp2
-
-                ; lda temp2
-                ; sta PF1     
-                ; _ROL16 temp2, temp2
-                ; _ROL16 temp2, temp2
-                ; _EOR16 temp, temp2, temp
-                ; _AND16 temp, temp, temp
-                
-                ; _ORA16 temp, p0_y, temp2  
+              
 
                 
                 _NEXTLINE
-                ; lda #0
-                ; sta COLUPF
-                ; inc COLUPF
-        
-                ; lda temp2+0
-                ; sta PF1
+                _GET_COLOR p0_y, scanline, colors2
+                sta COLUPF
                 
+
                 dec scanline
            
               
@@ -225,6 +218,7 @@ switch_noreset:
                 bne switch_color
                 ldx #1
 switch_color:                
+                ; stx invertColors
                 ;TODO switch color
 
 ; Player 0 Difficulty
@@ -256,6 +250,8 @@ switch_P1Diff1: ; Difficulty 1
                 lda temp
                 sta pitch
                 _SND_PLAY #4, pitch
+                ldx #1
+                stx invertColors
 pos_nofire:                
                 sty speed
 

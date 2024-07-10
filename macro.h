@@ -172,13 +172,26 @@ VERSION_MACRO         = 106
         
         lda {1}
         adc {2} 
-        lsr
-        lsr
-        lsr
-        lsr                       
+        and #$0F                ; limit the value to 0-15
         tax
-        lda {3},x
+        lda {3},x       
         ENDM
+
+    MAC _GET_COLOR_RANDOM15
+    ; Galois 8-bit Linear Feedback Shift Registers
+; https://samiam.org/blog/20130617.html
+; galois_lfsr_random              
+        lda r_seed              ; keep calling funtion to for better entropy
+        lsr                     ; shift right
+        bcc .noeor0              ; if carry 1, then exclusive OR the bits
+        eor #$D4                ; d4 tap (11010100)
+.noeor0 sta r_seed 
+        and #$0F                ; limit the value to 0-15
+        tax
+        lda colors2,x                       
+        ENDM
+
+                
 
     ; ldx channel
     ; {1}     = type

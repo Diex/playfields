@@ -374,7 +374,38 @@
     167  0000 ????				      dec	scanline
     168  0000 ????				      sta	WSYNC
     169  0000 ????				      ENDM
-    170  0000 ????						; EOF
+    170  0000 ????
+    171  0000 ????				      MAC	_get_color
+    172  0000 ????
+    173  0000 ????				      lda	{1}
+    174  0000 ????				      adc	{2}
+    175  0000 ????				      lsr
+    176  0000 ????				      lsr
+    177  0000 ????				      lsr
+    178  0000 ????				      lsr
+    179  0000 ????				      tax
+    180  0000 ????				      lda	{3},x
+    181  0000 ????				      ENDM
+    182  0000 ????
+    183  0000 ????						; ldx channel
+    184  0000 ????						; {1}	   = type
+    185  0000 ????						; {2}	   = pitch
+    186  0000 ????				      MAC	_snd_play
+    187  0000 ????						; lda sndbank_type,y
+    188  0000 ????				      ldx	#0
+    189  0000 ????				      lda	{1}
+    190  0000 ????				      sta	AUDC0,x	; audio control
+    191  0000 ????				      lda	#3
+    192  0000 ????				      sta	AUDV0,x	; audio volume (0 a 15)
+    193  0000 ????
+    194  0000 ????				      lda	{2}
+    195  0000 ????				      sta	AUDF0,x	; audio frequence (0 a 31 - divisiones del clock)
+    196  0000 ????
+    197  0000 ????				      lda	#20
+    198  0000 ????				      sta	snd_on,x	; len of audio in frames (>0 = sound on)
+    199  0000 ????				      ENDM
+    200  0000 ????
+    201  0000 ????						; EOF
 ------- FILE kernel_19.asm
 ------- FILE macros2.h LEVEL 2 PASS 2
       0  0000 ????				      include	"macros2.h"
