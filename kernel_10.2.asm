@@ -113,18 +113,15 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
               
 render:		    sta WSYNC            
                 
-                lda scanline
+                _GET_COLOR scanline, 0, colors
                 sta COLUPF
                 
 
-
-                ; lda c16_1
-                ; adc scanline
                 _ADD16 c16_1, scanline, temp
                 
                 ; rol
                 _EOR16 temp, p0_x, temp
-                _EOR16 temp, scanline, temp
+                
                 ; _ROL16 temp, temp
 
                 ; sta temp
@@ -140,12 +137,18 @@ render:		    sta WSYNC
                 
 
                 _NEXTLINE
+                _EOR16 temp, scanline, temp
 
                 lda temp
                 sta PF2
 
+                _GET_COLOR scanline, 0, colors
+                sta COLUPF
+                
+                
                 _NEXTLINE
                 
+
                 
                 ; lda c16_1
                 ; ror
@@ -155,9 +158,9 @@ render:		    sta WSYNC
                 ; ror
                 ; adc temp  
 
-                lda scanline
-                ror                                             
-                sta COLUPF
+                ; lda scanline
+                ; ror                                             
+             
           
                 ; jsr kernel2
                 _ADD16 c16_1, scanline, temp

@@ -12,9 +12,9 @@ AUDF1                    0018
 AUDV0                    0019              (R )
 AUDV1                    001a                  
 c16_1                    0080              (R )
-check_switch_select      f1c9                  
-colors                   f25d                  
-colors2                  f244              (R )
+check_switch_select      f1d8                  
+colors                   f26c              (R )
+colors2                  f253              (R )
 COLUBK                   0009              (R )
 COLUP0                   0006                  
 COLUP1                   0007                  
@@ -29,12 +29,12 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-DoneWithFrame            f0d7              (R )
+DoneWithFrame            f0e6              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   0087              (R )
-gotorender               f0d4              (R )
+gotorender               f0e3              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -50,7 +50,7 @@ INPT2                    000a
 INPT3                    000b                  
 INPT4                    000c              (R )
 INPT5                    000d                  
-input                    f0e5                  
+input                    f0f4                  
 INTIM                    0284              (R )
 invertColors             0098              (R )
 MAX_COLORS               0008                  
@@ -66,11 +66,11 @@ PF1                      000e              (R )
 PF2                      000f              (R )
 PF_H                     00c0              (R )
 pitch                    0094              (R )
-pos_nodown               f1a0              (R )
-pos_nofire               f12e              (R )
-pos_noleft               f17a              (R )
-pos_noright              f156              (R )
-pos_noup                 f1c4              (R )
+pos_nodown               f1af              (R )
+pos_nofire               f13d              (R )
+pos_noleft               f189              (R )
+pos_noright              f165              (R )
+pos_noup                 f1d3              (R )
 r_seed                   0097              (R )
 REFP0                    000b                  
 REFP1                    000c                  
@@ -84,39 +84,39 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 revbits                  0088                  
-reverseBits              f265                  
-reversedOrderBits        f26a              (R )
+reverseBits              f274                  
+reversedOrderBits        f279              (R )
 RSYNC                    0003                  
 scanline                 008b              (R )
 selDebounceOn            008f              (R )
 selDebounceTm            008e              (R )
 selectMode               0090              (R )
-snd_ch                   f204              (R )
-snd_cont                 f210              (R )
-snd_done                 f210              (R )
+snd_ch                   f213              (R )
+snd_cont                 f21f              (R )
+snd_done                 f21f              (R )
 snd_on                   0095              (R )
-snd_play                 f1ee                  
-snd_process              f202              (R )
-sndbank_len              f238                  
-sndbank_pitch            f22c                  
-sndbank_type             f214                  
-sndbank_vol              f220                  
+snd_play                 f1fd                  
+snd_process              f211              (R )
+sndbank_len              f247                  
+sndbank_pitch            f23b                  
+sndbank_type             f223                  
+sndbank_vol              f22f                  
 speed                    008a              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280              (R )
 SWCHB                    0282              (R )
-switch_color             f0fa              (R )
-switch_noreset           f0ef              (R )
-switch_P0Diff1           f103              (R )
-switch_P0Diff2           f103                  
-switch_P1Diff1           f10c              (R )
-switch_P1Diff2           f10c                  
-switch_select_chkbounced f1c9                  
-switch_select_decrease   f1e5              (R )
-switch_select_end        f1ed              (R )
-switch_select_solid      f1e5              (R )
-switch_select_stripped   f1e2                  
+switch_color             f109              (R )
+switch_noreset           f0fe              (R )
+switch_P0Diff1           f112              (R )
+switch_P0Diff2           f112                  
+switch_P1Diff1           f11b              (R )
+switch_P1Diff2           f11b                  
+switch_select_chkbounced f1d8                  
+switch_select_decrease   f1f4              (R )
+switch_select_end        f1fc              (R )
+switch_select_solid      f1f4              (R )
+switch_select_stripped   f1f1                  
 T1024T                   0297                  
 temp                     0083              (R )
 temp2                    0085                  

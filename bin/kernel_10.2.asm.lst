@@ -786,7 +786,7 @@
      83  f03c							; 'randomly' select an initial bearing (direction)
      84  f03c							; sta random1
      85  f03c
-     86  f03c		       20 02 f2    .sndproc   jsr	snd_process
+     86  f03c		       20 11 f2    .sndproc   jsr	snd_process
      87  f03f
      88  f03f
      89  f03f
@@ -814,7 +814,7 @@
       3  f05a		       65 00		      adc	0
       4  f05c		       29 0f		      and	#$0F
       5  f05e		       aa		      tax
-      6  f05f		       bd 44 f2 	      lda	colors2,x
+      6  f05f		       bd 53 f2 	      lda	colors2,x
     109  f062		       85 09		      sta	COLUBK
     110  f064
     111  f064							; -------- ; primera linea visible  ------------------------------------
@@ -822,503 +822,518 @@
     113  f064
     114  f064		       85 02	   render     sta	WSYNC
     115  f066
-    116  f066		       a5 8b		      lda	scanline
-    117  f068		       85 08		      sta	COLUPF
-    118  f06a
-    119  f06a
-    120  f06a
-    121  f06a							; lda c16_1
-    122  f06a							; adc scanline
-      0  f06a					      _ADD16	c16_1, scanline, temp
-      1  f06a					      IF	c16_1 != scanline
-      2  f06a		       18		      CLC
-      3  f06b		       a5 80		      LDA	c16_1+0
-      4  f06d		       65 8b		      ADC	scanline+0
-      5  f06f		       85 83		      STA	temp+0
-      6  f071		       a5 81		      LDA	c16_1+1
-      7  f073		       65 8c		      ADC	scanline+1
-      8  f075		       85 84		      STA	temp+1
-      9  f077				  -	      ELSE
-     10  f077				  -	      _ASL16	c16_1,temp
-     11  f077					      ENDIF
-    124  f077
-    125  f077							; rol
-      0  f077					      _EOR16	temp, p0_x, temp
-      1  f077					      IF	temp != p0_x
-      2  f077		       a5 83		      LDA	temp+0
-      3  f079		       45 91		      EOR	p0_x+0
-      4  f07b		       85 83		      STA	temp+0
-      5  f07d		       a5 84		      LDA	temp+1
-      6  f07f		       45 92		      EOR	p0_x+1
-      7  f081		       85 84		      STA	temp+1
-      8  f083				  -	      ELSE
-      9  f083				  -	      _CLR16	temp
-     10  f083					      ENDIF
-      0  f083					      _EOR16	temp, scanline, temp
-      1  f083					      IF	temp != scanline
-      2  f083		       a5 83		      LDA	temp+0
-      3  f085		       45 8b		      EOR	scanline+0
-      4  f087		       85 83		      STA	temp+0
-      5  f089		       a5 84		      LDA	temp+1
-      6  f08b		       45 8c		      EOR	scanline+1
-      7  f08d		       85 84		      STA	temp+1
-      8  f08f				  -	      ELSE
-      9  f08f				  -	      _CLR16	temp
-     10  f08f					      ENDIF
-    128  f08f							; _ROL16 temp, temp
-    129  f08f
-    130  f08f							; sta temp
-    131  f08f							; lda c16_1
-    132  f08f							; rol
-    133  f08f
-    134  f08f							; _ROL16 temp, temp
-    135  f08f
-    136  f08f
-    137  f08f							; eor temp
-    138  f08f							; sta temp
-    139  f08f
-    140  f08f
-    141  f08f
-      0  f08f					      _NEXTLINE
-      1  f08f		       c6 8b		      dec	scanline
-      2  f091		       85 02		      sta	WSYNC
-    143  f093
-    144  f093		       a5 83		      lda	temp
-    145  f095		       85 0f		      sta	PF2
-    146  f097
-      0  f097					      _NEXTLINE
-      1  f097		       c6 8b		      dec	scanline
-      2  f099		       85 02		      sta	WSYNC
-    148  f09b
-    149  f09b
-    150  f09b							; lda c16_1
-    151  f09b							; ror
-    152  f09b							; ror
-    153  f09b							; ror
-    154  f09b							; ror
-    155  f09b							; ror
-    156  f09b							; adc temp
-    157  f09b
-    158  f09b		       a5 8b		      lda	scanline
-    159  f09d		       6a		      ror
-    160  f09e		       85 08		      sta	COLUPF
-    161  f0a0
-    162  f0a0							; jsr kernel2
-      0  f0a0					      _ADD16	c16_1, scanline, temp
-      1  f0a0					      IF	c16_1 != scanline
-      2  f0a0		       18		      CLC
-      3  f0a1		       a5 80		      LDA	c16_1+0
-      4  f0a3		       65 8b		      ADC	scanline+0
-      5  f0a5		       85 83		      STA	temp+0
-      6  f0a7		       a5 81		      LDA	c16_1+1
-      7  f0a9		       65 8c		      ADC	scanline+1
-      8  f0ab		       85 84		      STA	temp+1
-      9  f0ad				  -	      ELSE
-     10  f0ad				  -	      _ASL16	c16_1,temp
-     11  f0ad					      ENDIF
-      0  f0ad					      _EOR16	temp, scanline, temp
-      1  f0ad					      IF	temp != scanline
-      2  f0ad		       a5 83		      LDA	temp+0
-      3  f0af		       45 8b		      EOR	scanline+0
-      4  f0b1		       85 83		      STA	temp+0
-      5  f0b3		       a5 84		      LDA	temp+1
-      6  f0b5		       45 8c		      EOR	scanline+1
-      7  f0b7		       85 84		      STA	temp+1
-      8  f0b9				  -	      ELSE
-      9  f0b9				  -	      _CLR16	temp
-     10  f0b9					      ENDIF
-      0  f0b9					      _EOR16	temp, p0_y, temp
-      1  f0b9					      IF	temp != p0_y
-      2  f0b9		       a5 83		      LDA	temp+0
-      3  f0bb		       45 92		      EOR	p0_y+0
-      4  f0bd		       85 83		      STA	temp+0
-      5  f0bf		       a5 84		      LDA	temp+1
-      6  f0c1		       45 93		      EOR	p0_y+1
-      7  f0c3		       85 84		      STA	temp+1
-      8  f0c5				  -	      ELSE
-      9  f0c5				  -	      _CLR16	temp
-     10  f0c5					      ENDIF
-    166  f0c5
-    167  f0c5
-      0  f0c5					      _NEXTLINE
-      1  f0c5		       c6 8b		      dec	scanline
-      2  f0c7		       85 02		      sta	WSYNC
-    169  f0c9
-    170  f0c9		       a5 83		      lda	temp
-    171  f0cb		       85 0e		      sta	PF1
-    172  f0cd
-    173  f0cd		       c6 8b		      dec	scanline
-    174  f0cf
-    175  f0cf		       d0 03		      bne	gotorender	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-    176  f0d1		       4c d7 f0 	      jmp	DoneWithFrame	; (3) 2 bytes del opcode (jmp) + 1 byte operando + byte del salto
-    177  f0d4		       4c 64 f0    gotorender jmp	render
-    178  f0d7
-    179  f0d7							; --------------- DoneWithFrame	---------------
-    180  f0d7				   DoneWithFrame
-    181  f0d7
-    182  f0d7							; ---- Overscan (30 scanlines)
-    183  f0d7							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-    184  f0d7							; 2280 machine cycles / 64 clocks = 35.625
-    185  f0d7		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-    186  f0d9		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
-    187  f0dc
-    188  f0dc
-    189  f0dc
-    190  f0dc
-    191  f0dc		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-    192  f0de		       85 01		      sta	VBLANK	; turn off the beam
-    193  f0e0
-    194  f0e0							; -------- wait ------------------------------------
-    195  f0e0		       ad 84 02 	      lda	INTIM	; check the timer
-    196  f0e3		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
-    197  f0e5							; -------- done ------------------------------------
-    198  f0e5
-    199  f0e5
-    200  f0e5
-    201  f0e5							; -------- INPUT ------------------------------------
-    202  f0e5							; Reset
-    203  f0e5		       a9 01	   input      lda	#%00000001	; (2) read reset input
-    204  f0e7		       2c 82 02 	      bit	SWCHB
-    205  f0ea		       d0 03		      bne	switch_noreset
-    206  f0ec		       4c 00 f0 	      jmp	reset
-    207  f0ef				   switch_noreset
-    208  f0ef
-    209  f0ef
-    210  f0ef
-    211  f0ef
-    212  f0ef							; B/W input
-    213  f0ef		       a2 00		      ldx	#0
-    214  f0f1		       a9 08		      lda	#%00001000
-    215  f0f3		       2c 82 02 	      bit	SWCHB
-    216  f0f6		       d0 02		      bne	switch_color
-    217  f0f8		       a2 01		      ldx	#1
-    218  f0fa				   switch_color
-    219  f0fa							; stx invertColors
-    220  f0fa							;TODO switch color
-    221  f0fa
-    222  f0fa							; Player 0 Difficulty
-    223  f0fa		       a2 00		      ldx	#0
-    224  f0fc		       a9 40		      lda	#%01000000
-    225  f0fe		       2c 82 02 	      bit	SWCHB
-    226  f101		       d0 00		      bne	switch_P0Diff1
-    227  f103				   switch_P0Diff2
-    228  f103							; TODO Difficulty 2
-    229  f103				   switch_P0Diff1
-    230  f103							; TODO Difficulty 1
-    231  f103
-    232  f103							; Player 1 Difficulty
-    233  f103		       a2 00		      ldx	#0
-    234  f105		       a9 80		      lda	#%10000000
-    235  f107		       2c 82 02 	      bit	SWCHB
-    236  f10a		       d0 00		      bne	switch_P1Diff1
-    237  f10c				   switch_P1Diff2		; Difficulty 2
-    238  f10c				   switch_P1Diff1		; Difficulty 1
-    239  f10c
-    240  f10c							; ------- joystick:
-    241  f10c
-    242  f10c							; Read button input
-    243  f10c		       a0 08		      ldy	#MIN_SPEED	; P0 Fire switch
-    244  f10e		       24 0c		      bit	INPT4
-    245  f110		       30 1c		      bmi	pos_nofire
-    246  f112		       a0 01		      ldy	#1
-    247  f114
-    248  f114		       a5 83		      lda	temp
-    249  f116		       85 94		      sta	pitch
-      0  f118					      _SND_PLAY	#4, pitch
-      1  f118
-      2  f118		       a2 00		      ldx	#0
-      3  f11a		       a9 04		      lda	#4
-      4  f11c		       95 15		      sta	AUDC0,x
-      5  f11e		       a9 03		      lda	#3
-      6  f120		       95 19		      sta	AUDV0,x
-      7  f122
-      8  f122		       a5 94		      lda	pitch
-      9  f124		       95 17		      sta	AUDF0,x
-     10  f126
-     11  f126		       a9 14		      lda	#20
-     12  f128		       95 95		      sta	snd_on,x
-    251  f12a		       a2 01		      ldx	#1
-    252  f12c		       86 98		      stx	invertColors
-    253  f12e				   pos_nofire
-    254  f12e		       84 8a		      sty	speed
-    255  f130
-    256  f130							; ------------------
-    257  f130							; lda #%00
-    258  f130							; sta triggerSound
-    259  f130
-    260  f130							; read direction input
-    261  f130		       a6 91		      ldx	p0_x	; p0_x es la posición del jugador 0 en x
-    262  f132		       a9 80		      lda	#%10000000	; P0 Right switch
-    263  f134		       2c 80 02 	      bit	SWCHA
-    264  f137		       d0 1d		      bne	pos_noright	; z es el estado del boton: branch if no se movió.
-    265  f139		       e0 ff		      cpx	#$FF	; max right position
-    266  f13b		       b0 19		      bcs	pos_noright
-    267  f13d		       e8		      inx
-    268  f13e							; stx var1
-    269  f13e		       86 91		      stx	p0_x
-    270  f140
-    271  f140		       a5 83		      lda	temp
-    272  f142		       85 94		      sta	pitch
-      0  f144					      _SND_PLAY	#6, pitch
-      1  f144
-      2  f144		       a2 00		      ldx	#0
-      3  f146		       a9 06		      lda	#6
-      4  f148		       95 15		      sta	AUDC0,x
-      5  f14a		       a9 03		      lda	#3
-      6  f14c		       95 19		      sta	AUDV0,x
-      7  f14e
-      8  f14e		       a5 94		      lda	pitch
-      9  f150		       95 17		      sta	AUDF0,x
-     10  f152
-     11  f152		       a9 14		      lda	#20
-     12  f154		       95 95		      sta	snd_on,x
-    274  f156
-    275  f156				   pos_noright
-    276  f156		       a9 40		      lda	#%01000000	; check left movement
-    277  f158		       2c 80 02 	      bit	SWCHA
-    278  f15b		       d0 1d		      bne	pos_noleft
-    279  f15d		       e0 00		      cpx	#0
-    280  f15f		       90 19		      bcc	pos_noleft
-    281  f161		       ca		      dex
-    282  f162							; stx var1
-    283  f162		       86 91		      stx	p0_x
-    284  f164
-    285  f164		       a5 83		      lda	temp
-    286  f166		       85 94		      sta	pitch
-      0  f168					      _SND_PLAY	#3, pitch
-      1  f168
-      2  f168		       a2 00		      ldx	#0
-      3  f16a		       a9 03		      lda	#3
-      4  f16c		       95 15		      sta	AUDC0,x
-      5  f16e		       a9 03		      lda	#3
-      6  f170		       95 19		      sta	AUDV0,x
-      7  f172
-      8  f172		       a5 94		      lda	pitch
-      9  f174		       95 17		      sta	AUDF0,x
-     10  f176
-     11  f176		       a9 14		      lda	#20
-     12  f178		       95 95		      sta	snd_on,x
-    288  f17a
-    289  f17a				   pos_noleft
-    290  f17a							; ldx var1
-    291  f17a							; stx p0_x
-    292  f17a
-    293  f17a		       a6 92		      ldx	p0_y
-    294  f17c		       a9 20		      lda	#%00100000
-    295  f17e		       2c 80 02 	      bit	SWCHA
-    296  f181		       d0 1d		      bne	pos_nodown
-    297  f183		       e0 00		      cpx	#$00
-    298  f185		       90 19		      bcc	pos_nodown
-    299  f187		       ca		      dex
-    300  f188		       86 92		      stx	p0_y
-    301  f18a
-    302  f18a
-    303  f18a		       a5 80		      lda	c16_1
-    304  f18c		       85 94		      sta	pitch
-      0  f18e					      _SND_PLAY	#1, pitch
-      1  f18e
-      2  f18e		       a2 00		      ldx	#0
-      3  f190		       a9 01		      lda	#1
-      4  f192		       95 15		      sta	AUDC0,x
-      5  f194		       a9 03		      lda	#3
-      6  f196		       95 19		      sta	AUDV0,x
-      7  f198
-      8  f198		       a5 94		      lda	pitch
-      9  f19a		       95 17		      sta	AUDF0,x
-     10  f19c
-     11  f19c		       a9 14		      lda	#20
-     12  f19e		       95 95		      sta	snd_on,x
-    306  f1a0
-    307  f1a0				   pos_nodown
-    308  f1a0		       a9 10		      lda	#%00010000
-    309  f1a2		       2c 80 02 	      bit	SWCHA
-    310  f1a5		       d0 1d		      bne	pos_noup
-    311  f1a7		       e0 ff		      cpx	#255
-    312  f1a9		       b0 19		      bcs	pos_noup
-    313  f1ab		       e8		      inx
-    314  f1ac		       86 92		      stx	p0_y
-    315  f1ae
-    316  f1ae		       a5 80		      lda	c16_1
-    317  f1b0		       85 94		      sta	pitch
-      0  f1b2					      _SND_PLAY	#5, pitch
-      1  f1b2
-      2  f1b2		       a2 00		      ldx	#0
-      3  f1b4		       a9 05		      lda	#5
-      4  f1b6		       95 15		      sta	AUDC0,x
-      5  f1b8		       a9 03		      lda	#3
-      6  f1ba		       95 19		      sta	AUDV0,x
-      7  f1bc
-      8  f1bc		       a5 94		      lda	pitch
-      9  f1be		       95 17		      sta	AUDF0,x
-     10  f1c0
-     11  f1c0		       a9 14		      lda	#20
-     12  f1c2		       95 95		      sta	snd_on,x
-    319  f1c4				   pos_noup
-    320  f1c4							; stx p0_y
-    321  f1c4
-    322  f1c4
-    323  f1c4
-    324  f1c4							; -------- done ------------------------------------
-    325  f1c4		       e6 87		      inc	fcount
-    326  f1c6		       4c 20 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-    327  f1c9
-    328  f1c9							; -------- done ------------------------------------
-    329  f1c9
-    330  f1c9
-    331  f1c9
-    332  f1c9							; Game Select
-    333  f1c9				   check_switch_select
-    334  f1c9				   switch_select_chkbounced
-    335  f1c9		       a5 8f		      lda	selDebounceOn	; (2)
-    336  f1cb		       d0 18		      bne	switch_select_decrease	; if debounce already on then branch out
-    337  f1cd
-    338  f1cd		       a9 02		      lda	#%00000010
-    339  f1cf		       2c 82 02 	      bit	SWCHB
-    340  f1d2		       d0 19		      bne	switch_select_end
-    341  f1d4
-    342  f1d4		       a9 01		      lda	#1
-    343  f1d6		       85 8f		      sta	selDebounceOn
-    344  f1d8		       a9 28		      lda	#40
-    345  f1da		       85 8e		      sta	selDebounceTm
-    346  f1dc
-    347  f1dc		       06 90		      asl	selectMode
-    348  f1de		       90 05		      bcc	switch_select_solid
-    349  f1e0		       e6 90		      inc	selectMode
-    350  f1e2
-    351  f1e2				   switch_select_stripped
-    352  f1e2
-    353  f1e2		       4c ed f1 	      jmp	switch_select_end
-    354  f1e5
-    355  f1e5				   switch_select_solid
-    356  f1e5
-    357  f1e5
-    358  f1e5				   switch_select_decrease
-    359  f1e5		       c6 8e		      dec	selDebounceTm
-    360  f1e7		       d0 04		      bne	switch_select_end
-    361  f1e9		       a9 00		      lda	#0
-    362  f1eb		       85 8f		      sta	selDebounceOn
-    363  f1ed				   switch_select_end
-    364  f1ed		       60		      rts
-    365  f1ee
-    366  f1ee
-    367  f1ee							; cues a sound to play. sets audio registers based on table lookup sndbank.
-    368  f1ee							; parameters: x = channel (0|1), y = sound to play
-    369  f1ee				   snd_play
-    370  f1ee							; lda sndbank_type,y
-    371  f1ee		       a9 0c		      lda	#$0C
-    372  f1f0		       95 15		      sta	AUDC0,x	; audio control
-    373  f1f2		       a9 04		      lda	#4
-    374  f1f4		       95 19		      sta	AUDV0,x	; audio volume (0 a 15)
-    375  f1f6
-    376  f1f6		       a5 80		      lda	c16_1
-    377  f1f8		       6a		      ror
-    378  f1f9		       6a		      ror
-    379  f1fa		       6a		      ror
-    380  f1fb		       95 17		      sta	AUDF0,x	; audio frequence (0 a 31 - divisiones del clock)
-    381  f1fd
-    382  f1fd		       a9 0c		      lda	#12
-    383  f1ff		       95 95		      sta	snd_on,x	; len of audio in frames (>0 = sound on)
-    384  f201		       60		      rts
-    385  f202
-    386  f202							; process sound channels to turn off volume when sound length counter runs out
-    387  f202				   snd_process
-    388  f202		       a2 01		      ldx	#1	; channel to process, start with channel 1
-    389  f204				   snd_ch
-    390  f204		       b5 95		      lda	snd_on,x	; get sound length counter for this channel
-    391  f206		       f0 08		      beq	snd_done	; are we playing a sound? a>1
-    392  f208		       d6 95		      dec	snd_on,x	; yes, decrese the sound length counter for this channel
-    393  f20a		       d0 04		      bne	snd_cont	; did we reach the end of the sound length?
-    394  f20c		       a9 00		      lda	#0	; yes
-    395  f20e		       95 19		      sta	AUDV0,x	; turn off the volume for this channel
-    396  f210				   snd_done
-    397  f210
-    398  f210				   snd_cont
-    399  f210		       ca		      dex		; do it again for channel 0
-    400  f211		       f0 f1		      beq	snd_ch
-    401  f213		       60		      rts
-    402  f214
-    403  f214
-    404  f214
-    405  f214							; -------------------------------------------------------------------
-    406  f214							;	 CODE
-    407  f214							;	 FOR MY
-    408  f214							;  TIA  MUSIC
-    409  f214							;  CODE DRIVER NAME	DESCRIPTION
-    410  f214							;   1	 110	Saw	sounds similar to a saw waveform
-    411  f214							;   3	 111	Engine	many 2600 games use this for an engine sound
-    412  f214							;   4	 000	Square	a high pitched square waveform
-    413  f214							;   6	 001	Bass	fat bass sound
-    414  f214							;   7	 010	Pitfall log sound in pitfall, low and buzzy
-    415  f214							;   8	 011	Noise	white noise
-    416  f214							;  12	 101	Lead	lower pitch square wave sound
-    417  f214							;  15	 100	Buzz	atonal buzz, good for percussion
-    418  f214							; -------------------------------------------------------------------
-    419  f214							; define sounds, bounce, reset, backward, forward
-    420  f214				   sndbank_type
-    421  f214		       06 07 00 01*	      .byte.b	$06, $07, $00, $01, $02, $03, $05, $04, $0C, $02, $06, $06
-    422  f220				   sndbank_vol
-    423  f220		       02 06 04 04*	      .byte.b	$02, $06, $04, $04, $02, $06, $04, $04, $02, $06, $04, $04
-    424  f22c				   sndbank_pitch
-    425  f22c		       1a 0e 1f 09*	      .byte.b	$1A, $0E, $1F, $09, $12, $07, $1C, $0B, $14, $03, $19, $0D
-    426  f238				   sndbank_len
-    427  f238		       01 08 03 03*	      .byte.b	$01, $08, $03, $03, $0C, $02, $06, $06, $0C, $02, $06, $06
-    428  f244
-    429  f244
-    430  f244				   colors2
-    431  f244		       30 32 34 36*	      .byte.b	$30, $32, $34, $36, $38, $3a, $3c, $3e
-    432  f24c		       5a 6a 7a 8a*	      .byte.b	$5a, $6a, $7a, $8a, $9a, $aa, $5c, $6c,
-    433  f255		       7c 8c 9c ac*	      .byte.b	$7c, $8c, $9c, $ac, $5d, $6d, $7d, $8d
-    434  f25d				   colors
-    435  f25d		       30 32 34 36*	      .byte.b	$30, $32, $34, $36, $38, $3a, $3c, $3e
-    436  f265
-    437  f265
-    438  f265
-    439  f265				   reverseBits
-    440  f265		       aa		      tax
-    441  f266		       bd 6a f2 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
-    442  f269		       60		      rts
-    443  f26a
-    444  f26a				   reversedOrderBits
-    445  f26a		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
-    446  f27a		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
-    447  f28a		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
-    448  f29a		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
-    449  f2aa		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
-    450  f2ba		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
-    451  f2ca		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
-    452  f2da		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
-    453  f2ea		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
-    454  f2fa		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
-    455  f30a		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
-    456  f31a		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
-    457  f32a		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
-    458  f33a		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
-    459  f34a		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
-    460  f35a		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
-    461  f36a		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
-    462  f37a		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
-    463  f38a		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
-    464  f39a		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
-    465  f3aa		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
-    466  f3ba		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
-    467  f3ca		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
-    468  f3da		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
-    469  f3ea		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
-    470  f3fa		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
-    471  f40a		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
-    472  f41a		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
-    473  f42a		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
-    474  f43a		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
-    475  f44a		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
-    476  f45a		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
-    477  f46a
-    478  f46a
-    479  fffa					      org	$FFFA
-    480  fffa
-    481  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    482  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    483  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    484  10000
-    485  10000
-    486  10000
+      0  f066					      _GET_COLOR	scanline, 0, colors
+      1  f066
+      2  f066		       a5 8b		      lda	scanline
+      3  f068		       65 00		      adc	0
+      4  f06a		       29 0f		      and	#$0F
+      5  f06c		       aa		      tax
+      6  f06d		       bd 6c f2 	      lda	colors,x
+    117  f070		       85 08		      sta	COLUPF
+    118  f072
+    119  f072
+      0  f072					      _ADD16	c16_1, scanline, temp
+      1  f072					      IF	c16_1 != scanline
+      2  f072		       18		      CLC
+      3  f073		       a5 80		      LDA	c16_1+0
+      4  f075		       65 8b		      ADC	scanline+0
+      5  f077		       85 83		      STA	temp+0
+      6  f079		       a5 81		      LDA	c16_1+1
+      7  f07b		       65 8c		      ADC	scanline+1
+      8  f07d		       85 84		      STA	temp+1
+      9  f07f				  -	      ELSE
+     10  f07f				  -	      _ASL16	c16_1,temp
+     11  f07f					      ENDIF
+    121  f07f
+    122  f07f							; rol
+      0  f07f					      _EOR16	temp, p0_x, temp
+      1  f07f					      IF	temp != p0_x
+      2  f07f		       a5 83		      LDA	temp+0
+      3  f081		       45 91		      EOR	p0_x+0
+      4  f083		       85 83		      STA	temp+0
+      5  f085		       a5 84		      LDA	temp+1
+      6  f087		       45 92		      EOR	p0_x+1
+      7  f089		       85 84		      STA	temp+1
+      8  f08b				  -	      ELSE
+      9  f08b				  -	      _CLR16	temp
+     10  f08b					      ENDIF
+    124  f08b
+    125  f08b							; _ROL16 temp, temp
+    126  f08b
+    127  f08b							; sta temp
+    128  f08b							; lda c16_1
+    129  f08b							; rol
+    130  f08b
+    131  f08b							; _ROL16 temp, temp
+    132  f08b
+    133  f08b
+    134  f08b							; eor temp
+    135  f08b							; sta temp
+    136  f08b
+    137  f08b
+    138  f08b
+      0  f08b					      _NEXTLINE
+      1  f08b		       c6 8b		      dec	scanline
+      2  f08d		       85 02		      sta	WSYNC
+      0  f08f					      _EOR16	temp, scanline, temp
+      1  f08f					      IF	temp != scanline
+      2  f08f		       a5 83		      LDA	temp+0
+      3  f091		       45 8b		      EOR	scanline+0
+      4  f093		       85 83		      STA	temp+0
+      5  f095		       a5 84		      LDA	temp+1
+      6  f097		       45 8c		      EOR	scanline+1
+      7  f099		       85 84		      STA	temp+1
+      8  f09b				  -	      ELSE
+      9  f09b				  -	      _CLR16	temp
+     10  f09b					      ENDIF
+    141  f09b
+    142  f09b		       a5 83		      lda	temp
+    143  f09d		       85 0f		      sta	PF2
+    144  f09f
+      0  f09f					      _GET_COLOR	scanline, 0, colors
+      1  f09f
+      2  f09f		       a5 8b		      lda	scanline
+      3  f0a1		       65 00		      adc	0
+      4  f0a3		       29 0f		      and	#$0F
+      5  f0a5		       aa		      tax
+      6  f0a6		       bd 6c f2 	      lda	colors,x
+    146  f0a9		       85 08		      sta	COLUPF
+    147  f0ab
+    148  f0ab
+      0  f0ab					      _NEXTLINE
+      1  f0ab		       c6 8b		      dec	scanline
+      2  f0ad		       85 02		      sta	WSYNC
+    150  f0af
+    151  f0af
+    152  f0af
+    153  f0af							; lda c16_1
+    154  f0af							; ror
+    155  f0af							; ror
+    156  f0af							; ror
+    157  f0af							; ror
+    158  f0af							; ror
+    159  f0af							; adc temp
+    160  f0af
+    161  f0af							; lda scanline
+    162  f0af							; ror
+    163  f0af
+    164  f0af
+    165  f0af							; jsr kernel2
+      0  f0af					      _ADD16	c16_1, scanline, temp
+      1  f0af					      IF	c16_1 != scanline
+      2  f0af		       18		      CLC
+      3  f0b0		       a5 80		      LDA	c16_1+0
+      4  f0b2		       65 8b		      ADC	scanline+0
+      5  f0b4		       85 83		      STA	temp+0
+      6  f0b6		       a5 81		      LDA	c16_1+1
+      7  f0b8		       65 8c		      ADC	scanline+1
+      8  f0ba		       85 84		      STA	temp+1
+      9  f0bc				  -	      ELSE
+     10  f0bc				  -	      _ASL16	c16_1,temp
+     11  f0bc					      ENDIF
+      0  f0bc					      _EOR16	temp, scanline, temp
+      1  f0bc					      IF	temp != scanline
+      2  f0bc		       a5 83		      LDA	temp+0
+      3  f0be		       45 8b		      EOR	scanline+0
+      4  f0c0		       85 83		      STA	temp+0
+      5  f0c2		       a5 84		      LDA	temp+1
+      6  f0c4		       45 8c		      EOR	scanline+1
+      7  f0c6		       85 84		      STA	temp+1
+      8  f0c8				  -	      ELSE
+      9  f0c8				  -	      _CLR16	temp
+     10  f0c8					      ENDIF
+      0  f0c8					      _EOR16	temp, p0_y, temp
+      1  f0c8					      IF	temp != p0_y
+      2  f0c8		       a5 83		      LDA	temp+0
+      3  f0ca		       45 92		      EOR	p0_y+0
+      4  f0cc		       85 83		      STA	temp+0
+      5  f0ce		       a5 84		      LDA	temp+1
+      6  f0d0		       45 93		      EOR	p0_y+1
+      7  f0d2		       85 84		      STA	temp+1
+      8  f0d4				  -	      ELSE
+      9  f0d4				  -	      _CLR16	temp
+     10  f0d4					      ENDIF
+    169  f0d4
+    170  f0d4
+      0  f0d4					      _NEXTLINE
+      1  f0d4		       c6 8b		      dec	scanline
+      2  f0d6		       85 02		      sta	WSYNC
+    172  f0d8
+    173  f0d8		       a5 83		      lda	temp
+    174  f0da		       85 0e		      sta	PF1
+    175  f0dc
+    176  f0dc		       c6 8b		      dec	scanline
+    177  f0de
+    178  f0de		       d0 03		      bne	gotorender	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
+    179  f0e0		       4c e6 f0 	      jmp	DoneWithFrame	; (3) 2 bytes del opcode (jmp) + 1 byte operando + byte del salto
+    180  f0e3		       4c 64 f0    gotorender jmp	render
+    181  f0e6
+    182  f0e6							; --------------- DoneWithFrame	---------------
+    183  f0e6				   DoneWithFrame
+    184  f0e6
+    185  f0e6							; ---- Overscan (30 scanlines)
+    186  f0e6							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+    187  f0e6							; 2280 machine cycles / 64 clocks = 35.625
+    188  f0e6		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+    189  f0e8		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
+    190  f0eb
+    191  f0eb
+    192  f0eb
+    193  f0eb
+    194  f0eb		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+    195  f0ed		       85 01		      sta	VBLANK	; turn off the beam
+    196  f0ef
+    197  f0ef							; -------- wait ------------------------------------
+    198  f0ef		       ad 84 02 	      lda	INTIM	; check the timer
+    199  f0f2		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
+    200  f0f4							; -------- done ------------------------------------
+    201  f0f4
+    202  f0f4
+    203  f0f4
+    204  f0f4							; -------- INPUT ------------------------------------
+    205  f0f4							; Reset
+    206  f0f4		       a9 01	   input      lda	#%00000001	; (2) read reset input
+    207  f0f6		       2c 82 02 	      bit	SWCHB
+    208  f0f9		       d0 03		      bne	switch_noreset
+    209  f0fb		       4c 00 f0 	      jmp	reset
+    210  f0fe				   switch_noreset
+    211  f0fe
+    212  f0fe
+    213  f0fe
+    214  f0fe
+    215  f0fe							; B/W input
+    216  f0fe		       a2 00		      ldx	#0
+    217  f100		       a9 08		      lda	#%00001000
+    218  f102		       2c 82 02 	      bit	SWCHB
+    219  f105		       d0 02		      bne	switch_color
+    220  f107		       a2 01		      ldx	#1
+    221  f109				   switch_color
+    222  f109							; stx invertColors
+    223  f109							;TODO switch color
+    224  f109
+    225  f109							; Player 0 Difficulty
+    226  f109		       a2 00		      ldx	#0
+    227  f10b		       a9 40		      lda	#%01000000
+    228  f10d		       2c 82 02 	      bit	SWCHB
+    229  f110		       d0 00		      bne	switch_P0Diff1
+    230  f112				   switch_P0Diff2
+    231  f112							; TODO Difficulty 2
+    232  f112				   switch_P0Diff1
+    233  f112							; TODO Difficulty 1
+    234  f112
+    235  f112							; Player 1 Difficulty
+    236  f112		       a2 00		      ldx	#0
+    237  f114		       a9 80		      lda	#%10000000
+    238  f116		       2c 82 02 	      bit	SWCHB
+    239  f119		       d0 00		      bne	switch_P1Diff1
+    240  f11b				   switch_P1Diff2		; Difficulty 2
+    241  f11b				   switch_P1Diff1		; Difficulty 1
+    242  f11b
+    243  f11b							; ------- joystick:
+    244  f11b
+    245  f11b							; Read button input
+    246  f11b		       a0 08		      ldy	#MIN_SPEED	; P0 Fire switch
+    247  f11d		       24 0c		      bit	INPT4
+    248  f11f		       30 1c		      bmi	pos_nofire
+    249  f121		       a0 01		      ldy	#1
+    250  f123
+    251  f123		       a5 83		      lda	temp
+    252  f125		       85 94		      sta	pitch
+      0  f127					      _SND_PLAY	#4, pitch
+      1  f127
+      2  f127		       a2 00		      ldx	#0
+      3  f129		       a9 04		      lda	#4
+      4  f12b		       95 15		      sta	AUDC0,x
+      5  f12d		       a9 03		      lda	#3
+      6  f12f		       95 19		      sta	AUDV0,x
+      7  f131
+      8  f131		       a5 94		      lda	pitch
+      9  f133		       95 17		      sta	AUDF0,x
+     10  f135
+     11  f135		       a9 14		      lda	#20
+     12  f137		       95 95		      sta	snd_on,x
+    254  f139		       a2 01		      ldx	#1
+    255  f13b		       86 98		      stx	invertColors
+    256  f13d				   pos_nofire
+    257  f13d		       84 8a		      sty	speed
+    258  f13f
+    259  f13f							; ------------------
+    260  f13f							; lda #%00
+    261  f13f							; sta triggerSound
+    262  f13f
+    263  f13f							; read direction input
+    264  f13f		       a6 91		      ldx	p0_x	; p0_x es la posición del jugador 0 en x
+    265  f141		       a9 80		      lda	#%10000000	; P0 Right switch
+    266  f143		       2c 80 02 	      bit	SWCHA
+    267  f146		       d0 1d		      bne	pos_noright	; z es el estado del boton: branch if no se movió.
+    268  f148		       e0 ff		      cpx	#$FF	; max right position
+    269  f14a		       b0 19		      bcs	pos_noright
+    270  f14c		       e8		      inx
+    271  f14d							; stx var1
+    272  f14d		       86 91		      stx	p0_x
+    273  f14f
+    274  f14f		       a5 83		      lda	temp
+    275  f151		       85 94		      sta	pitch
+      0  f153					      _SND_PLAY	#6, pitch
+      1  f153
+      2  f153		       a2 00		      ldx	#0
+      3  f155		       a9 06		      lda	#6
+      4  f157		       95 15		      sta	AUDC0,x
+      5  f159		       a9 03		      lda	#3
+      6  f15b		       95 19		      sta	AUDV0,x
+      7  f15d
+      8  f15d		       a5 94		      lda	pitch
+      9  f15f		       95 17		      sta	AUDF0,x
+     10  f161
+     11  f161		       a9 14		      lda	#20
+     12  f163		       95 95		      sta	snd_on,x
+    277  f165
+    278  f165				   pos_noright
+    279  f165		       a9 40		      lda	#%01000000	; check left movement
+    280  f167		       2c 80 02 	      bit	SWCHA
+    281  f16a		       d0 1d		      bne	pos_noleft
+    282  f16c		       e0 00		      cpx	#0
+    283  f16e		       90 19		      bcc	pos_noleft
+    284  f170		       ca		      dex
+    285  f171							; stx var1
+    286  f171		       86 91		      stx	p0_x
+    287  f173
+    288  f173		       a5 83		      lda	temp
+    289  f175		       85 94		      sta	pitch
+      0  f177					      _SND_PLAY	#3, pitch
+      1  f177
+      2  f177		       a2 00		      ldx	#0
+      3  f179		       a9 03		      lda	#3
+      4  f17b		       95 15		      sta	AUDC0,x
+      5  f17d		       a9 03		      lda	#3
+      6  f17f		       95 19		      sta	AUDV0,x
+      7  f181
+      8  f181		       a5 94		      lda	pitch
+      9  f183		       95 17		      sta	AUDF0,x
+     10  f185
+     11  f185		       a9 14		      lda	#20
+     12  f187		       95 95		      sta	snd_on,x
+    291  f189
+    292  f189				   pos_noleft
+    293  f189							; ldx var1
+    294  f189							; stx p0_x
+    295  f189
+    296  f189		       a6 92		      ldx	p0_y
+    297  f18b		       a9 20		      lda	#%00100000
+    298  f18d		       2c 80 02 	      bit	SWCHA
+    299  f190		       d0 1d		      bne	pos_nodown
+    300  f192		       e0 00		      cpx	#$00
+    301  f194		       90 19		      bcc	pos_nodown
+    302  f196		       ca		      dex
+    303  f197		       86 92		      stx	p0_y
+    304  f199
+    305  f199
+    306  f199		       a5 80		      lda	c16_1
+    307  f19b		       85 94		      sta	pitch
+      0  f19d					      _SND_PLAY	#1, pitch
+      1  f19d
+      2  f19d		       a2 00		      ldx	#0
+      3  f19f		       a9 01		      lda	#1
+      4  f1a1		       95 15		      sta	AUDC0,x
+      5  f1a3		       a9 03		      lda	#3
+      6  f1a5		       95 19		      sta	AUDV0,x
+      7  f1a7
+      8  f1a7		       a5 94		      lda	pitch
+      9  f1a9		       95 17		      sta	AUDF0,x
+     10  f1ab
+     11  f1ab		       a9 14		      lda	#20
+     12  f1ad		       95 95		      sta	snd_on,x
+    309  f1af
+    310  f1af				   pos_nodown
+    311  f1af		       a9 10		      lda	#%00010000
+    312  f1b1		       2c 80 02 	      bit	SWCHA
+    313  f1b4		       d0 1d		      bne	pos_noup
+    314  f1b6		       e0 ff		      cpx	#255
+    315  f1b8		       b0 19		      bcs	pos_noup
+    316  f1ba		       e8		      inx
+    317  f1bb		       86 92		      stx	p0_y
+    318  f1bd
+    319  f1bd		       a5 80		      lda	c16_1
+    320  f1bf		       85 94		      sta	pitch
+      0  f1c1					      _SND_PLAY	#5, pitch
+      1  f1c1
+      2  f1c1		       a2 00		      ldx	#0
+      3  f1c3		       a9 05		      lda	#5
+      4  f1c5		       95 15		      sta	AUDC0,x
+      5  f1c7		       a9 03		      lda	#3
+      6  f1c9		       95 19		      sta	AUDV0,x
+      7  f1cb
+      8  f1cb		       a5 94		      lda	pitch
+      9  f1cd		       95 17		      sta	AUDF0,x
+     10  f1cf
+     11  f1cf		       a9 14		      lda	#20
+     12  f1d1		       95 95		      sta	snd_on,x
+    322  f1d3				   pos_noup
+    323  f1d3							; stx p0_y
+    324  f1d3
+    325  f1d3
+    326  f1d3
+    327  f1d3							; -------- done ------------------------------------
+    328  f1d3		       e6 87		      inc	fcount
+    329  f1d5		       4c 20 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
+    330  f1d8
+    331  f1d8							; -------- done ------------------------------------
+    332  f1d8
+    333  f1d8
+    334  f1d8
+    335  f1d8							; Game Select
+    336  f1d8				   check_switch_select
+    337  f1d8				   switch_select_chkbounced
+    338  f1d8		       a5 8f		      lda	selDebounceOn	; (2)
+    339  f1da		       d0 18		      bne	switch_select_decrease	; if debounce already on then branch out
+    340  f1dc
+    341  f1dc		       a9 02		      lda	#%00000010
+    342  f1de		       2c 82 02 	      bit	SWCHB
+    343  f1e1		       d0 19		      bne	switch_select_end
+    344  f1e3
+    345  f1e3		       a9 01		      lda	#1
+    346  f1e5		       85 8f		      sta	selDebounceOn
+    347  f1e7		       a9 28		      lda	#40
+    348  f1e9		       85 8e		      sta	selDebounceTm
+    349  f1eb
+    350  f1eb		       06 90		      asl	selectMode
+    351  f1ed		       90 05		      bcc	switch_select_solid
+    352  f1ef		       e6 90		      inc	selectMode
+    353  f1f1
+    354  f1f1				   switch_select_stripped
+    355  f1f1
+    356  f1f1		       4c fc f1 	      jmp	switch_select_end
+    357  f1f4
+    358  f1f4				   switch_select_solid
+    359  f1f4
+    360  f1f4
+    361  f1f4				   switch_select_decrease
+    362  f1f4		       c6 8e		      dec	selDebounceTm
+    363  f1f6		       d0 04		      bne	switch_select_end
+    364  f1f8		       a9 00		      lda	#0
+    365  f1fa		       85 8f		      sta	selDebounceOn
+    366  f1fc				   switch_select_end
+    367  f1fc		       60		      rts
+    368  f1fd
+    369  f1fd
+    370  f1fd							; cues a sound to play. sets audio registers based on table lookup sndbank.
+    371  f1fd							; parameters: x = channel (0|1), y = sound to play
+    372  f1fd				   snd_play
+    373  f1fd							; lda sndbank_type,y
+    374  f1fd		       a9 0c		      lda	#$0C
+    375  f1ff		       95 15		      sta	AUDC0,x	; audio control
+    376  f201		       a9 04		      lda	#4
+    377  f203		       95 19		      sta	AUDV0,x	; audio volume (0 a 15)
+    378  f205
+    379  f205		       a5 80		      lda	c16_1
+    380  f207		       6a		      ror
+    381  f208		       6a		      ror
+    382  f209		       6a		      ror
+    383  f20a		       95 17		      sta	AUDF0,x	; audio frequence (0 a 31 - divisiones del clock)
+    384  f20c
+    385  f20c		       a9 0c		      lda	#12
+    386  f20e		       95 95		      sta	snd_on,x	; len of audio in frames (>0 = sound on)
+    387  f210		       60		      rts
+    388  f211
+    389  f211							; process sound channels to turn off volume when sound length counter runs out
+    390  f211				   snd_process
+    391  f211		       a2 01		      ldx	#1	; channel to process, start with channel 1
+    392  f213				   snd_ch
+    393  f213		       b5 95		      lda	snd_on,x	; get sound length counter for this channel
+    394  f215		       f0 08		      beq	snd_done	; are we playing a sound? a>1
+    395  f217		       d6 95		      dec	snd_on,x	; yes, decrese the sound length counter for this channel
+    396  f219		       d0 04		      bne	snd_cont	; did we reach the end of the sound length?
+    397  f21b		       a9 00		      lda	#0	; yes
+    398  f21d		       95 19		      sta	AUDV0,x	; turn off the volume for this channel
+    399  f21f				   snd_done
+    400  f21f
+    401  f21f				   snd_cont
+    402  f21f		       ca		      dex		; do it again for channel 0
+    403  f220		       f0 f1		      beq	snd_ch
+    404  f222		       60		      rts
+    405  f223
+    406  f223
+    407  f223
+    408  f223							; -------------------------------------------------------------------
+    409  f223							;	 CODE
+    410  f223							;	 FOR MY
+    411  f223							;  TIA  MUSIC
+    412  f223							;  CODE DRIVER NAME	DESCRIPTION
+    413  f223							;   1	 110	Saw	sounds similar to a saw waveform
+    414  f223							;   3	 111	Engine	many 2600 games use this for an engine sound
+    415  f223							;   4	 000	Square	a high pitched square waveform
+    416  f223							;   6	 001	Bass	fat bass sound
+    417  f223							;   7	 010	Pitfall log sound in pitfall, low and buzzy
+    418  f223							;   8	 011	Noise	white noise
+    419  f223							;  12	 101	Lead	lower pitch square wave sound
+    420  f223							;  15	 100	Buzz	atonal buzz, good for percussion
+    421  f223							; -------------------------------------------------------------------
+    422  f223							; define sounds, bounce, reset, backward, forward
+    423  f223				   sndbank_type
+    424  f223		       06 07 00 01*	      .byte.b	$06, $07, $00, $01, $02, $03, $05, $04, $0C, $02, $06, $06
+    425  f22f				   sndbank_vol
+    426  f22f		       02 06 04 04*	      .byte.b	$02, $06, $04, $04, $02, $06, $04, $04, $02, $06, $04, $04
+    427  f23b				   sndbank_pitch
+    428  f23b		       1a 0e 1f 09*	      .byte.b	$1A, $0E, $1F, $09, $12, $07, $1C, $0B, $14, $03, $19, $0D
+    429  f247				   sndbank_len
+    430  f247		       01 08 03 03*	      .byte.b	$01, $08, $03, $03, $0C, $02, $06, $06, $0C, $02, $06, $06
+    431  f253
+    432  f253
+    433  f253				   colors2
+    434  f253		       30 32 34 36*	      .byte.b	$30, $32, $34, $36, $38, $3a, $3c, $3e
+    435  f25b		       5a 6a 7a 8a*	      .byte.b	$5a, $6a, $7a, $8a, $9a, $aa, $5c, $6c,
+    436  f264		       7c 8c 9c ac*	      .byte.b	$7c, $8c, $9c, $ac, $5d, $6d, $7d, $8d
+    437  f26c				   colors
+    438  f26c		       30 32 34 36*	      .byte.b	$30, $32, $34, $36, $38, $3a, $3c, $3e
+    439  f274
+    440  f274
+    441  f274
+    442  f274				   reverseBits
+    443  f274		       aa		      tax
+    444  f275		       bd 79 f2 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
+    445  f278		       60		      rts
+    446  f279
+    447  f279				   reversedOrderBits
+    448  f279		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
+    449  f289		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
+    450  f299		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
+    451  f2a9		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
+    452  f2b9		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
+    453  f2c9		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
+    454  f2d9		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
+    455  f2e9		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
+    456  f2f9		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
+    457  f309		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
+    458  f319		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
+    459  f329		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
+    460  f339		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
+    461  f349		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
+    462  f359		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
+    463  f369		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
+    464  f379		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
+    465  f389		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
+    466  f399		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
+    467  f3a9		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
+    468  f3b9		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
+    469  f3c9		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
+    470  f3d9		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
+    471  f3e9		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
+    472  f3f9		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
+    473  f409		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
+    474  f419		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
+    475  f429		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
+    476  f439		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
+    477  f449		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
+    478  f459		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
+    479  f469		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
+    480  f479
+    481  f479
+    482  fffa					      org	$FFFA
+    483  fffa
+    484  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    485  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    486  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
     487  10000
+    488  10000
+    489  10000
+    490  10000
