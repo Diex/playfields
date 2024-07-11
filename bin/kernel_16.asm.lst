@@ -367,7 +367,58 @@
     160  0000 ????				      ENDM
     161  0000 ????
     162  0000 ????
-    163  0000 ????						; EOF
+    163  0000 ????						;-------------------------------------------------------------------------------
+    164  0000 ????						; shortcut
+    165  0000 ????
+    166  0000 ????				      MAC	_nextline
+    167  0000 ????				      dec	scanline
+    168  0000 ????				      sta	WSYNC
+    169  0000 ????				      ENDM
+    170  0000 ????
+    171  0000 ????				      MAC	_get_color
+    172  0000 ????
+    173  0000 ????				      lda	{1}
+    174  0000 ????				      adc	{2}
+    175  0000 ????				      and	#$0F	; limit the value to 0-15
+    176  0000 ????				      tax
+    177  0000 ????				      lda	{3},x
+    178  0000 ????				      ENDM
+    179  0000 ????
+    180  0000 ????				      MAC	_get_color_random15
+    181  0000 ????						; Galois 8-bit Linear Feedback Shift Registers
+    182  0000 ????						; https://samiam.org/blog/20130617.html
+    183  0000 ????						; galois_lfsr_random
+    184  0000 ????				      lda	r_seed	; keep calling funtion to for better entropy
+    185  0000 ????				      lsr		; shift right
+    186  0000 ????				      bcc	.noeor0	; if carry 1, then exclusive OR the bits
+    187  0000 ????				      eor	#$D4	; d4 tap (11010100)
+    188  0000 ????			   .noeor0    sta	r_seed
+    189  0000 ????				      and	#$0F	; limit the value to 0-15
+    190  0000 ????				      tax
+    191  0000 ????				      lda	colors2,x
+    192  0000 ????				      ENDM
+    193  0000 ????
+    194  0000 ????
+    195  0000 ????
+    196  0000 ????						; ldx channel
+    197  0000 ????						; {1}	   = type
+    198  0000 ????						; {2}	   = pitch
+    199  0000 ????				      MAC	_snd_play
+    200  0000 ????						; lda sndbank_type,y
+    201  0000 ????				      ldx	#0
+    202  0000 ????				      lda	{1}
+    203  0000 ????				      sta	AUDC0,x	; audio control
+    204  0000 ????				      lda	#3
+    205  0000 ????				      sta	AUDV0,x	; audio volume (0 a 15)
+    206  0000 ????
+    207  0000 ????				      lda	{2}
+    208  0000 ????				      sta	AUDF0,x	; audio frequence (0 a 31 - divisiones del clock)
+    209  0000 ????
+    210  0000 ????				      lda	#20
+    211  0000 ????				      sta	snd_on,x	; len of audio in frames (>0 = sound on)
+    212  0000 ????				      ENDM
+    213  0000 ????
+    214  0000 ????						; EOF
 ------- FILE kernel_16.asm
       4  0000 ????						;
       5  0000 ????						; This Episode on Youtube - https://youtu.be/KJYeQjJTkj4

@@ -57,8 +57,8 @@ reset:			CLEAN_START			; ouput: all ram registers 0
                 lda #$80
                 sta p0_y
 
-                lda #$80
-                sta c16_1+1
+                ; lda #$80
+                ; sta c16_1+1
 
                 ; generate a random see from the interval timer
                 lda INTIM               ; unknown value to use as an initial random seed
@@ -113,69 +113,65 @@ nextframe:		VERTICAL_SYNC	    ; output: a = 0; 3 scanlines
               
 render:		    sta WSYNC            
                 
-                _GET_COLOR p0_x, scanline, colors2                
+                lda scanline
                 sta COLUPF
                 
-                _ADD16 c16_1, scanline, temp
-                _EOR16 scanline, temp, temp
-                ; _EOR16 scanline, #$55, temp
-                
-                _NEXTLINE
-                                
-                lda #0
-                sta COLUPF
 
-                _ADD16 c16_1, scanline, temp                
+
+                ; lda c16_1
+                ; adc scanline
+                _ADD16 c16_1, scanline, temp
+                
+                ; rol
                 _EOR16 temp, p0_x, temp
+                _EOR16 temp, scanline, temp
+                ; _ROL16 temp, temp
+
+                ; sta temp
+                ; lda c16_1
+                ; rol
+                
+                ; _ROL16 temp, temp
+                
+                
+                ; eor temp
+                ; sta temp
+                
+                
+
+                _NEXTLINE
 
                 lda temp
-                sta PF1                
-
-                _NEXTLINE
-                
-                _GET_COLOR p0_y, scanline, colors2
-                sta COLUPF
-
-                _ADD16 c16_1, scanline, temp2
-                _ROL16 temp, temp        
-               
-           
-                
-                
-                _NEXTLINE
-
-                lda #0
-                sta COLUPF
-
-                 _ROR16 temp2, temp2
-                _EOR16 temp, temp2, temp
-
-                _ADD16 c16_1, scanline, temp
-                
-                
-                
-                _NEXTLINE
-
-                _GET_COLOR p0_y, scanline, colors2
-                sta COLUPF
-                
-                _EOR16 temp, p0_y, temp2
-                
-
-                lda temp
-                eor p0_y
                 sta PF2
-              
 
-                
                 _NEXTLINE
-                _GET_COLOR p0_y, scanline, colors2
+                
+                
+                ; lda c16_1
+                ; ror
+                ; ror
+                ; ror
+                ; ror
+                ; ror
+                ; adc temp  
+
+                lda scanline
+                ror                                             
                 sta COLUPF
+          
+                ; jsr kernel2
+                _ADD16 c16_1, scanline, temp
+                _EOR16 temp, scanline, temp
+                _EOR16 temp, p0_y, temp
                 
 
+                _NEXTLINE
+
+                lda temp
+                sta PF1
+            
                 dec scanline
-           
-              
+
                 bne gotorender          ; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
                 jmp DoneWithFrame       ; (3) 2 bytes del opcode (jmp) + 1 byte operando + byte del salto
 gotorender      jmp render                
@@ -272,9 +268,9 @@ pos_nofire:
                 ; stx var1
                 stx p0_x
                 
-                lda temp2
+                lda temp
                 sta pitch
-                _SND_PLAY #3, pitch
+                _SND_PLAY #6, pitch
                                 
 pos_noright                
                 lda #%01000000      ; check left movement
@@ -286,7 +282,7 @@ pos_noright
                 ; stx var1
                 stx p0_x
 
-                lda temp2
+                lda temp
                 sta pitch
                 _SND_PLAY #3, pitch
                 

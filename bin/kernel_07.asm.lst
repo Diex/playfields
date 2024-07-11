@@ -367,7 +367,58 @@
     160  0000 ????				      ENDM
     161  0000 ????
     162  0000 ????
-    163  0000 ????						; EOF
+    163  0000 ????						;-------------------------------------------------------------------------------
+    164  0000 ????						; shortcut
+    165  0000 ????
+    166  0000 ????				      MAC	_nextline
+    167  0000 ????				      dec	scanline
+    168  0000 ????				      sta	WSYNC
+    169  0000 ????				      ENDM
+    170  0000 ????
+    171  0000 ????				      MAC	_get_color
+    172  0000 ????
+    173  0000 ????				      lda	{1}
+    174  0000 ????				      adc	{2}
+    175  0000 ????				      and	#$0F	; limit the value to 0-15
+    176  0000 ????				      tax
+    177  0000 ????				      lda	{3},x
+    178  0000 ????				      ENDM
+    179  0000 ????
+    180  0000 ????				      MAC	_get_color_random15
+    181  0000 ????						; Galois 8-bit Linear Feedback Shift Registers
+    182  0000 ????						; https://samiam.org/blog/20130617.html
+    183  0000 ????						; galois_lfsr_random
+    184  0000 ????				      lda	r_seed	; keep calling funtion to for better entropy
+    185  0000 ????				      lsr		; shift right
+    186  0000 ????				      bcc	.noeor0	; if carry 1, then exclusive OR the bits
+    187  0000 ????				      eor	#$D4	; d4 tap (11010100)
+    188  0000 ????			   .noeor0    sta	r_seed
+    189  0000 ????				      and	#$0F	; limit the value to 0-15
+    190  0000 ????				      tax
+    191  0000 ????				      lda	colors2,x
+    192  0000 ????				      ENDM
+    193  0000 ????
+    194  0000 ????
+    195  0000 ????
+    196  0000 ????						; ldx channel
+    197  0000 ????						; {1}	   = type
+    198  0000 ????						; {2}	   = pitch
+    199  0000 ????				      MAC	_snd_play
+    200  0000 ????						; lda sndbank_type,y
+    201  0000 ????				      ldx	#0
+    202  0000 ????				      lda	{1}
+    203  0000 ????				      sta	AUDC0,x	; audio control
+    204  0000 ????				      lda	#3
+    205  0000 ????				      sta	AUDV0,x	; audio volume (0 a 15)
+    206  0000 ????
+    207  0000 ????				      lda	{2}
+    208  0000 ????				      sta	AUDF0,x	; audio frequence (0 a 31 - divisiones del clock)
+    209  0000 ????
+    210  0000 ????				      lda	#20
+    211  0000 ????				      sta	snd_on,x	; len of audio in frames (>0 = sound on)
+    212  0000 ????				      ENDM
+    213  0000 ????
+    214  0000 ????						; EOF
 ------- FILE kernel_07.asm
       4  0000 ????						;
       5  0000 ????						; This Episode on Youtube - https://youtu.be/KJYeQjJTkj4
@@ -447,194 +498,196 @@
      63  f02a
      64  f02a		       a9 c0		      lda	#PF_H
      65  f02c		       85 a4		      sta	scanline
-     66  f02e
-     67  f02e		       20 8b f0 	      jsr	inc24	; inc24 es muy larga y flickea
-     68  f031
-     69  f031
-     70  f031		       85 02		      sta	WSYNC	; primera linea visible
-     71  f033
-     72  f033
+     66  f02e							; flickering tipico error:
+     67  f02e							; la llamada a la subrutina es muy larga.
+     68  f02e							; inc24 es muy larga y flickea
+     69  f02e		       20 8b f0 	      jsr	inc24	;
+     70  f031
+     71  f031
+     72  f031		       85 02		      sta	WSYNC	; primera linea visible
      73  f033
      74  f033
      75  f033
      76  f033
      77  f033
      78  f033
-     79  f033		       85 02	   kernel     sta	WSYNC	; no lo cuento en la snl
-     80  f035		       a5 a4		      lda	scanline
-     81  f037		       6a		      ror
-     82  f038		       6a		      ror
-     83  f039		       85 08		      sta	COLUPF
-     84  f03b
-     85  f03b		       a5 81		      lda	c24_1+1
-     86  f03d		       65 a4		      adc	scanline
-     87  f03f		       2a		      rol
-     88  f040		       85 a0		      sta	temp
-     89  f042		       a5 81		      lda	c24_1+1
-     90  f044		       2a		      rol
-     91  f045		       45 a0		      eor	temp
-     92  f047		       85 a0		      sta	temp
-     93  f049
-     94  f049		       a5 81		      lda	c24_1+1
-     95  f04b		       6a		      ror
-     96  f04c		       6a		      ror
-     97  f04d		       6a		      ror
-     98  f04e		       6a		      ror
-     99  f04f							; ror
-    100  f04f		       65 a0		      adc	temp
-    101  f051		       85 0f		      sta	PF2
-    102  f053
-    103  f053		       c6 a4		      dec	scanline	; (2)
-    104  f055		       85 02		      sta	WSYNC
-    105  f057
-    106  f057
+     79  f033
+     80  f033
+     81  f033		       85 02	   kernel     sta	WSYNC	; no lo cuento en la snl
+     82  f035		       a5 a4		      lda	scanline
+     83  f037		       6a		      ror
+     84  f038		       6a		      ror
+     85  f039		       85 08		      sta	COLUPF
+     86  f03b
+     87  f03b		       a5 81		      lda	c24_1+1
+     88  f03d		       65 a4		      adc	scanline
+     89  f03f		       2a		      rol
+     90  f040		       85 a0		      sta	temp
+     91  f042		       a5 81		      lda	c24_1+1
+     92  f044		       2a		      rol
+     93  f045		       45 a0		      eor	temp
+     94  f047		       85 a0		      sta	temp
+     95  f049
+     96  f049		       a5 81		      lda	c24_1+1
+     97  f04b		       6a		      ror
+     98  f04c		       6a		      ror
+     99  f04d		       6a		      ror
+    100  f04e		       6a		      ror
+    101  f04f							; ror
+    102  f04f		       65 a0		      adc	temp
+    103  f051		       85 0f		      sta	PF2
+    104  f053
+    105  f053		       c6 a4		      dec	scanline	; (2)
+    106  f055		       85 02		      sta	WSYNC
     107  f057
-    108  f057							; ; PF1
-    109  f057							; (((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7)
-    110  f057
-    111  f057		       a5 80		      lda	c24_1+0
-    112  f059		       65 a4		      adc	scanline
-    113  f05b		       2a		      rol
-    114  f05c		       85 a0		      sta	temp
-    115  f05e		       a5 80		      lda	c24_1+0
-    116  f060		       2a		      rol
-    117  f061		       45 a0		      eor	temp
-    118  f063
-    119  f063							; rol
-    120  f063							; eor #15
-    121  f063							; eor scanline
-    122  f063		       85 0e		      sta	PF1
-    123  f065
-    124  f065							; ; PF2
-    125  f065							; lda c24_1
-    126  f065							; ror
-    127  f065							; eor #7
-    128  f065							; jsr reverseBits
-    129  f065							; eor scanline
-    130  f065							; sta PF0
-    131  f065
-    132  f065							; ldy #0
-    133  f065							; lda plfys,y
-    134  f065							; sta PF0
-    135  f065
-    136  f065							; iny
-    137  f065							; lda plfys,y
-    138  f065							; sta PF1
-    139  f065
-    140  f065							; iny
-    141  f065							; lda plfys,y
-    142  f065							; sta PF2
-    143  f065
-    144  f065
-    145  f065		       c6 a4		      dec	scanline	; (2)
-    146  f067		       d0 ca		      bne	kernel	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
-    147  f069
-    148  f069							; --------------- DoneWithFrame	---------------
+    108  f057
+    109  f057
+    110  f057							; ; PF1
+    111  f057							; (((t<<1)^((t<<1)+(t>>7)&t>>12))|t>>(4-(1^7&(t>>19)))|t>>7)
+    112  f057
+    113  f057		       a5 80		      lda	c24_1+0
+    114  f059		       65 a4		      adc	scanline
+    115  f05b		       2a		      rol
+    116  f05c		       85 a0		      sta	temp
+    117  f05e		       a5 80		      lda	c24_1+0
+    118  f060		       2a		      rol
+    119  f061		       45 a0		      eor	temp
+    120  f063
+    121  f063							; rol
+    122  f063							; eor #15
+    123  f063							; eor scanline
+    124  f063		       85 0e		      sta	PF1
+    125  f065
+    126  f065							; ; PF2
+    127  f065							; lda c24_1
+    128  f065							; ror
+    129  f065							; eor #7
+    130  f065							; jsr reverseBits
+    131  f065							; eor scanline
+    132  f065							; sta PF0
+    133  f065
+    134  f065							; ldy #0
+    135  f065							; lda plfys,y
+    136  f065							; sta PF0
+    137  f065
+    138  f065							; iny
+    139  f065							; lda plfys,y
+    140  f065							; sta PF1
+    141  f065
+    142  f065							; iny
+    143  f065							; lda plfys,y
+    144  f065							; sta PF2
+    145  f065
+    146  f065
+    147  f065		       c6 a4		      dec	scanline	; (2)
+    148  f067		       d0 ca		      bne	kernel	; (3) 2 bytes del opcode (beq) + 1 byte operando + byte del salto
     149  f069
-    150  f069							; ---- Overscan (30 scanlines)
-    151  f069							; 30 scanlines x 76 machine cycles = 2280 machine cycles
-    152  f069							; 2280 machine cycles / 64 clocks = 35.625
-    153  f069		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
-    154  f06b		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
-    155  f06e
-    156  f06e
+    150  f069							; --------------- DoneWithFrame	---------------
+    151  f069
+    152  f069							; ---- Overscan (30 scanlines)
+    153  f069							; 30 scanlines x 76 machine cycles = 2280 machine cycles
+    154  f069							; 2280 machine cycles / 64 clocks = 35.625
+    155  f069		       a9 23		      lda	#35	; We'll round down, and clean up the remaining cycles with a WSYNC
+    156  f06b		       8d 96 02 	      sta	TIM64T	; Set a count of 35 with 64-clock interval
     157  f06e
     158  f06e
-    159  f06e		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
-    160  f070		       85 01		      sta	VBLANK	; turn off the beam
-    161  f072
-    162  f072							; -------- wait ------------------------------------
-    163  f072		       ad 84 02 	      lda	INTIM	; check the timer
-    164  f075		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
-    165  f077							; -------- done ------------------------------------
-    166  f077
-    167  f077		       4c 13 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
-    168  f07a
-    169  f07a
+    159  f06e
+    160  f06e
+    161  f06e		       a9 02		      lda	#$2	; set D1 = 1 to initiate VBLANK
+    162  f070		       85 01		      sta	VBLANK	; turn off the beam
+    163  f072
+    164  f072							; -------- wait ------------------------------------
+    165  f072		       ad 84 02 	      lda	INTIM	; check the timer
+    166  f075		       d0 fb		      bne	.-3	; 2 bytes del opcode (bne) + 1 byte operando
+    167  f077							; -------- done ------------------------------------
+    168  f077
+    169  f077		       4c 13 f0 	      jmp	nextframe	; (3) jump back up to start the next frame
     170  f07a
     171  f07a
-    172  f07a							; Shift a 16bit value by one place left (e.g. multiply by two)
-    173  f07a		       06 83	   asl16      ASL	params+0	;Shift the LSB
-    174  f07c		       26 84		      ROL	params+1	;Rotate the MSB
-    175  f07e		       60		      rts
-    176  f07f
-    177  f07f
-    178  f07f		       18	   inc16      clc
-    179  f080		       a5 8c		      lda	c16_1+1
-    180  f082		       69 01		      adc	#1
-    181  f084		       85 8c		      sta	c16_1+1
-    182  f086		       90 01		      bcc	.+3
-    183  f088		       e6 8b		      inc	c16_1+0
-    184  f08a							; ok
-    185  f08a		       60		      rts
-    186  f08b
-    187  f08b		       18	   inc24      clc
-    188  f08c		       a5 82		      lda	c24_1+2
-    189  f08e		       69 1f		      adc	#31
-    190  f090		       85 82		      sta	c24_1+2
-    191  f092		       90 0f		      bcc	ok
-    192  f094		       18		      clc
-    193  f095		       a5 81		      lda	c24_1+1
-    194  f097		       69 01		      adc	#1
-    195  f099		       85 81		      sta	c24_1+1
-    196  f09b		       90 06		      bcc	ok
-    197  f09d		       a5 80		      lda	c24_1+0
-    198  f09f		       69 01		      adc	#1
-    199  f0a1		       85 80		      sta	c24_1+0
-    200  f0a3		       60	   ok	      rts
-    201  f0a4
-    202  f0a4
+    172  f07a
+    173  f07a
+    174  f07a							; Shift a 16bit value by one place left (e.g. multiply by two)
+    175  f07a		       06 83	   asl16      ASL	params+0	;Shift the LSB
+    176  f07c		       26 84		      ROL	params+1	;Rotate the MSB
+    177  f07e		       60		      rts
+    178  f07f
+    179  f07f
+    180  f07f		       18	   inc16      clc
+    181  f080		       a5 8c		      lda	c16_1+1
+    182  f082		       69 01		      adc	#1
+    183  f084		       85 8c		      sta	c16_1+1
+    184  f086		       90 01		      bcc	.+3
+    185  f088		       e6 8b		      inc	c16_1+0
+    186  f08a							; ok
+    187  f08a		       60		      rts
+    188  f08b
+    189  f08b		       18	   inc24      clc
+    190  f08c		       a5 82		      lda	c24_1+2
+    191  f08e		       69 1f		      adc	#31
+    192  f090		       85 82		      sta	c24_1+2
+    193  f092		       90 0f		      bcc	ok
+    194  f094		       18		      clc
+    195  f095		       a5 81		      lda	c24_1+1
+    196  f097		       69 01		      adc	#1
+    197  f099		       85 81		      sta	c24_1+1
+    198  f09b		       90 06		      bcc	ok
+    199  f09d		       a5 80		      lda	c24_1+0
+    200  f09f		       69 01		      adc	#1
+    201  f0a1		       85 80		      sta	c24_1+0
+    202  f0a3		       60	   ok	      rts
     203  f0a4
-    204  f0a4				   reverseBits
-    205  f0a4		       aa		      tax
-    206  f0a5		       bd b1 f0 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
-    207  f0a8		       60		      rts
-    208  f0a9
-    209  f0a9				   colors
-    210  f0a9		       36 48 76 b4*	      .byte.b	$36, $48, $76, $b4, $ea, $4c, $8a, $a4	; Player 0-7 colors
-    211  f0b1
-    212  f0b1
-    213  f0b1				   reversedOrderBits
-    214  f0b1		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
-    215  f0c1		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
-    216  f0d1		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
-    217  f0e1		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
-    218  f0f1		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
-    219  f101		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
-    220  f111		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
-    221  f121		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
-    222  f131		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
-    223  f141		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
-    224  f151		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
-    225  f161		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
-    226  f171		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
-    227  f181		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
-    228  f191		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
-    229  f1a1		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
-    230  f1b1		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
-    231  f1c1		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
-    232  f1d1		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
-    233  f1e1		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
-    234  f1f1		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
-    235  f201		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
-    236  f211		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
-    237  f221		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
-    238  f231		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
-    239  f241		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
-    240  f251		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
-    241  f261		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
-    242  f271		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
-    243  f281		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
-    244  f291		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
-    245  f2a1		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
-    246  f2b1
-    247  f2b1
-    248  fffa					      org	$FFFA
-    249  fffa
-    250  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
-    251  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
-    252  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
-    253  10000
-    254  10000
+    204  f0a4
+    205  f0a4
+    206  f0a4				   reverseBits
+    207  f0a4		       aa		      tax
+    208  f0a5		       bd b1 f0 	      lda	reversedOrderBits,x	; Load the value to be reversed from memory
+    209  f0a8		       60		      rts
+    210  f0a9
+    211  f0a9				   colors
+    212  f0a9		       36 48 76 b4*	      .byte.b	$36, $48, $76, $b4, $ea, $4c, $8a, $a4	; Player 0-7 colors
+    213  f0b1
+    214  f0b1
+    215  f0b1				   reversedOrderBits
+    216  f0b1		       00 00 80 00*	      .word.w	$00, $80, $40, $c0, $20, $a0, $60, $e0
+    217  f0c1		       10 00 90 00*	      .word.w	$10, $90, $50, $d0, $30, $b0, $70, $f0
+    218  f0d1		       08 00 88 00*	      .word.w	$08, $88, $48, $c8, $28, $a8, $68, $e8
+    219  f0e1		       18 00 98 00*	      .word.w	$18, $98, $58, $d8, $38, $b8, $78, $f8
+    220  f0f1		       04 00 84 00*	      .word.w	$04, $84, $44, $c4, $24, $a4, $64, $e4
+    221  f101		       14 00 94 00*	      .word.w	$14, $94, $54, $d4, $34, $b4, $74, $f4
+    222  f111		       0c 00 8c 00*	      .word.w	$0c, $8c, $4c, $cc, $2c, $ac, $6c, $ec
+    223  f121		       1c 00 9c 00*	      .word.w	$1c, $9c, $5c, $dc, $3c, $bc, $7c, $fc
+    224  f131		       02 00 82 00*	      .word.w	$02, $82, $42, $c2, $22, $a2, $62, $e2
+    225  f141		       12 00 92 00*	      .word.w	$12, $92, $52, $d2, $32, $b2, $72, $f2
+    226  f151		       0a 00 8a 00*	      .word.w	$0a, $8a, $4a, $ca, $2a, $aa, $6a, $ea
+    227  f161		       1a 00 9a 00*	      .word.w	$1a, $9a, $5a, $da, $3a, $ba, $7a, $fa
+    228  f171		       06 00 86 00*	      .word.w	$06, $86, $46, $c6, $26, $a6, $66, $e6
+    229  f181		       16 00 96 00*	      .word.w	$16, $96, $56, $d6, $36, $b6, $76, $f6
+    230  f191		       0e 00 8e 00*	      .word.w	$0e, $8e, $4e, $ce, $2e, $ae, $6e, $ee
+    231  f1a1		       1e 00 9e 00*	      .word.w	$1e, $9e, $5e, $de, $3e, $be, $7e, $fe
+    232  f1b1		       01 00 81 00*	      .word.w	$01, $81, $41, $c1, $21, $a1, $61, $e1
+    233  f1c1		       11 00 91 00*	      .word.w	$11, $91, $51, $d1, $31, $b1, $71, $f1
+    234  f1d1		       09 00 89 00*	      .word.w	$09, $89, $49, $c9, $29, $a9, $69, $e9
+    235  f1e1		       19 00 99 00*	      .word.w	$19, $99, $59, $d9, $39, $b9, $79, $f9
+    236  f1f1		       05 00 85 00*	      .word.w	$05, $85, $45, $c5, $25, $a5, $65, $e5
+    237  f201		       15 00 95 00*	      .word.w	$15, $95, $55, $d5, $35, $b5, $75, $f5
+    238  f211		       0d 00 8d 00*	      .word.w	$0d, $8d, $4d, $cd, $2d, $ad, $6d, $ed
+    239  f221		       1d 00 9d 00*	      .word.w	$1d, $9d, $5d, $dd, $3d, $bd, $7d, $fd
+    240  f231		       03 00 83 00*	      .word.w	$03, $83, $43, $c3, $23, $a3, $63, $e3
+    241  f241		       13 00 93 00*	      .word.w	$13, $93, $53, $d3, $33, $b3, $73, $f3
+    242  f251		       0b 00 8b 00*	      .word.w	$0b, $8b, $4b, $cb, $2b, $ab, $6b, $eb
+    243  f261		       1b 00 9b 00*	      .word.w	$1b, $9b, $5b, $db, $3b, $bb, $7b, $fb
+    244  f271		       07 00 87 00*	      .word.w	$07, $87, $47, $c7, $27, $a7, $67, $e7
+    245  f281		       17 00 97 00*	      .word.w	$17, $97, $57, $d7, $37, $b7, $77, $f7
+    246  f291		       0f 00 8f 00*	      .word.w	$0f, $8f, $4f, $cf, $2f, $af, $6f, $ef
+    247  f2a1		       1f 00 9f 00*	      .word.w	$1f, $9f, $5f, $df, $3f, $bf, $7f, $ff
+    248  f2b1
+    249  f2b1
+    250  fffa					      org	$FFFA
+    251  fffa
+    252  fffa		       00 f0		      .word.w	reset	; NMI	($FFFA)
+    253  fffc		       00 f0		      .word.w	reset	; RESET ($FFFC)
+    254  fffe		       00 f0		      .word.w	reset	; IRQ ($FFFE)
     255  10000
     256  10000
+    257  10000
+    258  10000
