@@ -9,7 +9,7 @@ AUDV0                    0019
 AUDV1                    001a                  
 bgcolor                  0083              (R )
 BLUE                     009a              (R )
-changeBackground         f09b              (R )
+changeBackground         f09d              (R )
 changeColorSpeed         003c              (R )
 clear                    f012                  
 COLUBK                   0009              (R )
@@ -30,7 +30,7 @@ ENABL                    001f
 ENAM0                    001d                  
 ENAM1                    001e                  
 fcount                   0082              (R )
-galois_lfsr_random       f081              (R )
+galois_lfsr_random       f083              (R )
 GRP0                     001b                  
 GRP1                     001c                  
 HMBL                     0024                  
@@ -51,16 +51,16 @@ INTIM                    0284              (R )
 l_seed                   0081              (R )
 lcount                   0084              (R )
 lineCountChange          000c              (R )
-noChangeColor            f06a              (R )
-noeor0                   f088              (R )
+noChangeColor            f06c              (R )
+noeor0                   f08a              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-overscan                 f075              (R )
+overscan                 f077              (R )
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
-PLAYER0COLOR             000f              (R )
-PLAYER1COLOR             00f0              (R )
+PLAYER0COLOR             0000 ????         (R )
+PLAYER1COLOR             0000 ????         (R )
 playfield                f05b              (R )
 r_seed                   0080              (R )
 REFP0                    000b                  
@@ -74,7 +74,7 @@ RESMP1                   0029
 RESP0                    0010                  
 RESP1                    0011                  
 RSYNC                    0003                  
-setPlayfield             f08b              (R )
+setPlayfield             f08d              (R )
 startFrame               f022              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
